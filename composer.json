@@ -33,7 +33,9 @@
         "nette/database": "^3.1",
         "nette/di": "^3.1",
         "nette/caching": "^3.1",
-        "symfony/polyfill-php80": "^1.27"
+        "symfony/polyfill-php80": "^1.27",
+        "ext-json": "*",
+        "ext-pdo": "*"
     },
     "require-dev": {
         "nette/bootstrap": "^3.1",

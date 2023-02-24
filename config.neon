@@ -1,0 +1,24 @@
+services:
+    # Managers
+    repositoryManager:
+        create: Efabrica\NetteDatabaseRepository\Repositores\Managers\ManualRepositoryManager
+
+    modelFactoryManager:
+        create: Efabrica\NetteDatabaseRepository\Models\Managers\ManualModelFactoryManager(@activeRowModelFactory)
+
+    # Factories
+    activeRowModelFactory:
+        implement: Efabrica\NetteDatabaseRepository\Models\Factories\ModelFactoryInterface
+
+    castFactory:
+        create: Efabrica\NetteDatabaseRepository\Casts\Factories\CastFactory
+
+    selectionFactory:
+        implement: Efabrica\NetteDatabaseRepository\Selections\Factories\SelectionFactoryInterface
+        autowired: Efabrica\NetteDatabaseRepository\Selections\Factories\SelectionFactoryInterface
+
+    # Casts
+    - Efabrica\NetteDatabaseRepository\Casts\ArrayCast
+
+    # Other
+    - Efabrica\NetteDatabaseRepository\Helpers\CallableAutowirer

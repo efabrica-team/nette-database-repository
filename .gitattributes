@@ -6,3 +6,4 @@ infection.json export-ignore
 phpunit.xml export-ignore
 CHANGELOG.md export-ignore
 README.md export-ignore
+LICENSE export-ignore
