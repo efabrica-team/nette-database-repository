@@ -1,0 +1,54 @@
+{
+    "name": "efabrica/nette-database-repository",
+    "type": "library",
+    "description": "Repositories for Nette database",
+    "keywords": [
+        "php",
+        "nette",
+        "database",
+        "repository"
+    ],
+    "readme": "README.md",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Martin Petricko",
+            "email": "matopetricko@gmail.com"
+        },
+        {
+            "name": "Samuel Kelemen",
+            "email": "kelemen.samuel@gmail.com"
+        },
+        {
+            "name": "Michal Lulco",
+            "email": "michal.lulco@gmail.com"
+        },
+        {
+            "name": "Tomas Majer",
+            "email": "tomas.majer@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^7.4|^8.0",
+        "nette/database": "^3.1",
+        "nette/di": "^3.1",
+        "nette/caching": "^3.1",
+        "symfony/polyfill-php80": "^1.27"
+    },
+    "require-dev": {
+        "nette/bootstrap": "^3.1",
+        "tracy/tracy": "^2.9",
+        "nette/http": "^3.2",
+        "phpunit/phpunit": "^9.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "Efabrica\\NetteDatabaseRepository\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    }
+}
