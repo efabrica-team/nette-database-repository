@@ -1,6 +1,6 @@
-INSERT INTO `groups` (`id`, `name`)
-VALUES (1, 'Admin'),
-       (2, 'Editor');
+INSERT INTO `groups` (`id`, `name`, `permissions`)
+VALUES (1, 'Admin', '["manage_users", "manage_posts"]'),
+       (2, 'Editor', '["manage_posts"]');
 
 INSERT INTO `users` (`id`, `group_id`, `name`, `email`)
 VALUES (1, 1, 'Admin', 'admin@admin.com'),

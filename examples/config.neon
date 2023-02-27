@@ -39,3 +39,5 @@ services:
 
     userModelFactory:
         implement: Examples\Models\Factories\UserModelFactory
+
+    # Casts

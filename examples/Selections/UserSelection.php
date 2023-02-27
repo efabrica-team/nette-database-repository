@@ -17,7 +17,7 @@ use Iterator;
  */
 class UserSelection extends Selection
 {
-    public function hasGroup(): self
+    public function whereHasGroup(): self
     {
         return $this->where('group_id IS NOT NULL');
     }

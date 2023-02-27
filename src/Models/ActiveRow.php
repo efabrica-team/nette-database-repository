@@ -41,12 +41,7 @@ class ActiveRow extends BaseActiveRow
     public function &__get(string $key)
     {
         $value = array_key_exists($key, $this->attributes) ? $this->attributes[$key] : parent::__get($key);
-
-        foreach ($this->getCastsByAttribute($key) as $cast) {
-            $value = $cast->get($this, $key, $value, $this->toArray());
-        }
-
-        return $value;
+        return $this->castDataToGet([$key => $value])[$key];
     }
 
     /**
@@ -57,9 +52,7 @@ class ActiveRow extends BaseActiveRow
      */
     public function __set($column, $value): void
     {
-        foreach ($this->getCastsByAttribute($column) as $cast) {
-            $value = $cast->set($this, $column, $value, $this->attributes);
-        }
+        $value = $this->castDataToSet([$column => $value])[$column];
         $this->attributes[$column] = $value;
     }
 
@@ -114,7 +107,11 @@ class ActiveRow extends BaseActiveRow
      */
     public function originalUpdate(iterable $data, array $hookIgnores = []): bool
     {
-        $this->table->importHookIgnores($hookIgnores);
+        $table = $this->table;
+        if (in_array(HasHookIgnores::class, class_uses($table), true)) {
+            /** @var HasHookIgnores $table */
+            $table->importHookIgnores($hookIgnores);
+        }
         return parent::update($data);
     }
 
@@ -136,7 +133,11 @@ class ActiveRow extends BaseActiveRow
      */
     public function originalDelete(array $hookIgnores = []): int
     {
-        $this->table->importHookIgnores($hookIgnores);
+        $table = $this->table;
+        if (in_array(HasHookIgnores::class, class_uses($table), true)) {
+            /** @var HasHookIgnores $table */
+            $table->importHookIgnores($hookIgnores);
+        }
         return parent::delete();
     }
 
@@ -144,7 +145,7 @@ class ActiveRow extends BaseActiveRow
     {
         foreach ($data as $key => $value) {
             foreach ($this->getCastsByAttribute($key) as $cast) {
-                $value = $cast->get($this, $key, $value, $data);
+                $value = $cast->get($this, $key, $value, array_merge($this->attributes, $data));
             }
             $data[$key] = $value;
         }
@@ -155,7 +156,7 @@ class ActiveRow extends BaseActiveRow
     {
         foreach ($data as $key => $value) {
             foreach ($this->getCastsByAttribute($key) as $cast) {
-                $value = $cast->set($this, $key, $value, $data);
+                $value = $cast->set($this, $key, $value, array_merge($this->attributes, $data));
             }
             $data[$key] = $value;
         }

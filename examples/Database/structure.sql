@@ -1,7 +1,8 @@
 CREATE TABLE `groups`
 (
     `id`   int PRIMARY KEY NOT NULL,
-    `name` TEXT NOT NULL
+    `name` TEXT NOT NULL,
+    `permissions` TEXT NOT NULL
 );
 
 CREATE TABLE `users`
