@@ -1,0 +1,41 @@
+includes:
+    - ../config.neon
+
+database:
+    dsn: "sqlite::memory:"
+
+services:
+    repositoryManager:
+        setup:
+            - addRepository('groups', @groupRepository)
+            - addRepository('users', @userRepository)
+
+    modelFactoryManager:
+        setup:
+            - addFactory('groups', @groupModelFactory)
+            - addFactory('users', @userModelFactory)
+
+    # Repositories
+    groupRepository:
+        create: Examples\Repositories\GroupRepository
+        arguments:
+            selectionFactory: @groupSelectionFactory
+
+    userRepository:
+        create: Examples\Repositories\UserRepository
+        arguments:
+            selectionFactory: @userSelectionFactory
+
+    # Selections
+    groupSelectionFactory:
+        implement: Examples\Selections\Factories\GroupSelectionFactory
+
+    userSelectionFactory:
+        implement: Examples\Selections\Factories\UserSelectionFactory
+
+    # Models
+    groupModelFactory:
+        implement: Examples\Models\Factories\GroupModelFactory
+
+    userModelFactory:
+        implement: Examples\Models\Factories\UserModelFactory

@@ -16,6 +16,10 @@ use ReflectionMethod;
 use Throwable;
 use Traversable;
 
+/**
+ * @template S of Selection
+ * @template M of ActiveRow
+ */
 abstract class Repository
 {
     use HasHookIgnores;
@@ -40,11 +44,17 @@ abstract class Repository
         return $this->explorer;
     }
 
+    /**
+     * @return S
+     */
     public function getSelection(): Selection
     {
         return $this->selectionFactory->create($this->getTableName());
     }
 
+    /**
+     * @return S
+     */
     public function query(): Selection
     {
         $hookIgnores = $this->getHookIgnores();
@@ -56,7 +66,7 @@ abstract class Repository
     /**
      * @param iterable $data
      *
-     * @return bool|int|ActiveRow
+     * @return bool|int|M
      * @throws RepositoryException
      * @throws Throwable
      */
@@ -105,10 +115,10 @@ abstract class Repository
     }
 
     /**
-     * @param ActiveRow|int|string $record
+     * @param M|int|string $record
      * @param iterable $data
      *
-     * @return ActiveRow|null
+     * @return M|null
      * @throws RepositoryException
      * @throws Throwable
      */
@@ -118,8 +128,8 @@ abstract class Repository
         $hookIgnores = $this->getHookIgnores();
         $this->resetHookIgnores();
 
-        $record = $this->getRecord($record);
-        if ($record === null) {
+        $recordToUpdate = $this->getRecord($record);
+        if ($recordToUpdate === null) {
             return null;
         }
 
@@ -131,14 +141,14 @@ abstract class Repository
             }
 
             $data = $data instanceof Traversable ? iterator_to_array($data) : $data;
-            $data = $record->castDataToSet($data);
-            $data = $this->beforeUpdate($record, $data);
-            $oldModel = clone $record;
-            $record->originalUpdate($data, $hookIgnores);
+            $data = $recordToUpdate->castDataToSet($data);
+            $data = $this->beforeUpdate($recordToUpdate, $data);
+            $oldModel = clone $recordToUpdate;
+            $recordToUpdate->originalUpdate($data, $hookIgnores);
             foreach ($data as $key => $value) {
-                $record->$key = $value;
+                $recordToUpdate->$key = $value;
             }
-            $this->callMethods('afterUpdate', ['oldRecord' => $oldModel, 'newRecord' => $record, 'data' => $data], $this->hookIgnores);
+            $this->callMethods('afterUpdate', ['oldRecord' => $oldModel, 'newRecord' => $recordToUpdate, 'data' => $data], $this->hookIgnores);
 
             if (!$inTransaction) {
                 $this->getExplorer()->commit();
@@ -149,11 +159,11 @@ abstract class Repository
             }
             throw $e;
         }
-        return $record;
+        return $recordToUpdate;
     }
 
     /**
-     * @param ActiveRow|int|string $record
+     * @param M|int|string $record
      *
      * @return bool
      * @throws Throwable
@@ -164,8 +174,8 @@ abstract class Repository
         $hookIgnores = $this->getHookIgnores();
         $this->resetHookIgnores();
 
-        $record = $this->getRecord($record);
-        if ($record === null) {
+        $recordToDelete = $this->getRecord($record);
+        if ($recordToDelete === null) {
             return false;
         }
 
@@ -176,9 +186,9 @@ abstract class Repository
                 $this->getExplorer()->beginTransaction();
             }
 
-            $oldRecord = clone $record;
-            $this->callMethods('beforeDelete', ['record' => $record], $this->hookIgnores);
-            $result = $record->originalDelete($hookIgnores);
+            $oldRecord = clone $recordToDelete;
+            $this->callMethods('beforeDelete', ['record' => $recordToDelete], $this->hookIgnores);
+            $result = $recordToDelete->originalDelete($hookIgnores);
             $this->callMethods('afterDelete', ['record' => $oldRecord], $this->hookIgnores);
 
             if (!$inTransaction) {
@@ -193,6 +203,11 @@ abstract class Repository
         return (bool)$result;
     }
 
+    /**
+     * @param $record
+     *
+     * @return M|null
+     */
     protected function getRecord($record): ?ActiveRow
     {
         if (!$record instanceof ActiveRow) {

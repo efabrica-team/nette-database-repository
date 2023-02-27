@@ -18,7 +18,7 @@ services:
         autowired: Efabrica\NetteDatabaseRepository\Selections\Factories\SelectionFactoryInterface
 
     # Casts
-    - Efabrica\NetteDatabaseRepository\Casts\ArrayCast
+    - Efabrica\NetteDatabaseRepository\Casts\JsonArrayCast
 
     # Other
     - Efabrica\NetteDatabaseRepository\Helpers\CallableAutowirer

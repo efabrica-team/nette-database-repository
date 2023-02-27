@@ -2,12 +2,22 @@
 
 namespace Tests\Unit;
 
-use PHPUnit\Framework\TestCase;
+use Examples\Repositories\UserRepository;
+use Tests\TestCase;
 
 class ExampleTest extends TestCase
 {
+    private UserRepository $userRepository;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seedDatabase();
+        $this->userRepository = $this->container->getByType(UserRepository::class);
+    }
+
     public function testExample(): void
     {
-        $this->assertTrue(true);
+        $this->assertSame(9, $this->userRepository->query()->count('*'));
     }
 }

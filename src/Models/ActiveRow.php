@@ -6,8 +6,8 @@ use Efabrica\NetteDatabaseRepository\Casts\CastInterface;
 use Efabrica\NetteDatabaseRepository\Casts\Factories\CastFactory;
 use Efabrica\NetteDatabaseRepository\Helpers\HasHookIgnores;
 use Efabrica\NetteDatabaseRepository\Repositores\Managers\RepositoryManagerInterface;
-use Efabrica\NetteDatabaseRepository\Selections\Selection;
 use Nette\Database\Table\ActiveRow as BaseActiveRow;
+use Nette\Database\Table\Selection;
 use ReflectionClass;
 
 class ActiveRow extends BaseActiveRow

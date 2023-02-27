@@ -14,6 +14,9 @@ final class ManualRepositoryManager implements RepositoryManagerInterface
         return $this;
     }
 
+    /**
+     * @param Repository[] $repositories
+     */
     public function setRepositories(array $repositories): self
     {
         $this->repositories = $repositories;

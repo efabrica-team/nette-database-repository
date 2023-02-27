@@ -15,6 +15,13 @@ final class CastFactory
         $this->container = $container;
     }
 
+    /**
+     * @template C of CastInterface
+     *
+     * @param class-string<C> $type
+     *
+     * @return C
+     */
     public function createFromType(string $type, array $args = []): CastInterface
     {
         $cast = $this->container->createInstance($type, $args);

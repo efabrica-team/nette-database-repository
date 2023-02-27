@@ -5,7 +5,7 @@ namespace Efabrica\NetteDatabaseRepository\Casts;
 use Efabrica\NetteDatabaseRepository\Models\ActiveRow;
 use JsonException;
 
-final class ArrayCast implements CastInterface
+final class JsonArrayCast implements CastInterface
 {
     /**
      * @param mixed $value
