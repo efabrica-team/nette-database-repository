@@ -6,6 +6,8 @@ use Efabrica\NetteDatabaseRepository\Casts\Factories\CastFactory;
 use Efabrica\NetteDatabaseRepository\Casts\JsonArrayCast;
 use Efabrica\NetteDatabaseRepository\Models\Factories\ModelFactoryInterface;
 use Efabrica\NetteDatabaseRepository\Selections\Factories\SelectionFactoryInterface;
+use Examples\Models\Factories\GroupModelFactory;
+use Examples\Selections\Factories\GroupSelectionFactory;
 use Tests\TestCase;
 
 class JsonArrayCastTest extends TestCase
@@ -20,12 +22,8 @@ class JsonArrayCastTest extends TestCase
     {
         parent::setUp();
 
-        /**
-         * @var SelectionFactoryInterface $selectionFactory
-         * @var ModelFactoryInterface $modelFactory
-         */
-        $selectionFactory = $this->container->getByName('groupSelectionFactory');
-        $modelFactory = $this->container->getByName('groupModelFactory');
+        $selectionFactory = $this->container->getByType(GroupSelectionFactory::class);
+        $modelFactory = $this->container->getByType(GroupModelFactory::class);
         $castFactory = new CastFactory($this->container);
 
         $this->arrayCast = $castFactory->createFromType(JsonArrayCast::class);

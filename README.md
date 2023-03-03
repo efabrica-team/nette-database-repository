@@ -4,7 +4,7 @@ This package extends Nettes ActiveRow and Selection to add support for database 
 custom models, selections and define repository hooks before and after database actions.
 
 All repository write actions expect to work with a single record. When performing mass actions with selections hook
-methods will not be called.
+methods will not be called because records are never actually fetched from database.
 
 ## Table of contents
 
@@ -35,9 +35,6 @@ Via composer
 Repositories only need to implement the `getTableName()` method, which returns the name of the table to be queried
 against.
 
-Repository insert, update, and delete actions are run in a transaction. In case of an unexpected error
-throw [RepositoryException](src/Exceptions/RepositoryException.php) which will roll back database transactions.
-
 ```php
 namespace Examples\Repositories;
 
@@ -52,6 +49,9 @@ class UserRepository extends Repository
 }
 ```
 
+Repository insert, update, and delete actions are run in a transaction. In case of an unexpected error
+throw [RepositoryException](src/Exceptions/RepositoryException.php) which will roll back database transactions.
+
 #### Hooks
 
 Repositories can define methods that will be called before and after executing database actions. To define
@@ -59,7 +59,7 @@ hook action you need to add a final public method to the repository that starts 
 etc.). Hooks for the same actions are called in the order of definition (from top to bottom).
 
 Note that select hooks are also called on aggregations (sum of columns, etc.). So the results may not include all of
-them data you may expect in after select hook. **ALWAYS CHECK THAT THE REQUIRED DATA IS SET!**
+the data you may expect in after select hook. **ALWAYS CHECK THAT THE REQUIRED DATA IS SET!**
 
 You can add additional parameters to hook methods and container will try to inject them.
 
@@ -120,7 +120,7 @@ class UserRepository extends Repository
 ```
 
 **Default parameters must remain the same as in the definition. For example, by changing `$data` to `$values`
-in `beforeInsert` hook, it would be impossible to determine which parameters should be injected and which passed from
+in `beforeInsert` hook, it would be impossible to determine which parameters should be injected and which are passed from
 the code.**
 
 ### Selections
@@ -193,9 +193,11 @@ will be processed with the repository associated with the target table and all r
 #### Custom models
 
 You can define your own model extending ActiveRow. This is useful if you want to annotate model attributes or
-assign [casts](#casts) to these attributes. You can use class-string and the object is created in the background.
-However, if you want to pass some attributes, you need to create a cast using a factory. Defining your own models is
-optional. If not defined, the default ActiveRow is used.
+assign [casts](#casts) to these attributes. Defining your own models is optional. If not defined, the default ActiveRow
+is used.
+
+When assigning casts, you can use class-string and the cast is created in the background. However, if you want to pass
+some attributes, you need to create cast using a factory.
 
 ```php
 namespace Examples\Models;

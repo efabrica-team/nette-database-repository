@@ -17,7 +17,7 @@ class ManualModelFactoryManagerTest extends TestCase
     {
         parent::setUp();
         /** @var ModelFactoryInterface $defaultModelFactory */
-        $defaultModelFactory = $this->container->createService('activeRowModelFactory');
+        $defaultModelFactory = $this->container->getByType(ModelFactoryInterface::class);
         $this->defaultModelFactory = $defaultModelFactory;
         $this->manualModelFactoryManager = new ManualModelFactoryManager($this->defaultModelFactory);
     }

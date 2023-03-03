@@ -9,11 +9,13 @@ services:
         setup:
             - addRepository('groups', @groupRepository)
             - addRepository('users', @userRepository)
+            - addRepository('articles', @articleRepository)
 
     modelFactoryManager:
         setup:
             - addFactory('groups', @groupModelFactory)
             - addFactory('users', @userModelFactory)
+            - addFactory('articles', @articleModelFactory)
 
     # Repositories
     groupRepository:
@@ -26,6 +28,11 @@ services:
         arguments:
             selectionFactory: @userSelectionFactory
 
+    articleRepository:
+        create: Examples\Repositories\ArticleRepository
+        arguments:
+            selectionFactory: @articleSelectionFactory
+
     # Selections
     groupSelectionFactory:
         implement: Examples\Selections\Factories\GroupSelectionFactory
@@ -33,11 +40,17 @@ services:
     userSelectionFactory:
         implement: Examples\Selections\Factories\UserSelectionFactory
 
+    articleSelectionFactory:
+        implement: Examples\Selections\Factories\ArticleSelectionFactory
+
     # Models
     groupModelFactory:
         implement: Examples\Models\Factories\GroupModelFactory
 
     userModelFactory:
         implement: Examples\Models\Factories\UserModelFactory
+
+    articleModelFactory:
+        implement: Examples\Models\Factories\ArticleModelFactory
 
     # Casts

@@ -21,6 +21,12 @@ final class ManualModelFactoryManager implements ModelFactoryManagerInterface
         return $this;
     }
 
+    public function unsetFactory(string $table): self
+    {
+        unset($this->factories[$table]);
+        return $this;
+    }
+
     public function createForTable(string $table): ModelFactoryInterface
     {
         return $this->factories[$table] ?? $this->defaultModelFactory;

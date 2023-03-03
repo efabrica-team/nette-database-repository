@@ -2,11 +2,9 @@
 
 namespace Tests;
 
-use Efabrica\NetteDatabaseRepository\Repositores\Repository;
 use Nette\Bootstrap\Configurator;
 use Nette\Database\Explorer;
 use Nette\DI\Container;
-use Nette\Utils\FileSystem;
 use PHPUnit\Framework\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
@@ -34,7 +32,6 @@ abstract class TestCase extends BaseTestCase
     protected function tearDown(): void
     {
         $this->database->getConnection()->disconnect();
-        FileSystem::delete(__DIR__ . '/../temp');
     }
 
     protected function seedDatabase(): void

@@ -107,9 +107,9 @@ class ActiveRow extends BaseActiveRow
      */
     public function originalUpdate(iterable $data, array $hookIgnores = []): bool
     {
+        /** @var \Efabrica\NetteDatabaseRepository\Selections\Selection $table */
         $table = $this->table;
         if (in_array(HasHookIgnores::class, class_uses($table), true)) {
-            /** @var HasHookIgnores $table */
             $table->importHookIgnores($hookIgnores);
         }
         return parent::update($data);
@@ -133,9 +133,9 @@ class ActiveRow extends BaseActiveRow
      */
     public function originalDelete(array $hookIgnores = []): int
     {
+        /** @var \Efabrica\NetteDatabaseRepository\Selections\Selection $table */
         $table = $this->table;
         if (in_array(HasHookIgnores::class, class_uses($table), true)) {
-            /** @var HasHookIgnores $table */
             $table->importHookIgnores($hookIgnores);
         }
         return parent::delete();

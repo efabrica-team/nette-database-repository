@@ -4,18 +4,19 @@ services:
         create: Efabrica\NetteDatabaseRepository\Repositores\Managers\ManualRepositoryManager
 
     modelFactoryManager:
-        create: Efabrica\NetteDatabaseRepository\Models\Managers\ManualModelFactoryManager(@activeRowModelFactory)
+        create: Efabrica\NetteDatabaseRepository\Models\Managers\ManualModelFactoryManager(@modelFactory)
 
     # Factories
-    activeRowModelFactory:
-        implement: Efabrica\NetteDatabaseRepository\Models\Factories\ModelFactoryInterface
-
-    castFactory:
-        create: Efabrica\NetteDatabaseRepository\Casts\Factories\CastFactory
-
     selectionFactory:
         implement: Efabrica\NetteDatabaseRepository\Selections\Factories\SelectionFactoryInterface
         autowired: Efabrica\NetteDatabaseRepository\Selections\Factories\SelectionFactoryInterface
+
+    modelFactory:
+        implement: Efabrica\NetteDatabaseRepository\Models\Factories\ModelFactoryInterface
+        autowired: Efabrica\NetteDatabaseRepository\Models\Factories\ModelFactoryInterface
+
+    castFactory:
+        create: Efabrica\NetteDatabaseRepository\Casts\Factories\CastFactory
 
     # Casts
     - Efabrica\NetteDatabaseRepository\Casts\JsonArrayCast

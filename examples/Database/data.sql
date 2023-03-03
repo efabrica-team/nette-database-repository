@@ -12,3 +12,12 @@ VALUES (1, 1, 'Admin', 'admin@admin.com'),
        (10, NULL, 'User #3', 'user3@editor.com'),
        (11, NULL, 'User #4', 'user4@editor.com'),
        (12, NULL, 'User #5', 'user5@editor.com');
+
+
+INSERT INTO `articles` (`id`, `user_id`, `title`, `body`)
+VALUES (1, 2, 'Article #1', 'Lorem Ipsum'),
+       (2, 2, 'Article #2', 'Dolor Sit'),
+       (3, 3, 'Article #3', 'Amet Consectetur'),
+       (4, 3, 'Article #4', 'Adipiscing Elit'),
+       (5, 4, 'Article #5', 'Etiam Bibendum'),
+       (6, 4, 'Article #6', 'Nec Nulla')

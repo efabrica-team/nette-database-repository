@@ -4,7 +4,13 @@
     <testsuite name="Unit">
       <directory>./tests/Unit</directory>
     </testsuite>
+    <testsuite name="Feature">
+      <directory>./tests/Feature</directory>
+    </testsuite>
   </testsuites>
+  <extensions>
+    <extension class="Tests\Extensions\RemoveTempFolderAfterTests" />
+  </extensions>
   <coverage>
     <include>
       <directory suffix=".php">./src</directory>

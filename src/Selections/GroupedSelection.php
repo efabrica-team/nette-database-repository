@@ -5,6 +5,7 @@ namespace Efabrica\NetteDatabaseRepository\Selections;
 use Efabrica\NetteDatabaseRepository\Models\ActiveRow;
 use Efabrica\NetteDatabaseRepository\Models\Managers\ModelFactoryManagerInterface;
 use Efabrica\NetteDatabaseRepository\Repositores\Managers\RepositoryManagerInterface;
+use Iterator;
 use Nette\Caching\Storage;
 use Nette\Database\Conventions;
 use Nette\Database\Explorer;
@@ -13,6 +14,7 @@ use Nette\Database\Table\Selection as BaseSelection;
 
 /**
  * @template M of ActiveRow
+ * @template-implements Iterator<int, ActiveRow>
  *
  * @property M[] $data
  * @property M[] $rows

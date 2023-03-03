@@ -14,6 +14,12 @@ final class ManualRepositoryManager implements RepositoryManagerInterface
         return $this;
     }
 
+    public function unsetRepository(string $table): self
+    {
+        unset($this->repositories[$table]);
+        return $this;
+    }
+
     /**
      * @param Repository[] $repositories
      */
