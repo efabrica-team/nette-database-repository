@@ -20,6 +20,7 @@ methods will not be called because records are never actually fetched from datab
         * [Factories](#factories-1)
         * [Casts](#casts)
     * [Behaviors](#behaviors)
+    * [Ingoring hooks](#ignoring-hooks)
 * [Registration](#registration)
 
 ## Installation
@@ -120,7 +121,8 @@ class UserRepository extends Repository
 ```
 
 **Default parameters must remain the same as in the definition. For example, by changing `$data` to `$values`
-in `beforeInsert` hook, it would be impossible to determine which parameters should be injected and which are passed from
+in `beforeInsert` hook, it would be impossible to determine which parameters should be injected and which are passed
+from
 the code.**
 
 ### Selections
@@ -308,6 +310,26 @@ final class JsonArrayCast implements CastInterface
 ### Behaviors
 
 Behaviors are traits containing hook methods that can be easily applied to repositories.
+
+### Ignoring hooks
+
+Before querying database, you can define which hooks should be ignored. These hook ignores can be applided to
+repositories, selections and models.
+
+```php
+use Examples\Repositories\UserRepository;
+
+/** @var UserRepository $userRepository */
+$userRepository->query()->ignoreHooks()->fetchAll(); // Ignore all hooks
+
+$userRepository->query()->ignoreHook('defaultConditionsHookName')->fetchAll(); // Ignore single hook by its name
+
+$userRepository->query()->ignoreHookType('defaultConditions')->fetchAll(); // Ignore all default conditions hooks
+
+$userRepository->query()->ignoreBehavior(SoftDeleteBehavior::class)->fetchAll(); // Ignore all hooks defined in trait
+$userRepository->query()->ignoreBehavior(SoftDeleteBehavior::class, 'defaultConditions')->fetchAll(); // Ignore default condition hooks defined in trait
+
+```
 
 ## Registration
 

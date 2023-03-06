@@ -22,6 +22,10 @@ final class HookIgnore
 
     public function isCallableIgnored(ReflectionClass $repositoryReflection, ReflectionMethod $hookReflection): bool
     {
+        if ($this->traitClass === null && $this->hookType === null && $this->hookName === null) {
+            return true;
+        }
+
         $hookTraitClass = null;
         foreach ($repositoryReflection->getTraits() as $repositoryTraitReflection) {
             if ($hookReflection->getFileName() === $repositoryTraitReflection->getFileName()) {

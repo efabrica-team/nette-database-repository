@@ -16,12 +16,12 @@ class HookIgnoreTest extends TestCase
         $repositoryReflection = new ReflectionClass($this->container->createInstance(HookIgnoreRepository::class));
 
         $hookignore = new HookIgnore();
-        $this->assertFalse($hookignore->isCallableIgnored($repositoryReflection, $repositoryReflection->getMethod('defaultConditionsApplyFirstLorem')));
-        $this->assertFalse($hookignore->isCallableIgnored($repositoryReflection, $repositoryReflection->getMethod('defaultConditionsApplySecondLorem')));
-        $this->assertFalse($hookignore->isCallableIgnored($repositoryReflection, $repositoryReflection->getMethod('beforeSelectApplyThirdLorem')));
-        $this->assertFalse($hookignore->isCallableIgnored($repositoryReflection, $repositoryReflection->getMethod('defaultConditionsApplyFirstIpsum')));
-        $this->assertFalse($hookignore->isCallableIgnored($repositoryReflection, $repositoryReflection->getMethod('defaultConditionsApplySecondIpsum')));
-        $this->assertFalse($hookignore->isCallableIgnored($repositoryReflection, $repositoryReflection->getMethod('beforeSelectApplyThirdIpsum')));
+        $this->assertTrue($hookignore->isCallableIgnored($repositoryReflection, $repositoryReflection->getMethod('defaultConditionsApplyFirstLorem')));
+        $this->assertTrue($hookignore->isCallableIgnored($repositoryReflection, $repositoryReflection->getMethod('defaultConditionsApplySecondLorem')));
+        $this->assertTrue($hookignore->isCallableIgnored($repositoryReflection, $repositoryReflection->getMethod('beforeSelectApplyThirdLorem')));
+        $this->assertTrue($hookignore->isCallableIgnored($repositoryReflection, $repositoryReflection->getMethod('defaultConditionsApplyFirstIpsum')));
+        $this->assertTrue($hookignore->isCallableIgnored($repositoryReflection, $repositoryReflection->getMethod('defaultConditionsApplySecondIpsum')));
+        $this->assertTrue($hookignore->isCallableIgnored($repositoryReflection, $repositoryReflection->getMethod('beforeSelectApplyThirdIpsum')));
 
         $hookignore = new HookIgnore(LoremBehavior::class);
         $this->assertTrue($hookignore->isCallableIgnored($repositoryReflection, $repositoryReflection->getMethod('defaultConditionsApplyFirstLorem')));

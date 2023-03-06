@@ -56,4 +56,13 @@ trait HasHookIgnores
         $this->hookIgnores[] = new HookIgnore($traitName, $hookType, $hookName);
         return $this;
     }
+
+    /**
+     * @return static
+     */
+    public function ignoreHooks(): self
+    {
+        $this->hookIgnores[] = new HookIgnore();
+        return $this;
+    }
 }
