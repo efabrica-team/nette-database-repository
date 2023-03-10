@@ -12,8 +12,6 @@ use ReflectionClass;
 
 class ActiveRow extends BaseActiveRow
 {
-    use HasHookIgnores;
-
     protected RepositoryManagerInterface $repositoryManager;
 
     protected CastFactory $castFactory;
@@ -89,15 +87,12 @@ class ActiveRow extends BaseActiveRow
 
     public function update(iterable $data): bool
     {
-        $hookIgnores = $this->getHookIgnores();
-        $this->resetHookIgnores();
-
         $repository = $this->repositoryManager->createForTable($this->table->getName());
         if ($repository === null) {
             return parent::update($data);
         }
 
-        $repository->importHookIgnores($hookIgnores)->update($this, $data);
+        $repository->update($this, $data);
 
         return (bool)$data;
     }
@@ -105,39 +100,26 @@ class ActiveRow extends BaseActiveRow
     /**
      * @internal
      */
-    public function originalUpdate(iterable $data, array $hookIgnores = []): bool
+    public function originalUpdate(iterable $data): bool
     {
-        /** @var \Efabrica\NetteDatabaseRepository\Selections\Selection $table */
-        $table = $this->table;
-        if (in_array(HasHookIgnores::class, class_uses($table), true)) {
-            $table->importHookIgnores($hookIgnores);
-        }
         return parent::update($data);
     }
 
     public function delete(): int
     {
-        $hookIgnores = $this->getHookIgnores();
-        $this->resetHookIgnores();
-
         $repository = $this->repositoryManager->createForTable($this->table->getName());
         if ($repository === null) {
             return parent::delete();
         }
 
-        return (int)$repository->importHookIgnores($hookIgnores)->delete($this);
+        return (int)$repository->delete($this);
     }
 
     /**
      * @internal
      */
-    public function originalDelete(array $hookIgnores = []): int
+    public function originalDelete(): int
     {
-        /** @var \Efabrica\NetteDatabaseRepository\Selections\Selection $table */
-        $table = $this->table;
-        if (in_array(HasHookIgnores::class, class_uses($table), true)) {
-            $table->importHookIgnores($hookIgnores);
-        }
         return parent::delete();
     }
 

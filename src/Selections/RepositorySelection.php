@@ -2,13 +2,11 @@
 
 namespace Efabrica\NetteDatabaseRepository\Selections;
 
-use Efabrica\NetteDatabaseRepository\Helpers\HasHookIgnores;
+use Efabrica\NetteDatabaseRepository\Behavior\Behavior;
 use Efabrica\NetteDatabaseRepository\Models\ActiveRow;
 
 trait RepositorySelection
 {
-    use HasHookIgnores;
-
     protected function execute(): void
     {
         if ($this->rows !== null) {
@@ -21,12 +19,15 @@ trait RepositorySelection
             return;
         }
 
-        $repository->callMethods('defaultConditions', ['selection' => $this], $this->hookIgnores);
-        $repository->callMethods('beforeSelect', ['selection' => $this], $this->hookIgnores);
+        foreach ($repository->getBehaviors() as $behavior) {
+            $behavior->beforeSelect($this);
+        }
 
         parent::execute();
 
-        $repository->callMethods('afterSelect', ['selection' => $this], $this->hookIgnores);
+        foreach ($repository->getBehaviors() as $behavior) {
+            $behavior->afterSelect($this);
+        }
     }
 
     protected function createRow(array $row): ActiveRow
@@ -36,13 +37,7 @@ trait RepositorySelection
 
     public function createSelectionInstance(?string $table = null): Selection
     {
-        $selection = new Selection($this->repositoryManager, $this->modelFactoryManager, $this->explorer, $this->conventions, $table ?: $this->name, $this->cache->getStorage());
-
-        if ($this->getName() === $selection->getName()) {
-            $selection->importHookIgnores($this->getHookIgnores());
-        }
-
-        return $selection;
+        return new Selection($this->repositoryManager, $this->modelFactoryManager, $this->explorer, $this->conventions, $table ?: $this->name, $this->cache->getStorage());
     }
 
     protected function createGroupedSelectionInstance(string $table, string $column): GroupedSelection

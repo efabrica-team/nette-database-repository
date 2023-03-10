@@ -14,7 +14,7 @@ use Nette\Database\Table\Selection as BaseSelection;
 
 /**
  * @template M of ActiveRow
- * @template-implements Iterator<int, ActiveRow>
+ * @implements Iterator<int, M>
  *
  * @property M[] $data
  * @property M[] $rows

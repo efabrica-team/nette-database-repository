@@ -20,6 +20,3 @@ services:
 
     # Casts
     - Efabrica\NetteDatabaseRepository\Casts\JsonArrayCast
-
-    # Other
-    - Efabrica\NetteDatabaseRepository\Helpers\CallableAutowirer
