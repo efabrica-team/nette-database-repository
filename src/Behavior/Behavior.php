@@ -7,7 +7,6 @@ use Nette\Database\Table\Selection;
 
 abstract class Behavior
 {
-
     public function beforeInsert(array $data): array
     {
         return $data;

@@ -2,7 +2,6 @@
 
 namespace Efabrica\NetteDatabaseRepository\Selections;
 
-use Efabrica\NetteDatabaseRepository\Behavior\Behavior;
 use Efabrica\NetteDatabaseRepository\Models\ActiveRow;
 
 trait RepositorySelection

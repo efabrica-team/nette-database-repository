@@ -7,30 +7,31 @@ use Efabrica\NetteDatabaseRepository\Models\ActiveRow;
 
 class DateBehavior extends Behavior
 {
-    private ?string $createdAt;
-    private ?string $updatedAt;
+    private ?string $createdAtField;
 
-    public function __construct(?string $createdAt = 'created_at', ?string $updatedAt = 'updated_at')
+    private ?string $updatedAtField;
+
+    public function __construct(?string $createdAtField = 'created_at', ?string $updatedAtField = 'updated_at')
     {
-        $this->createdAt = $createdAt;
-        $this->updatedAt = $updatedAt;
+        $this->createdAtField = $createdAtField;
+        $this->updatedAtField = $updatedAtField;
     }
 
     public function beforeInsert(array $data): array
     {
-        if ($this->createdAt !== null) {
-            $data[$this->createdAt] ??= new DateTime();
+        if ($this->createdAtField !== null) {
+            $data[$this->createdAtField] ??= new DateTime();
         }
-        if ($this->updatedAt !== null) {
-            $data[$this->updatedAt] ??= new DateTime();
+        if ($this->updatedAtField !== null) {
+            $data[$this->updatedAtField] ??= new DateTime();
         }
         return $data;
     }
 
     public function beforeUpdate(ActiveRow $row, array $data): array
     {
-        if ($this->updatedAt !== null && !isset($data[$this->updatedAt])) {
-            $data[$this->updatedAt] ??= new DateTime();
+        if ($this->updatedAtField !== null) {
+            $data[$this->updatedAtField] ??= new DateTime();
         }
         return $data;
     }

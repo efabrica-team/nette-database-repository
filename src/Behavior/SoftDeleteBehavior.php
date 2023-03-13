@@ -10,7 +10,9 @@ use Nette\Database\Table\Selection;
 class SoftDeleteBehavior extends Behavior
 {
     private string $deletedAt;
+
     private Repository $repository;
+
     private bool $defaultWhere;
 
     public function __construct(Repository $repository, bool $defaultWhere = true, string $deletedAt = 'deleted_at')
@@ -44,7 +46,7 @@ class SoftDeleteBehavior extends Behavior
     public function beforeSelect(Selection $selection): void
     {
         if ($this->defaultWhere) {
-            $selection->where($this->deletedAt.' < ?', new DateTime());
+            $selection->where($this->deletedAt . ' < ?', new DateTime());
         }
     }
 }
