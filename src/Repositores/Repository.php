@@ -2,6 +2,7 @@
 
 namespace Efabrica\NetteDatabaseRepository\Repositores;
 
+use Efabrica\NetteDatabaseRepository\Behavior\BehaviorInjector;
 use Efabrica\NetteDatabaseRepository\Exceptions\RepositoryException;
 use Efabrica\NetteDatabaseRepository\Models\ActiveRow;
 use Efabrica\NetteDatabaseRepository\Selections\Factories\SelectionFactoryInterface;
@@ -23,11 +24,11 @@ abstract class Repository
 
     protected RepositoryBehaviors $behaviors;
 
-    public function __construct(Explorer $db, SelectionFactoryInterface $selectionFactory)
+    public function __construct(Explorer $db, SelectionFactoryInterface $selectionFactory, BehaviorInjector $behaviorInjector)
     {
         $this->explorer = $db;
         $this->selectionFactory = $selectionFactory;
-        $this->behaviors = new RepositoryBehaviors();
+        $this->behaviors = new RepositoryBehaviors($behaviorInjector);
     }
 
     abstract public function getTableName(): string;

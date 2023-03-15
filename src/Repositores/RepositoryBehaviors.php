@@ -4,6 +4,7 @@ namespace Efabrica\NetteDatabaseRepository\Repositores;
 
 use ArrayIterator;
 use Efabrica\NetteDatabaseRepository\Behavior\Behavior;
+use Efabrica\NetteDatabaseRepository\Behavior\BehaviorInjector;
 use IteratorAggregate;
 
 /**
@@ -13,10 +14,17 @@ final class RepositoryBehaviors implements IteratorAggregate
 {
     /** @var Behavior[] */
     private array $behaviors = [];
+    private BehaviorInjector $injector;
+
+    public function __construct(BehaviorInjector $injector)
+    {
+        $this->injector = $injector;
+    }
 
     public function add(Behavior $behavior, ?string $key = null): self
     {
         $this->behaviors[$key ?? get_class($behavior)] = $behavior;
+        $this->injector->inject($behavior);
         return $this;
     }
 

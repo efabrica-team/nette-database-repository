@@ -20,3 +20,5 @@ services:
 
     # Casts
     - Efabrica\NetteDatabaseRepository\Casts\JsonArrayCast
+
+    - Efabrica\NetteDatabaseRepository\Behavior\BehaviorInjector
