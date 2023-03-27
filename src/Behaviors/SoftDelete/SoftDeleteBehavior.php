@@ -49,9 +49,12 @@ trait SoftDeleteBehavior
 
             $oldRecord = clone $recordToDelete;
             $this->callMethods('beforeSoftDelete', ['record' => $record], $hookIgnores);
-            $result = $this->update($recordToDelete, [
-                $this->deletedAtField() => new DateTime(),
-            ]);
+            $result = $this
+                ->ignoreHookType('beforeUpdate')
+                ->ignoreHookType('afterUpdate')
+                ->update($recordToDelete, [
+                    $this->deletedAtField() => new DateTime(),
+                ]);
             $this->callMethods('afterSoftDelete', ['record' => $oldRecord], $hookIgnores);
 
             if (!$inTransaction) {
@@ -94,9 +97,12 @@ trait SoftDeleteBehavior
 
             $oldRecord = clone $recordToRestore;
             $this->callMethods('beforeRestore', ['record' => $record], $hookIgnores);
-            $result = $this->update($recordToRestore, [
-                $this->deletedAtField() => null,
-            ]);
+            $result = $this
+                ->ignoreHookType('beforeUpdate')
+                ->ignoreHookType('afterUpdate')
+                ->update($recordToRestore, [
+                    $this->deletedAtField() => null,
+                ]);
             $this->callMethods('afterRestore', ['record' => $oldRecord], $hookIgnores);
 
             if (!$inTransaction) {
