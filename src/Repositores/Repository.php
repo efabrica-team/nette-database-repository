@@ -84,9 +84,9 @@ abstract class Repository
             }
 
             $data = $data instanceof Traversable ? iterator_to_array($data) : $data;
-            $data = $this->beforeInsert($data);
+            $data = $this->beforeInsert($data, $hookIgnores);
             $record = $this->query()->importHookIgnores($hookIgnores)->insert($data);
-            $this->callMethods('afterInsert', ['record' => $record, 'data' => $data], $this->hookIgnores);
+            $this->callMethods('afterInsert', ['record' => $record, 'data' => $data], $hookIgnores);
 
             if (!$inTransaction) {
                 $this->getExplorer()->commit();
@@ -125,10 +125,12 @@ abstract class Repository
     public function update($record, iterable $data): ?ActiveRow
     {
         $this->ignoreHookType('defaultConditions');
+
+        $recordToUpdate = $this->getRecord($record);
+
         $hookIgnores = $this->getHookIgnores();
         $this->resetHookIgnores();
 
-        $recordToUpdate = $this->getRecord($record);
         if ($recordToUpdate === null) {
             return null;
         }
@@ -142,7 +144,7 @@ abstract class Repository
 
             $data = $data instanceof Traversable ? iterator_to_array($data) : $data;
             $data = $recordToUpdate->castDataToSet($data);
-            $data = $this->beforeUpdate($recordToUpdate, $data);
+            $data = $this->beforeUpdate($recordToUpdate, $data, $hookIgnores);
             $oldModel = clone $recordToUpdate;
             $recordToUpdate->originalUpdate($data, $hookIgnores);
             foreach ($data as $key => $value) {
@@ -171,10 +173,12 @@ abstract class Repository
     public function delete($record): bool
     {
         $this->ignoreHookType('defaultConditions');
+
+        $recordToDelete = $this->getRecord($record);
+
         $hookIgnores = $this->getHookIgnores();
         $this->resetHookIgnores();
 
-        $recordToDelete = $this->getRecord($record);
         if ($recordToDelete === null) {
             return false;
         }
@@ -256,9 +260,9 @@ abstract class Repository
         return true;
     }
 
-    private function beforeInsert(array $data): array
+    private function beforeInsert(array $data, array $hookIgnores = []): array
     {
-        $methods = $this->findMethods('beforeInsert', $this->hookIgnores);
+        $methods = $this->findMethods('beforeInsert', $hookIgnores);
         foreach ($methods as $methodName) {
             $callable = [$this, $methodName];
             if (is_callable($callable)) {
@@ -269,9 +273,9 @@ abstract class Repository
         return $data;
     }
 
-    private function beforeUpdate(ActiveRow $record, array $data): array
+    private function beforeUpdate(ActiveRow $record, array $data, array $hookIgnores = []): array
     {
-        $methods = $this->findMethods('beforeUpdate', $this->hookIgnores);
+        $methods = $this->findMethods('beforeUpdate', $hookIgnores);
         foreach ($methods as $methodName) {
             $callable = [$this, $methodName];
             if (is_callable($callable)) {

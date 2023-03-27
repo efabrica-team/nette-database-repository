@@ -6,8 +6,10 @@ use Efabrica\NetteDatabaseRepository\Casts\CastInterface;
 use Efabrica\NetteDatabaseRepository\Casts\Factories\CastFactory;
 use Efabrica\NetteDatabaseRepository\Helpers\HasHookIgnores;
 use Efabrica\NetteDatabaseRepository\Repositores\Managers\RepositoryManagerInterface;
+use Efabrica\NetteDatabaseRepository\Selections\GroupedSelection;
+use Efabrica\NetteDatabaseRepository\Selections\Selection;
 use Nette\Database\Table\ActiveRow as BaseActiveRow;
-use Nette\Database\Table\Selection;
+use Nette\Database\Table\Selection as BaseSelection;
 use ReflectionClass;
 
 class ActiveRow extends BaseActiveRow
@@ -18,13 +20,13 @@ class ActiveRow extends BaseActiveRow
 
     protected CastFactory $castFactory;
 
-    protected Selection $table;
+    protected BaseSelection $table;
 
     protected array $attributes = [];
 
     protected array $casts = [];
 
-    public function __construct(RepositoryManagerInterface $repositoryManager, CastFactory $castFactory, array $data, Selection $table)
+    public function __construct(RepositoryManagerInterface $repositoryManager, CastFactory $castFactory, array $data, BaseSelection $table)
     {
         $this->repositoryManager = $repositoryManager;
         $this->castFactory = $castFactory;
@@ -107,9 +109,8 @@ class ActiveRow extends BaseActiveRow
      */
     public function originalUpdate(iterable $data, array $hookIgnores = []): bool
     {
-        /** @var \Efabrica\NetteDatabaseRepository\Selections\Selection $table */
         $table = $this->table;
-        if (in_array(HasHookIgnores::class, class_uses($table), true)) {
+        if ($table instanceof Selection || $table instanceof GroupedSelection) {
             $table->importHookIgnores($hookIgnores);
         }
         return parent::update($data);
@@ -133,7 +134,7 @@ class ActiveRow extends BaseActiveRow
      */
     public function originalDelete(array $hookIgnores = []): int
     {
-        /** @var \Efabrica\NetteDatabaseRepository\Selections\Selection $table */
+        /** @var Selection $table */
         $table = $this->table;
         if (in_array(HasHookIgnores::class, class_uses($table), true)) {
             $table->importHookIgnores($hookIgnores);
