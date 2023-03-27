@@ -2,6 +2,7 @@
 
 namespace Examples\Selections;
 
+use Efabrica\NetteDatabaseRepository\Behaviors\SoftDelete\SoftDeleteSelectionBehavior;
 use Efabrica\NetteDatabaseRepository\Selections\Selection;
 use Examples\Models\Article;
 use Iterator;
@@ -17,5 +18,5 @@ use Iterator;
  */
 class ArticleSelection extends Selection
 {
-    //
+    use SoftDeleteSelectionBehavior;
 }
