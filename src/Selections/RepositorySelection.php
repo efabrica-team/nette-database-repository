@@ -2,6 +2,7 @@
 
 namespace Efabrica\NetteDatabaseRepository\Selections;
 
+use Efabrica\NetteDatabaseRepository\Enums\HookType;
 use Efabrica\NetteDatabaseRepository\Helpers\HasHookIgnores;
 use Efabrica\NetteDatabaseRepository\Models\ActiveRow;
 
@@ -21,12 +22,12 @@ trait RepositorySelection
             return;
         }
 
-        $repository->callMethods('defaultConditions', ['selection' => $this], $this->hookIgnores);
-        $repository->callMethods('beforeSelect', ['selection' => $this], $this->hookIgnores);
+        $repository->callMethods(HookType::DEFAULT_CONDITIONS, ['selection' => $this], $this->hookIgnores);
+        $repository->callMethods(HookType::BEFORE_SELECT, ['selection' => $this], $this->hookIgnores);
 
         parent::execute();
 
-        $repository->callMethods('afterSelect', ['selection' => $this], $this->hookIgnores);
+        $repository->callMethods(HookType::AFTER_SELECT, ['selection' => $this], $this->hookIgnores);
     }
 
     protected function createRow(array $row): ActiveRow

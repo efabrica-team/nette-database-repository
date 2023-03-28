@@ -2,6 +2,7 @@
 
 namespace Efabrica\NetteDatabaseRepository\Repositores;
 
+use Efabrica\NetteDatabaseRepository\Enums\HookType;
 use Efabrica\NetteDatabaseRepository\Exceptions\RepositoryException;
 use Efabrica\NetteDatabaseRepository\Helpers\CallableAutowirer;
 use Efabrica\NetteDatabaseRepository\Helpers\HasHookIgnores;
@@ -72,7 +73,7 @@ abstract class Repository
      */
     public function insert(iterable $data)
     {
-        $this->ignoreHookType('defaultConditions');
+        $this->ignoreHookType(HookType::DEFAULT_CONDITIONS);
         $hookIgnores = $this->getHookIgnores();
         $this->resetHookIgnores();
 
@@ -86,7 +87,7 @@ abstract class Repository
             $data = $data instanceof Traversable ? iterator_to_array($data) : $data;
             $data = $this->beforeInsert($data, $hookIgnores);
             $record = $this->query()->importHookIgnores($hookIgnores)->insert($data);
-            $this->callMethods('afterInsert', ['record' => $record, 'data' => $data], $hookIgnores);
+            $this->callMethods(HookType::AFTER_INSERT, ['record' => $record, 'data' => $data], $hookIgnores);
 
             if (!$inTransaction) {
                 $this->getExplorer()->commit();
@@ -124,7 +125,7 @@ abstract class Repository
      */
     public function update($record, iterable $data): ?ActiveRow
     {
-        $this->ignoreHookType('defaultConditions');
+        $this->ignoreHookType(HookType::DEFAULT_CONDITIONS);
 
         $recordToUpdate = $this->getRecord($record);
 
@@ -151,7 +152,7 @@ abstract class Repository
             foreach ($data as $key => $value) {
                 $recordToUpdate->$key = $value;
             }
-            $this->callMethods('afterUpdate', ['oldRecord' => $oldModel, 'newRecord' => $recordToUpdate, 'data' => $data], $hookIgnores);
+            $this->callMethods(HookType::AFTER_UPDATE, ['oldRecord' => $oldModel, 'newRecord' => $recordToUpdate, 'data' => $data], $hookIgnores);
 
             if (!$inTransaction) {
                 $this->getExplorer()->commit();
@@ -173,7 +174,7 @@ abstract class Repository
      */
     public function delete($record): bool
     {
-        $this->ignoreHookType('defaultConditions');
+        $this->ignoreHookType(HookType::DEFAULT_CONDITIONS);
 
         $recordToDelete = $this->getRecord($record);
 
@@ -192,9 +193,9 @@ abstract class Repository
             }
 
             $oldRecord = clone $recordToDelete;
-            $this->callMethods('beforeDelete', ['record' => $recordToDelete], $hookIgnores);
+            $this->callMethods(HookType::BEFORE_DELETE, ['record' => $recordToDelete], $hookIgnores);
             $result = $recordToDelete->originalDelete($hookIgnores);
-            $this->callMethods('afterDelete', ['record' => $oldRecord], $hookIgnores);
+            $this->callMethods(HookType::AFTER_DELETE, ['record' => $oldRecord], $hookIgnores);
 
             if (!$inTransaction) {
                 $this->getExplorer()->commit();
@@ -263,7 +264,7 @@ abstract class Repository
 
     private function beforeInsert(array $data, array $hookIgnores = []): array
     {
-        $methods = $this->findMethods('beforeInsert', $hookIgnores);
+        $methods = $this->findMethods(HookType::BEFORE_INSERT, $hookIgnores);
         foreach ($methods as $methodName) {
             $callable = [$this, $methodName];
             if (is_callable($callable)) {
@@ -276,7 +277,7 @@ abstract class Repository
 
     private function beforeUpdate(ActiveRow $record, array $data, array $hookIgnores = []): array
     {
-        $methods = $this->findMethods('beforeUpdate', $hookIgnores);
+        $methods = $this->findMethods(HookType::BEFORE_UPDATE, $hookIgnores);
         foreach ($methods as $methodName) {
             $callable = [$this, $methodName];
             if (is_callable($callable)) {
