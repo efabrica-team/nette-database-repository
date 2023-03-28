@@ -25,8 +25,8 @@ use Traversable;
  */
 abstract class Repository
 {
-    use HasHookIgnores;
     use RepositoryBehavior;
+    use HasHookIgnores;
 
     protected Explorer $explorer;
 

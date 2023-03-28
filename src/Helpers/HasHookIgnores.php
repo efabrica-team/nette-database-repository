@@ -17,7 +17,7 @@ trait HasHookIgnores
     /**
      * @return static
      */
-    public function importHookIgnores(array $hookIgnores): self
+    public function importHookIgnores(array $hookIgnores)
     {
         $this->hookIgnores = array_merge($this->hookIgnores, $hookIgnores);
         return $this;
@@ -26,7 +26,7 @@ trait HasHookIgnores
     /**
      * @return static
      */
-    public function resetHookIgnores(): self
+    public function resetHookIgnores()
     {
         $this->hookIgnores = [];
         return $this;
@@ -35,7 +35,7 @@ trait HasHookIgnores
     /**
      * @return static
      */
-    public function ignoreHook(string $hookName): self
+    public function ignoreHook(string $hookName)
     {
         return $this->ignoreBehavior(null, null, $hookName);
     }
@@ -43,7 +43,7 @@ trait HasHookIgnores
     /**
      * @return static
      */
-    public function ignoreHookType(string $hookType, string $hookName = null): self
+    public function ignoreHookType(string $hookType, string $hookName = null)
     {
         return $this->ignoreBehavior(null, $hookType, $hookName);
     }
@@ -51,7 +51,7 @@ trait HasHookIgnores
     /**
      * @return static
      */
-    public function ignoreBehavior(?string $traitName, string $hookType = null, string $hookName = null): self
+    public function ignoreBehavior(?string $traitName, string $hookType = null, string $hookName = null)
     {
         $this->hookIgnores[] = new HookIgnore($traitName, $hookType, $hookName);
         return $this;
@@ -60,7 +60,7 @@ trait HasHookIgnores
     /**
      * @return static
      */
-    public function ignoreHooks(): self
+    public function ignoreHooks()
     {
         $this->hookIgnores[] = new HookIgnore();
         return $this;
