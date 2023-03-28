@@ -3,6 +3,7 @@
 namespace Efabrica\NetteDatabaseRepository\Behaviors;
 
 use Efabrica\NetteDatabaseRepository\Models\ActiveRow;
+use Nette\Database\Table\ActiveRow as BaseActiveRow;
 use Nette\Database\Table\GroupedSelection;
 
 /**
@@ -13,12 +14,12 @@ trait SelectionBehavior
     /**
      * @return M|null
      */
-    abstract public function get($key): ?ActiveRow;
+    abstract public function get($key): ?BaseActiveRow;
 
     /**
      * @return M|null
      */
-	abstract public function fetch(): ?ActiveRow;
+	abstract public function fetch(): ?BaseActiveRow;
 
 	abstract public function fetchField(?string $column = null);
 
@@ -83,30 +84,30 @@ trait SelectionBehavior
     /**
      * @return static
      */
-    abstract public function importHookIgnores(array $hookIgnores): self;
+    abstract public function importHookIgnores(array $hookIgnores);
 
     /**
      * @return static
      */
-    abstract public function resetHookIgnores(): self;
+    abstract public function resetHookIgnores();
 
     /**
      * @return static
      */
-    abstract public function ignoreHook(string $hookName): self;
+    abstract public function ignoreHook(string $hookName);
 
     /**
      * @return static
      */
-    abstract public function ignoreHookType(string $hookType, string $hookName = null): self;
+    abstract public function ignoreHookType(string $hookType, string $hookName = null);
 
     /**
      * @return static
      */
-    abstract public function ignoreBehavior(?string $traitName, string $hookType = null, string $hookName = null): self;
+    abstract public function ignoreBehavior(?string $traitName, string $hookType = null, string $hookName = null);
 
     /**
      * @return static
      */
-    abstract public function ignoreHooks(): self;
+    abstract public function ignoreHooks();
 }
