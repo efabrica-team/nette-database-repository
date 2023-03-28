@@ -3,6 +3,7 @@
 namespace Efabrica\NetteDatabaseRepository\Behaviors\SoftDelete;
 
 use Efabrica\NetteDatabaseRepository\Behaviors\RepositoryBehavior;
+use Efabrica\NetteDatabaseRepository\Enums\HookType;
 use Efabrica\NetteDatabaseRepository\Exceptions\RepositoryException;
 use Efabrica\NetteDatabaseRepository\Models\ActiveRow;
 use Nette\Database\Table\Selection;
@@ -32,7 +33,7 @@ trait SoftDeleteBehavior
      */
     public function delete($record): bool
     {
-        $this->ignoreHookType('defaultConditions');
+        $this->ignoreHookType(HookType::DEFAULT_CONDITIONS);
 
         $recordToDelete = $this->getRecord($record);
 
@@ -51,14 +52,14 @@ trait SoftDeleteBehavior
             }
 
             $oldRecord = clone $recordToDelete;
-            $this->callMethods('beforeSoftDelete', ['record' => $record], $hookIgnores);
+            $this->callMethods(HookType::BEFORE_SOFT_DELETE, ['record' => $record], $hookIgnores);
             $result = $this
-                ->ignoreHookType('beforeUpdate')
-                ->ignoreHookType('afterUpdate')
+                ->ignoreHookType(HookType::BEFORE_UPDATE)
+                ->ignoreHookType(HookType::AFTER_UPDATE)
                 ->update($recordToDelete, [
                     $this->deletedAtField() => new DateTime(),
                 ]);
-            $this->callMethods('afterSoftDelete', ['record' => $oldRecord], $hookIgnores);
+            $this->callMethods(HookType::AFTER_SOFT_DELETE, ['record' => $oldRecord], $hookIgnores);
 
             if (!$inTransaction) {
                 $this->getExplorer()->commit();
@@ -80,7 +81,7 @@ trait SoftDeleteBehavior
      */
     public function restore($record): bool
     {
-        $this->ignoreHookType('defaultConditions');
+        $this->ignoreHookType(HookType::DEFAULT_CONDITIONS);
 
         $recordToRestore = $this->getRecord($record);
 
@@ -99,14 +100,14 @@ trait SoftDeleteBehavior
             }
 
             $oldRecord = clone $recordToRestore;
-            $this->callMethods('beforeRestore', ['record' => $record], $hookIgnores);
+            $this->callMethods(HookType::BEFORE_RESTORE, ['record' => $record], $hookIgnores);
             $result = $this
-                ->ignoreHookType('beforeUpdate')
-                ->ignoreHookType('afterUpdate')
+                ->ignoreHookType(HookType::BEFORE_UPDATE)
+                ->ignoreHookType(HookType::AFTER_UPDATE)
                 ->update($recordToRestore, [
                     $this->deletedAtField() => null,
                 ]);
-            $this->callMethods('afterRestore', ['record' => $oldRecord], $hookIgnores);
+            $this->callMethods(HookType::AFTER_RESTORE, ['record' => $oldRecord], $hookIgnores);
 
             if (!$inTransaction) {
                 $this->getExplorer()->commit();
