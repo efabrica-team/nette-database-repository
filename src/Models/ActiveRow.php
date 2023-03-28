@@ -2,6 +2,7 @@
 
 namespace Efabrica\NetteDatabaseRepository\Models;
 
+use Efabrica\NetteDatabaseRepository\Behaviors\ModelBehavior;
 use Efabrica\NetteDatabaseRepository\Casts\CastInterface;
 use Efabrica\NetteDatabaseRepository\Casts\Factories\CastFactory;
 use Efabrica\NetteDatabaseRepository\Helpers\HasHookIgnores;
@@ -15,6 +16,7 @@ use ReflectionClass;
 class ActiveRow extends BaseActiveRow
 {
     use HasHookIgnores;
+    use ModelBehavior;
 
     protected RepositoryManagerInterface $repositoryManager;
 

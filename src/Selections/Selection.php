@@ -2,6 +2,7 @@
 
 namespace Efabrica\NetteDatabaseRepository\Selections;
 
+use Efabrica\NetteDatabaseRepository\Behaviors\SelectionBehavior;
 use Efabrica\NetteDatabaseRepository\Models\ActiveRow;
 use Efabrica\NetteDatabaseRepository\Models\Managers\ModelFactoryManagerInterface;
 use Efabrica\NetteDatabaseRepository\Repositores\Managers\RepositoryManagerInterface;
@@ -13,14 +14,11 @@ use Nette\Database\Table\Selection as BaseSelection;
 
 /**
  * @template M of ActiveRow
- * @template-implements Iterator<int, ActiveRow>
+ * @template-implements Iterator<int, M>
+ * @uses SelectionBehavior<M>
  *
  * @property M[] $data
  * @property M[] $rows
- * @method bool|int|ActiveRow|M insert(iterable $data)
- * @method ActiveRow|M|null get(mixed $key)
- * @method ActiveRow|M|null fetch()
- * @method ActiveRow|M[] fetchAll()
  */
 class Selection extends BaseSelection
 {

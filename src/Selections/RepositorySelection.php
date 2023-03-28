@@ -2,6 +2,7 @@
 
 namespace Efabrica\NetteDatabaseRepository\Selections;
 
+use Efabrica\NetteDatabaseRepository\Behaviors\SelectionBehavior;
 use Efabrica\NetteDatabaseRepository\Enums\HookType;
 use Efabrica\NetteDatabaseRepository\Helpers\HasHookIgnores;
 use Efabrica\NetteDatabaseRepository\Models\ActiveRow;
@@ -9,6 +10,7 @@ use Efabrica\NetteDatabaseRepository\Models\ActiveRow;
 trait RepositorySelection
 {
     use HasHookIgnores;
+    use SelectionBehavior;
 
     protected function execute(): void
     {

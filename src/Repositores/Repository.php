@@ -2,6 +2,7 @@
 
 namespace Efabrica\NetteDatabaseRepository\Repositores;
 
+use Efabrica\NetteDatabaseRepository\Behaviors\RepositoryBehavior;
 use Efabrica\NetteDatabaseRepository\Enums\HookType;
 use Efabrica\NetteDatabaseRepository\Exceptions\RepositoryException;
 use Efabrica\NetteDatabaseRepository\Helpers\CallableAutowirer;
@@ -20,10 +21,12 @@ use Traversable;
 /**
  * @template S of Selection
  * @template M of ActiveRow
+ * @uses RepositoryBehavior<M>
  */
 abstract class Repository
 {
     use HasHookIgnores;
+    use RepositoryBehavior;
 
     protected Explorer $explorer;
 

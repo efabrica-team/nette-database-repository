@@ -8,6 +8,9 @@ use Efabrica\NetteDatabaseRepository\Models\ActiveRow;
 use Efabrica\NetteDatabaseRepository\Selections\Selection;
 use Throwable;
 
+/**
+ * @template M of ActiveRow
+ */
 trait RepositoryBehavior
 {
     abstract public function getTableName(): string;
@@ -17,7 +20,7 @@ trait RepositoryBehavior
     /**
      * @param iterable $data
      *
-     * @return bool|int|ActiveRow
+     * @return bool|int|M
      * @throws RepositoryException
      * @throws Throwable
      */
@@ -26,17 +29,17 @@ trait RepositoryBehavior
     abstract public function insertMany(array $items): int;
 
     /**
-     * @param ActiveRow|int|string $record
+     * @param M|int|string $record
      * @param iterable $data
      *
-     * @return ActiveRow|null
+     * @return M|null
      * @throws RepositoryException
      * @throws Throwable
      */
     abstract public function update($record, iterable $data): ?ActiveRow;
 
     /**
-     * @param ActiveRow|int|string $record
+     * @param M|int|string $record
      *
      * @return bool
      * @throws Throwable
@@ -52,4 +55,36 @@ trait RepositoryBehavior
      * @param HookIgnore[] $hookIgnores
      */
     abstract public function callMethods(string $methodPrefix, array $args, array $hookIgnores = []): bool;
+
+    abstract public function getHookIgnores(): array;
+
+    /**
+     * @return static
+     */
+    abstract public function importHookIgnores(array $hookIgnores): self;
+
+    /**
+     * @return static
+     */
+    abstract public function resetHookIgnores(): self;
+
+    /**
+     * @return static
+     */
+    abstract public function ignoreHook(string $hookName): self;
+
+    /**
+     * @return static
+     */
+    abstract public function ignoreHookType(string $hookType, string $hookName = null): self;
+
+    /**
+     * @return static
+     */
+    abstract public function ignoreBehavior(?string $traitName, string $hookType = null, string $hookName = null): self;
+
+    /**
+     * @return static
+     */
+    abstract public function ignoreHooks(): self;
 }
