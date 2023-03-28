@@ -9,12 +9,12 @@ trait TimestampsBehavior
 {
     use RepositoryBehavior;
 
-    protected function createdAtField(): string
+    protected function createdAtField(): ?string
     {
         return 'created_at';
     }
 
-    protected function updatedAtField(): string
+    protected function updatedAtField(): ?string
     {
         return 'updated_at';
     }
