@@ -78,6 +78,11 @@ class ActiveRow extends BaseActiveRow
         unset($this->attributes[$key]);
     }
 
+    public function getTableName(): string
+    {
+        return $this->table->getName();
+    }
+
     public function getData(): array
     {
         return parent::toArray();
