@@ -147,10 +147,11 @@ abstract class Repository
             $data = $this->beforeUpdate($recordToUpdate, $data, $hookIgnores);
             $oldModel = clone $recordToUpdate;
             $recordToUpdate->originalUpdate($data, $hookIgnores);
+            //TODO: check if still needed
             foreach ($data as $key => $value) {
                 $recordToUpdate->$key = $value;
             }
-            $this->callMethods('afterUpdate', ['oldRecord' => $oldModel, 'newRecord' => $recordToUpdate, 'data' => $data], $this->hookIgnores);
+            $this->callMethods('afterUpdate', ['oldRecord' => $oldModel, 'newRecord' => $recordToUpdate, 'data' => $data], $hookIgnores);
 
             if (!$inTransaction) {
                 $this->getExplorer()->commit();
@@ -191,9 +192,9 @@ abstract class Repository
             }
 
             $oldRecord = clone $recordToDelete;
-            $this->callMethods('beforeDelete', ['record' => $recordToDelete], $this->hookIgnores);
+            $this->callMethods('beforeDelete', ['record' => $recordToDelete], $hookIgnores);
             $result = $recordToDelete->originalDelete($hookIgnores);
-            $this->callMethods('afterDelete', ['record' => $oldRecord], $this->hookIgnores);
+            $this->callMethods('afterDelete', ['record' => $oldRecord], $hookIgnores);
 
             if (!$inTransaction) {
                 $this->getExplorer()->commit();

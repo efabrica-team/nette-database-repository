@@ -2,6 +2,7 @@
 
 namespace Efabrica\NetteDatabaseRepository\Behaviors\SoftDelete;
 
+use Efabrica\NetteDatabaseRepository\Behaviors\RepositoryBehavior;
 use Efabrica\NetteDatabaseRepository\Exceptions\RepositoryException;
 use Efabrica\NetteDatabaseRepository\Models\ActiveRow;
 use Nette\Database\Table\Selection;
@@ -11,6 +12,8 @@ use Throwable;
 
 trait SoftDeleteBehavior
 {
+    use RepositoryBehavior;
+
     public function deletedAtField(): string
     {
         return 'deleted_at';
