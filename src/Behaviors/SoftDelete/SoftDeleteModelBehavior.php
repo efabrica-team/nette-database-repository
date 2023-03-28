@@ -3,12 +3,15 @@
 namespace Efabrica\NetteDatabaseRepository\Behaviors\SoftDelete;
 
 use BadMethodCallException;
+use Efabrica\NetteDatabaseRepository\Behaviors\ModelBehavior;
 use Efabrica\NetteDatabaseRepository\Exceptions\MissingRepositoryException;
 use Efabrica\NetteDatabaseRepository\Models\ActiveRow;
 use Efabrica\NetteDatabaseRepository\Repositores\Repository;
 
 trait SoftDeleteModelBehavior
 {
+    use ModelBehavior;
+
     public function isDeleted(): bool
     {
         $repository = $this->getSoftDeleteRepository();

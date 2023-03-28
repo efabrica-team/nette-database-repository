@@ -3,6 +3,7 @@
 namespace Efabrica\NetteDatabaseRepository\Behaviors\SoftDelete;
 
 use BadMethodCallException;
+use Efabrica\NetteDatabaseRepository\Behaviors\SelectionBehavior;
 use Efabrica\NetteDatabaseRepository\Exceptions\MissingRepositoryException;
 use Efabrica\NetteDatabaseRepository\Models\ActiveRow;
 use Efabrica\NetteDatabaseRepository\Repositores\Repository;
@@ -10,6 +11,8 @@ use Nette\Utils\DateTime;
 
 trait SoftDeleteSelectionBehavior
 {
+    use SelectionBehavior;
+
     /**
      * @return static
      */
