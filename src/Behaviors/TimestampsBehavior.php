@@ -22,10 +22,10 @@ trait TimestampsBehavior
     final public function beforeInsertActionName(array $data): array
     {
         $date = new DateTime();
-        if (!isset($data[$this->createdAtField()])) {
+        if ($this->createdAtField() !== null && !isset($data[$this->createdAtField()])) {
             $data[$this->createdAtField()] = $date;
         }
-        if (!isset($data[$this->updatedAtField()])) {
+        if ($this->updatedAtField() !== null && !isset($data[$this->updatedAtField()])) {
             $data[$this->updatedAtField()] = $date;
         }
         return $data;
@@ -33,7 +33,7 @@ trait TimestampsBehavior
 
     final public function beforeUpdateActionName(ActiveRow $record, array $data): array
     {
-        if (!isset($data[$this->updatedAtField()])) {
+        if ($this->updatedAtField() !== null && !isset($data[$this->updatedAtField()])) {
             $data[$this->updatedAtField()] = new DateTime();
         }
         return $data;
