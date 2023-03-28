@@ -7,17 +7,17 @@ use Efabrica\NetteDatabaseRepository\Models\ActiveRow;
 use Efabrica\NetteDatabaseRepository\Repositores\Repository;
 use Nette\Database\Table\Selection;
 
-class SoftDeleteBehavior extends Behavior
+class SoftDeleteBoolBehavior extends Behavior
 {
-    private string $deletedAt;
+    private string $isDeleted;
 
     private Repository $repository;
 
     private bool $isDefaultWhere = true;
 
-    public function __construct(Repository $repository, string $deletedAt = 'deleted_at')
+    public function __construct(Repository $repository, string $isDeleted = 'is_deleted')
     {
-        $this->deletedAt = $deletedAt;
+        $this->isDeleted = $isDeleted;
         $this->repository = $repository;
     }
 
@@ -33,7 +33,7 @@ class SoftDeleteBehavior extends Behavior
                 $behavior->beforeSoftDelete($row);
             }
         }
-        $this->repository->raw()->update($row, [$this->deletedAt => new DateTime()]);
+        $this->repository->raw()->update($row, [$this->isDeleted => new DateTime()]);
         foreach ($this->repository->getBehaviors() as $behavior) {
             if ($behavior instanceof BehaviorWithSoftDelete) {
                 $behavior->afterSoftDelete($row);
@@ -45,7 +45,7 @@ class SoftDeleteBehavior extends Behavior
     public function beforeSelect(Selection $selection): void
     {
         if ($this->isDefaultWhere) {
-            $selection->where($this->deletedAt . ' < ?', new DateTime());
+            $selection->where($this->isDeleted . ' IS NULL');
         }
     }
 }
