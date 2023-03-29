@@ -3,6 +3,7 @@
 namespace Efabrica\NetteDatabaseRepository\Behavior;
 
 use DateTime;
+use DateTimeInterface;
 use Efabrica\NetteDatabaseRepository\Models\ActiveRow;
 use Efabrica\NetteDatabaseRepository\Repositores\Repository;
 use Nette\Database\Table\Selection;
@@ -14,11 +15,16 @@ class SoftDeleteBehavior extends Behavior
     private Repository $repository;
 
     private bool $isDefaultWhere = true;
+    /**
+     * @var bool|DateTimeInterface
+     */
+    private $newValue;
 
-    public function __construct(Repository $repository, string $deletedAt = 'deleted_at')
+    public function __construct(Repository $repository, string $deletedAt = 'deleted_at', $newValue = null)
     {
         $this->deletedAt = $deletedAt;
         $this->repository = $repository;
+        $this->newValue = $newValue ?? new DateTime();
     }
 
     public function setIsDefaultWhere(bool $isDefaultWhere): void
@@ -33,7 +39,7 @@ class SoftDeleteBehavior extends Behavior
                 $behavior->beforeSoftDelete($row);
             }
         }
-        $this->repository->raw()->update($row, [$this->deletedAt => new DateTime()]);
+        $this->repository->raw()->update($row, [$this->deletedAt => $this->newValue]);
         foreach ($this->repository->getBehaviors() as $behavior) {
             if ($behavior instanceof BehaviorWithSoftDelete) {
                 $behavior->afterSoftDelete($row);
@@ -45,7 +51,25 @@ class SoftDeleteBehavior extends Behavior
     public function beforeSelect(Selection $selection): void
     {
         if ($this->isDefaultWhere) {
-            $selection->where($this->deletedAt . ' < ?', new DateTime());
+            $selection->where($this->deletedAt . ' IS NOT NULL', new DateTime());
         }
+    }
+
+
+    public function restore(ActiveRow $row): void
+    {
+        $this->repository->getExplorer()->transaction(function () use ($row) {
+            foreach ($this->repository->getBehaviors() as $behavior) {
+                if ($behavior instanceof BehaviorWithSoftDelete) {
+                    $behavior->beforeRestore($row);
+                }
+            }
+            $this->repository->raw()->update($row, [$this->deletedAt => null]);
+            foreach ($this->repository->getBehaviors() as $behavior) {
+                if ($behavior instanceof BehaviorWithSoftDelete) {
+                    $behavior->afterRestore($row);
+                }
+            }
+        });
     }
 }

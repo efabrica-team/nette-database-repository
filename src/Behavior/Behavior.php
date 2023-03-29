@@ -12,7 +12,7 @@ abstract class Behavior
         return $data;
     }
 
-    public function afterInsert(ActiveRow $row, iterable $data): void
+    public function afterInsert(ActiveRow $row, array $data): void
     {
     }
 
@@ -21,7 +21,7 @@ abstract class Behavior
         return $data;
     }
 
-    public function afterUpdate(ActiveRow $oldRow, ActiveRow $newRow, iterable $data): void
+    public function afterUpdate(ActiveRow $oldRow, ActiveRow $newRow, array $data): void
     {
     }
 

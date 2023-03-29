@@ -28,6 +28,11 @@ final class RepositoryBehaviors implements IteratorAggregate
         return $this;
     }
 
+    /**
+     * @template T extends Behavior
+     * @param class-string<T>|string $key
+     * @return T
+     */
     public function get(string $key): ?Behavior
     {
         return $this->behaviors[$key] ?? null;

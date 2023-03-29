@@ -5,6 +5,7 @@ namespace Efabrica\NetteDatabaseRepository\Repositores;
 use Efabrica\NetteDatabaseRepository\Behavior\BehaviorInjector;
 use Efabrica\NetteDatabaseRepository\Exceptions\RepositoryException;
 use Efabrica\NetteDatabaseRepository\Models\ActiveRow;
+use Efabrica\NetteDatabaseRepository\Repositores\Traits\SoftDeleteRestoreTrait;
 use Efabrica\NetteDatabaseRepository\Selections\Factories\SelectionFactoryInterface;
 use Efabrica\NetteDatabaseRepository\Selections\Selection;
 use Nette\Database\Explorer;
@@ -23,12 +24,14 @@ abstract class Repository
     protected SelectionFactoryInterface $selectionFactory;
 
     protected RepositoryBehaviors $behaviors;
+    private BehaviorInjector $behaviorInjector;
 
     public function __construct(Explorer $db, SelectionFactoryInterface $selectionFactory, BehaviorInjector $behaviorInjector)
     {
         $this->explorer = $db;
         $this->selectionFactory = $selectionFactory;
         $this->behaviors = new RepositoryBehaviors($behaviorInjector);
+        $this->behaviorInjector = $behaviorInjector;
     }
 
     abstract public function getTableName(): string;
@@ -57,7 +60,7 @@ abstract class Repository
     public function raw(): self
     {
         $raw = clone $this;
-        $raw->behaviors = new RepositoryBehaviors();
+        $raw->behaviors = new RepositoryBehaviors($this->behaviorInjector);
         return $raw;
     }
 
@@ -70,33 +73,16 @@ abstract class Repository
      */
     public function insert(iterable $data)
     {
-        $inTransaction = false;
-        try {
-            $inTransaction = $this->getExplorer()->getConnection()->getPdo()->inTransaction();
-            if (!$inTransaction) {
-                $this->getExplorer()->beginTransaction();
-            }
-
-            $data = $data instanceof Traversable ? iterator_to_array($data) : $data;
+        $this->getExplorer()->transaction(function () use (&$result, $data) {
             foreach ($this->behaviors as $behavior) {
-                $behavior->beforeInsert($data);
+                $data = $behavior->beforeInsert($data);
             }
-            $record = $this->getSelection()->insert($data);
+            $result = $this->getSelection()->insert($data);
             foreach ($this->behaviors as $behavior) {
-                $behavior->afterInsert($record, $data);
+                $behavior->afterInsert($result, $data);
             }
-
-            if (!$inTransaction) {
-                $this->getExplorer()->commit();
-            }
-        } catch (Throwable $e) {
-            if (!$inTransaction && ($e instanceof RepositoryException || $e instanceof PDOException)) {
-                $this->getExplorer()->rollBack();
-            }
-            throw $e;
-        }
-
-        return $record;
+        });
+        return $result;
     }
 
     /**
