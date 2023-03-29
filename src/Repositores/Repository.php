@@ -16,9 +16,12 @@ use Traversable;
 /**
  * @template S of Selection
  * @template M of ActiveRow
+ * @uses RepositoryBehavior<M>
  */
 abstract class Repository
 {
+    use RepositoryBehavior;
+
     protected Explorer $explorer;
 
     protected SelectionFactoryInterface $selectionFactory;

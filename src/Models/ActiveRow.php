@@ -2,26 +2,31 @@
 
 namespace Efabrica\NetteDatabaseRepository\Models;
 
+use Efabrica\NetteDatabaseRepository\Behaviors\ModelBehavior;
 use Efabrica\NetteDatabaseRepository\Casts\CastInterface;
 use Efabrica\NetteDatabaseRepository\Casts\Factories\CastFactory;
 use Efabrica\NetteDatabaseRepository\Repositores\Managers\RepositoryManagerInterface;
+use Efabrica\NetteDatabaseRepository\Selections\GroupedSelection;
+use Efabrica\NetteDatabaseRepository\Selections\Selection;
 use Nette\Database\Table\ActiveRow as BaseActiveRow;
-use Nette\Database\Table\Selection;
+use Nette\Database\Table\Selection as BaseSelection;
 use ReflectionClass;
 
 class ActiveRow extends BaseActiveRow
 {
+    use ModelBehavior;
+
     protected RepositoryManagerInterface $repositoryManager;
 
     protected CastFactory $castFactory;
 
-    protected Selection $table;
+    protected BaseSelection $table;
 
     protected array $attributes = [];
 
     protected array $casts = [];
 
-    public function __construct(RepositoryManagerInterface $repositoryManager, CastFactory $castFactory, array $data, Selection $table)
+    public function __construct(RepositoryManagerInterface $repositoryManager, CastFactory $castFactory, array $data, BaseSelection $table)
     {
         $this->repositoryManager = $repositoryManager;
         $this->castFactory = $castFactory;
@@ -71,6 +76,11 @@ class ActiveRow extends BaseActiveRow
     public function __unset($key): void
     {
         unset($this->attributes[$key]);
+    }
+
+    public function getTableName(): string
+    {
+        return $this->table->getName();
     }
 
     public function getData(): array

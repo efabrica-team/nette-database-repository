@@ -6,6 +6,8 @@ use Efabrica\NetteDatabaseRepository\Models\ActiveRow;
 
 trait RepositorySelection
 {
+    use SelectionBehavior;
+
     protected function execute(): void
     {
         if ($this->rows !== null) {
