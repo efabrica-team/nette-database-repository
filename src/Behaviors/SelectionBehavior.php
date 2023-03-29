@@ -78,36 +78,4 @@ trait SelectionBehavior
 	abstract public function getReferencedTable(ActiveRow $row, ?string $table, ?string $column = null);
 
 	abstract public function getReferencingTable(string $table, ?string $column = null, $active = null): ?GroupedSelection;
-
-    abstract public function getHookIgnores(): array;
-
-    /**
-     * @return static
-     */
-    abstract public function importHookIgnores(array $hookIgnores);
-
-    /**
-     * @return static
-     */
-    abstract public function resetHookIgnores();
-
-    /**
-     * @return static
-     */
-    abstract public function ignoreHook(string $hookName);
-
-    /**
-     * @return static
-     */
-    abstract public function ignoreHookType(string $hookType, string $hookName = null);
-
-    /**
-     * @return static
-     */
-    abstract public function ignoreBehavior(?string $traitName, string $hookType = null, string $hookName = null);
-
-    /**
-     * @return static
-     */
-    abstract public function ignoreHooks();
 }

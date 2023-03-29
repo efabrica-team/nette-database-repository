@@ -45,46 +45,4 @@ trait RepositoryBehavior
      * @throws Throwable
      */
     abstract public function delete($record): bool;
-
-    /**
-     * @param HookIgnore[] $hookIgnores
-     */
-    abstract protected function findMethods(string $methodPrefix, array $hookIgnores = []): array;
-
-    /**
-     * @param HookIgnore[] $hookIgnores
-     */
-    abstract public function callMethods(string $methodPrefix, array $args, array $hookIgnores = []): bool;
-
-    abstract public function getHookIgnores(): array;
-
-    /**
-     * @return static
-     */
-    abstract public function importHookIgnores(array $hookIgnores);
-
-    /**
-     * @return static
-     */
-    abstract public function resetHookIgnores();
-
-    /**
-     * @return static
-     */
-    abstract public function ignoreHook(string $hookName);
-
-    /**
-     * @return static
-     */
-    abstract public function ignoreHookType(string $hookType, string $hookName = null);
-
-    /**
-     * @return static
-     */
-    abstract public function ignoreBehavior(?string $traitName, string $hookType = null, string $hookName = null);
-
-    /**
-     * @return static
-     */
-    abstract public function ignoreHooks();
 }
