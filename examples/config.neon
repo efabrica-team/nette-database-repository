@@ -1,56 +1,38 @@
-includes:
-    - ../config.neon
+extensions:
+    repositories: Efabrica\NetteDatabaseRepository\Bridge\DI\NetteDatabaseRepositoryExtension
 
 database:
     dsn: "sqlite::memory:"
 
 services:
-    repositoryManager:
+    # Repositories
+    groupRepository:
+        create: Examples\Repositories\GroupRepository
+
+    userRepository:
+        create: Examples\Repositories\UserRepository
+
+    articleRepository:
+        create: Examples\Repositories\ArticleRepository
+
+    # Managers
+    repositories.repositoryManager:
+        create: Efabrica\NetteDatabaseRepository\Repositores\Managers\RepositoryManager
         setup:
             - addRepository('groups', @groupRepository)
             - addRepository('users', @userRepository)
             - addRepository('articles', @articleRepository)
 
-    modelFactoryManager:
+    repositories.selectionFactoryManager:
+        create: Efabrica\NetteDatabaseRepository\Models\Factories\SelectionFactoryManager
         setup:
-            - addFactory('groups', @groupModelFactory)
-            - addFactory('users', @userModelFactory)
-            - addFactory('articles', @articleModelFactory)
+            - addClass(Examples\Repositories\GroupRepository, Examples\Selections\GroupSelection)
+            - addClass(Examples\Repositories\UserRepository, Examples\Selections\UserSelection)
+            - addClass(Examples\Repositories\ArticleRepository, Examples\Selections\ArticleSelection)
 
-    # Repositories
-    groupRepository:
-        create: Examples\Repositories\GroupRepository
-        arguments:
-            selectionFactory: @groupSelectionFactory
-
-    userRepository:
-        create: Examples\Repositories\UserRepository
-        arguments:
-            selectionFactory: @userSelectionFactory
-
-    articleRepository:
-        create: Examples\Repositories\ArticleRepository
-        arguments:
-            selectionFactory: @articleSelectionFactory
-
-    # Selections
-    groupSelectionFactory:
-        implement: Examples\Selections\Factories\GroupSelectionFactory
-
-    userSelectionFactory:
-        implement: Examples\Selections\Factories\UserSelectionFactory
-
-    articleSelectionFactory:
-        implement: Examples\Selections\Factories\ArticleSelectionFactory
-
-    # Models
-    groupModelFactory:
-        implement: Examples\Models\Factories\GroupModelFactory
-
-    userModelFactory:
-        implement: Examples\Models\Factories\UserModelFactory
-
-    articleModelFactory:
-        implement: Examples\Models\Factories\ArticleModelFactory
-
-    # Casts
+    repositories.modelFactoryManager:
+        create: Efabrica\NetteDatabaseRepository\Models\Managers\ModelFactoryManager
+        setup:
+            - addClass('groups', Examples\Models\Group)
+            - addClass('users', Examples\Models\User)
+            - addClass('articles', Examples\Models\Article)

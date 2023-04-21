@@ -4,7 +4,7 @@ namespace Efabrica\NetteDatabaseRepository\Repositores\Managers;
 
 use Efabrica\NetteDatabaseRepository\Repositores\Repository;
 
-final class ManualRepositoryManager implements RepositoryManagerInterface
+final class RepositoryManager implements RepositoryManagerInterface
 {
     private array $repositories = [];
 

@@ -19,7 +19,6 @@ abstract class TestCase extends BaseTestCase
         $configurator->addStaticParameters(['appDir' => __DIR__ . '/..']);
         $configurator->setTempDirectory(__DIR__ . '/../temp');
         $configurator->addConfig(__DIR__ . '/../examples/config.neon');
-        $configurator->addConfig(__DIR__ . '/Unit/Mock/config.neon');
 
         $this->container = $configurator->createContainer();
         $this->database = $this->container->getByType(Explorer::class);

@@ -2,17 +2,28 @@
 
 namespace Efabrica\NetteDatabaseRepository\Models\Managers;
 
+use Efabrica\NetteDatabaseRepository\Models\Factories\ClassModelFactory;
 use Efabrica\NetteDatabaseRepository\Models\Factories\ModelFactoryInterface;
+use Nette\DI\Container;
 
-final class ManualModelFactoryManager implements ModelFactoryManagerInterface
+final class ModelFactoryManager implements ModelFactoryManagerInterface
 {
+    private Container $container;
+
     private ModelFactoryInterface $defaultModelFactory;
 
     private array $factories = [];
 
-    public function __construct(ModelFactoryInterface $defaultModelFactory)
+    public function __construct(Container $container, ModelFactoryInterface $defaultModelFactory)
     {
+        $this->container = $container;
         $this->defaultModelFactory = $defaultModelFactory;
+    }
+
+    public function addClass(string $table, string $activeRow): self
+    {
+        $this->factories[$table] = new ClassModelFactory($this->container, $activeRow);
+        return $this;
     }
 
     public function addFactory(string $table, ModelFactoryInterface $modelFactory): self

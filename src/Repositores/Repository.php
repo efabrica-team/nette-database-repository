@@ -9,7 +9,7 @@ use Efabrica\NetteDatabaseRepository\Helpers\CallableAutowirer;
 use Efabrica\NetteDatabaseRepository\Helpers\HasHookIgnores;
 use Efabrica\NetteDatabaseRepository\Helpers\HookIgnore;
 use Efabrica\NetteDatabaseRepository\Models\ActiveRow;
-use Efabrica\NetteDatabaseRepository\Selections\Factories\SelectionFactoryInterface;
+use Efabrica\NetteDatabaseRepository\Models\Factories\SelectionFactoryManager;
 use Efabrica\NetteDatabaseRepository\Selections\Selection;
 use Nette\Database\Explorer;
 use PDOException;
@@ -30,14 +30,14 @@ abstract class Repository
 
     protected Explorer $explorer;
 
-    protected SelectionFactoryInterface $selectionFactory;
+    protected SelectionFactoryManager $selectionFactoryManager;
 
     protected CallableAutowirer $callableAutowire;
 
-    public function __construct(Explorer $db, SelectionFactoryInterface $selectionFactory, CallableAutowirer $callableAutowire)
+    public function __construct(Explorer $db, SelectionFactoryManager $selectionFactoryManager, CallableAutowirer $callableAutowire)
     {
         $this->explorer = $db;
-        $this->selectionFactory = $selectionFactory;
+        $this->selectionFactoryManager = $selectionFactoryManager;
         $this->callableAutowire = $callableAutowire;
     }
 
@@ -53,7 +53,7 @@ abstract class Repository
      */
     public function getSelection(): Selection
     {
-        return $this->selectionFactory->create($this->getTableName());
+        return $this->selectionFactoryManager->createForRepository(get_class($this))->create($this->getTableName());
     }
 
     /**

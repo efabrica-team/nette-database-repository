@@ -2,19 +2,19 @@
 
 namespace Tests\Unit\Repositories\Managers;
 
-use Efabrica\NetteDatabaseRepository\Repositores\Managers\ManualRepositoryManager;
+use Efabrica\NetteDatabaseRepository\Repositores\Managers\RepositoryManager;
 use Examples\Repositories\GroupRepository;
 use Examples\Repositories\UserRepository;
 use Tests\TestCase;
 
 class ManualRepositoryManagerTest extends TestCase
 {
-    private ManualRepositoryManager $manualRepositoryManager;
+    private RepositoryManager $manualRepositoryManager;
 
     public function setUp(): void
     {
         parent::setUp();
-        $this->manualRepositoryManager = new ManualRepositoryManager();
+        $this->manualRepositoryManager = new RepositoryManager();
     }
 
     public function test_returns_null_on_unregistered_table(): void

@@ -4,7 +4,7 @@ namespace Tests\Feature\Repositories;
 
 use Efabrica\NetteDatabaseRepository\Exceptions\RepositoryException;
 use Efabrica\NetteDatabaseRepository\Models\ActiveRow;
-use Efabrica\NetteDatabaseRepository\Repositores\Managers\ManualRepositoryManager;
+use Efabrica\NetteDatabaseRepository\Repositores\Managers\RepositoryManager;
 use Examples\Repositories\UserRepository as BaseUserRepository;
 use Tests\TestCase;
 
@@ -16,7 +16,7 @@ class CustomRepositoryFunctionalityTest extends TestCase
     {
         parent::setUp();
 
-        $this->container->getByType(ManualRepositoryManager::class)->setRepositories([
+        $this->container->getByType(RepositoryManager::class)->setRepositories([
             'users' => $this->userRepository = $this->getUserRepository(),
         ]);
     }

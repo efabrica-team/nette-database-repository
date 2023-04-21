@@ -2,16 +2,17 @@
 
 namespace Tests\Unit\Models\Managers;
 
+use Efabrica\NetteDatabaseRepository\Models\Factories\ClassModelFactory;
 use Efabrica\NetteDatabaseRepository\Models\Factories\ModelFactoryInterface;
-use Efabrica\NetteDatabaseRepository\Models\Managers\ManualModelFactoryManager;
-use Examples\Models\Factories\GroupModelFactory;
+use Efabrica\NetteDatabaseRepository\Models\Managers\ModelFactoryManager;
+use Examples\Models\Group;
 use Tests\TestCase;
 
 class ManualModelFactoryManagerTest extends TestCase
 {
     private ModelFactoryInterface $defaultModelFactory;
 
-    private ManualModelFactoryManager $manualModelFactoryManager;
+    private ModelFactoryManager $manualModelFactoryManager;
 
     public function setUp(): void
     {
@@ -19,7 +20,7 @@ class ManualModelFactoryManagerTest extends TestCase
         /** @var ModelFactoryInterface $defaultModelFactory */
         $defaultModelFactory = $this->container->getByType(ModelFactoryInterface::class);
         $this->defaultModelFactory = $defaultModelFactory;
-        $this->manualModelFactoryManager = new ManualModelFactoryManager($this->defaultModelFactory);
+        $this->manualModelFactoryManager = new ModelFactoryManager($this->container, $this->defaultModelFactory);
     }
 
     public function test_returns_default_on_unregistered_table(): void
@@ -29,8 +30,8 @@ class ManualModelFactoryManagerTest extends TestCase
 
     public function test_can_return_correct_repository(): void
     {
-        /** @var GroupModelFactory $groupModelFactory */
-        $groupModelFactory = $this->container->createService('groupModelFactory');
+        /** @var ClassModelFactory $groupModelFactory */
+        $groupModelFactory = $this->container->createInstance(ClassModelFactory::class, ['modelClass' => Group::class]);
         $this->manualModelFactoryManager->addFactory('groups', $groupModelFactory);
         $this->assertSame($groupModelFactory, $this->manualModelFactoryManager->createForTable('groups'));
     }

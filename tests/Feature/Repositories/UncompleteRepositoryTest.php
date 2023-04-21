@@ -3,8 +3,9 @@
 namespace Tests\Feature\Repositories;
 
 use Efabrica\NetteDatabaseRepository\Models\ActiveRow;
-use Efabrica\NetteDatabaseRepository\Models\Managers\ManualModelFactoryManager;
-use Efabrica\NetteDatabaseRepository\Repositores\Managers\ManualRepositoryManager;
+use Efabrica\NetteDatabaseRepository\Models\Factories\SelectionFactoryManager;
+use Efabrica\NetteDatabaseRepository\Models\Managers\ModelFactoryManager;
+use Efabrica\NetteDatabaseRepository\Repositores\Managers\RepositoryManager;
 use Efabrica\NetteDatabaseRepository\Selections\Factories\SelectionFactoryInterface;
 use Efabrica\NetteDatabaseRepository\Selections\Selection;
 use Examples\Models\Article;
@@ -17,16 +18,19 @@ class UncompleteRepositoryTest extends TestCase
 {
     private UserRepository $userRepository;
 
-    private ManualRepositoryManager $repositoryManager;
+    private RepositoryManager $repositoryManager;
 
-    private ManualModelFactoryManager $modelFactoryManager;
+    private SelectionFactoryManager $selectionFactoryManager;
+
+    private ModelFactoryManager $modelFactoryManager;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->userRepository = $this->container->getByType(UserRepository::class);
-        $this->repositoryManager = $this->container->getByType(ManualRepositoryManager::class);
-        $this->modelFactoryManager = $this->container->getByType(ManualModelFactoryManager::class);
+        $this->repositoryManager = $this->container->getByType(RepositoryManager::class);
+        $this->selectionFactoryManager = $this->container->getByType(SelectionFactoryManager::class);
+        $this->modelFactoryManager = $this->container->getByType(ModelFactoryManager::class);
     }
 
     public function test_can_fetch_results_without_model(): void
@@ -43,11 +47,8 @@ class UncompleteRepositoryTest extends TestCase
     {
         $this->seedDatabase();
 
-        /** @var UserRepository $userRepository */
-        $userRepository = $this->container->createInstance(UserRepository::class, [
-            'selectionFactory' => $this->container->getByType(SelectionFactoryInterface::class)
-        ]);
-
+        $this->selectionFactoryManager->unsetFactory(UserRepository::class);
+        $userRepository = $this->container->createInstance(UserRepository::class);
         $seleciton = $userRepository->query();
         $this->assertInstanceOf(Selection::class, $seleciton);
         $this->assertNotInstanceOf(UserSelection::class, $seleciton);
