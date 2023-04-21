@@ -1,9 +1,3 @@
 parameters:
     ignoreErrors:
         - '#expects Nette\\Caching\\IStorage\|null, Nette\\Caching\\Storage\|null given#'
-        -
-            path: src/Selections/Selection.php
-            message: '#Class Efabrica\\NetteDatabaseRepository\\Selections\\Selection has @implements tag, but does not implement any interface#'
-        -
-            path: src/Selections/GroupedSelection.php
-            message: '#Class Efabrica\\NetteDatabaseRepository\\Selections\\GroupedSelection has @implements tag, but does not implement any interface#'

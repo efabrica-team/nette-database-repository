@@ -52,7 +52,7 @@ class CustomModelFunctionalityTest extends TestCase
 
         $user = $this->userRepository->query()->get(1);
         $this->expectExceptionMessage(GroupRepository::BEFORE_SELECT);
-        $user->group;
+        $this->assertNotNull($user->group);
     }
 
     public function test_model_related_using_repository(): void

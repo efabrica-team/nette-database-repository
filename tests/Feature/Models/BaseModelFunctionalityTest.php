@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Models;
 
+use Examples\Models\Group;
 use Examples\Repositories\UserRepository;
 use Nette\Database\Table\ActiveRow;
 use Tests\TestCase;
@@ -52,6 +53,7 @@ class BaseModelFunctionalityTest extends TestCase
         $userGroup = $user->group;
         $this->assertSame(2, $userGroup->id);
 
+        /** @var ?Group $userGroup */
         $userGroup = $user->ref('groups', 'group_id');
         $this->assertSame(2, $userGroup->id);
     }
