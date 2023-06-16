@@ -1,0 +1,93 @@
+<?php
+
+namespace Efabrica\NetteDatabaseRepository\Traits\AES;
+
+use Efabrica\NetteDatabaseRepository\Repository\Repository;
+use Efabrica\NetteDatabaseRepository\Subscriber\Event\InsertRepositoryEvent;
+use Efabrica\NetteDatabaseRepository\Subscriber\Event\InsertEntityEventResponse;
+use Efabrica\NetteDatabaseRepository\Subscriber\Event\SelectQueryEvent;
+use Efabrica\NetteDatabaseRepository\Subscriber\Event\SelectQueryResponse;
+use Efabrica\NetteDatabaseRepository\Subscriber\Event\UpdateQueryEvent;
+use Efabrica\NetteDatabaseRepository\Subscriber\EventSubscriber;
+use Nette\Database\Row;
+
+class AESEventSubscriber extends EventSubscriber
+{
+    public function supportsRepository(Repository $repository): bool
+    {
+        return $repository instanceof AESRepository;
+    }
+
+    public function onSelect(SelectQueryEvent $event): SelectQueryResponse
+    {
+        /** @var AESRepository&Repository $repository */
+        $repository = $event->getRepository();
+        $selectParts = [$repository->getTableName() . '.*'];
+        foreach ($repository->encryptedFields() as $field) {
+            $selectParts[] = $this->convertEncryptedField($repository, $field) . ' AS ' . $field;
+        }
+        $event->getQuery()->select($selectParts);
+        return $event->handle();
+    }
+
+    public function onInsert(InsertRepositoryEvent $event): InsertEntityEventResponse
+    {
+        /** @var Repository&AESRepository $repository */
+        foreach ($event->getEntities() as $entity) {
+            foreach ($repository->encryptedFields() as $field) {
+                $entity[$field] = $this->encryptValue($repository, $entity[$field]);
+            }
+        }
+        return $event->handle();
+    }
+
+    public function onUpdate(UpdateQueryEvent $event, array &$data): int
+    {
+        /** @var AESRepository&Repository $repository */
+        $repository = $event->getRepository();
+        foreach ($repository->encryptedFields() as $field) {
+            if (isset($data[$field])) {
+                $data[$field] = $this->encryptValue($repository, $data[$field]);
+            }
+        }
+        return $event->handle($data);
+    }
+
+    protected function convertEncryptedField(Repository $repository, string $field): string
+    {
+        /** @var Repository&AESRepository $repository */
+        if ($this->ivFunction($repository)) {
+            return 'CONVERT(AES_DECRYPT(UNHEX(SUBSTRING(' . $repository->getTableName() . '.' . $field . ', 33)), ' . $repository->keyFunction() . ', UNHEX(SUBSTRING(' . $repository->getTableName() . '.' . $field . ', 1, 32))) USING utf8)';
+        }
+        return 'CONVERT(AES_DECRYPT(UNHEX(' . $repository->getTableName() . '.' . $field . '), ' . $repository->keyFunction() . $this->ivFunction($repository) . ') USING utf8)';
+    }
+
+    protected function encryptValue(Repository $repository, string $value): string
+    {
+        /** @var Repository&AESBehavior $repository */
+        $ivFunction = $this->ivFunction($repository);
+        if ($ivFunction) {
+            $initVector = $repository->getExplorer()->fetch($ivFunction);
+            $randomBytes = addslashes($initVector->random);
+
+            /** @var Row $row */
+            $row = $repository->getExplorer()->fetch('SELECT HEX(CONCAT("' . $randomBytes . '", AES_ENCRYPT("' . addslashes($value) . '", ' . $repository->keyFunction() . ', "' . $randomBytes . '"))) AS encrypted');
+            return $row->encrypted;
+        }
+
+        /** @var Row $row */
+        $row = $repository->getExplorer()->fetch('SELECT HEX(AES_ENCRYPT("' . addslashes($value) . '", ' . $repository->keyFunction() . $this->ivFunction() . ')) AS encrypted');
+        return $row->encrypted;
+    }
+
+    private function ivFunction(Repository $repository): string
+    {
+        $blockEncryptionMode = $repository->getExplorer()->fetch('SHOW variables WHERE Variable_name = "block_encryption_mode"');
+        $blockEncryptionModeValue = $blockEncryptionMode ? $blockEncryptionMode->Value : 'aes-128-ecb';
+
+        if (str_contains($blockEncryptionModeValue, '-cbc')) {
+            return 'SELECT RANDOM_BYTES(16) AS random';
+        }
+        return '';
+    }
+}
