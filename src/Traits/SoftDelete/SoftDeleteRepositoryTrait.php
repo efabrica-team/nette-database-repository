@@ -13,7 +13,7 @@ trait SoftDeleteRepositoryTrait
 {
     public function forceDelete(Entity $entity): int
     {
-        return $this->findByEntity($entity, false)->delete();
+        return $this->query(false)->wherePrimary()->delete();
     }
 
     public function restore(Entity $entity): int

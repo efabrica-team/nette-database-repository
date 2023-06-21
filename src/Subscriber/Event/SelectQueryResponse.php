@@ -2,8 +2,6 @@
 
 namespace Efabrica\NetteDatabaseRepository\Subscriber\Event;
 
-use LogicException;
-
-final class SelectQueryResponse extends EntityEventResponse
+final class SelectQueryResponse extends RepositoryEventResponse
 {
 }

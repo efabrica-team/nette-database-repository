@@ -5,9 +5,10 @@ namespace Efabrica\NetteDatabaseRepository\Subscriber\Event;
 use Efabrica\NetteDatabaseRepository\Model\Entity;
 use Efabrica\NetteDatabaseRepository\Repository\Repository;
 use Efabrica\NetteDatabaseRepository\Subscriber\EventSubscriber;
+use Traversable;
 
 /**
- * @extends RepositoryEvent<Entity, InsertEntityEventResponse>
+ * @extends RepositoryEvent<Entity, InsertEventResponse>
  */
 class InsertRepositoryEvent extends RepositoryEvent
 {
@@ -20,13 +21,13 @@ class InsertRepositoryEvent extends RepositoryEvent
      * @param Repository $repository
      * @param Entity[] $entities
      */
-    public function __construct(Repository $repository, array $entities)
+    public function __construct(Repository $repository, iterable $entities)
     {
         parent::__construct($repository);
-        $this->entities = $entities;
+        $this->entities = $entities instanceof Traversable ? iterator_to_array($entities) : $entities;
     }
 
-    public function handle(): InsertEntityEventResponse
+    public function handle(): InsertEventResponse
     {
         $subscriber = current($this->subscribers);
         next($this->subscribers);
@@ -34,7 +35,7 @@ class InsertRepositoryEvent extends RepositoryEvent
             return $subscriber->onInsert($this);
         }
         return $this->stopPropagation(
-            $this->getRepository()->selection(false)->insert($this->entities)
+            $this->getRepository()->query(false)->insert($this->entities)
         );
     }
 
@@ -61,9 +62,13 @@ class InsertRepositoryEvent extends RepositoryEvent
         }
     }
 
-    public function stopPropagation($response = null): InsertEntityEventResponse
+    /**
+     * @param mixed $response
+     * @return InsertEventResponse
+     */
+    public function stopPropagation($response = null): InsertEventResponse
     {
         $this->subscribers = [];
-        return new InsertEntityEventResponse($this, $response);
+        return new InsertEventResponse($this, $response);
     }
 }

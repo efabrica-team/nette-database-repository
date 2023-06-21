@@ -2,7 +2,6 @@
 
 namespace Efabrica\NetteDatabaseRepository\Repository;
 
-use Efabrica\NetteDatabaseRepository\Model\EntityRelations;
 use Efabrica\NetteDatabaseRepository\Subscriber\Events;
 use Efabrica\NetteDatabaseRepository\Subscriber\EventSubscriber;
 use Nette\Database\Explorer;
@@ -14,21 +13,10 @@ final class RepositoryDependencies
 
     private Events $events;
 
-    private EntityRelations $entityRelations;
-
-    public function __construct(Explorer $explorer, Container $container, EntityRelations $entityRelations)
+    public function __construct(Explorer $explorer, Container $container)
     {
         $this->explorer = $explorer;
-        $eventSubscribers = $container->getByType(EventSubscriber::class);
-        $subscribers = [];
-        foreach ($eventSubscribers as $eventSubscriberName) {
-            $eventSubscriber = $container->getService($eventSubscriberName);
-            if ($eventSubscriber instanceof EventSubscriber) {
-                $subscribers[] = $eventSubscriber;
-            }
-        }
-        $this->events = new Events(...$subscribers);
-        $this->entityRelations = $entityRelations;
+        $this->events = new Events($container);
     }
 
     public function getExplorer(): Explorer
@@ -39,10 +27,5 @@ final class RepositoryDependencies
     public function getEvents(): Events
     {
         return $this->events;
-    }
-
-    public function getEntityRelations(): EntityRelations
-    {
-        return $this->entityRelations;
     }
 }

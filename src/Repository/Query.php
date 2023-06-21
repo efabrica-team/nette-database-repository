@@ -2,46 +2,84 @@
 
 namespace Efabrica\NetteDatabaseRepository\Repository;
 
-use CachingIterator;
 use Efabrica\NetteDatabaseRepository\Model\Entity;
+use Efabrica\NetteDatabaseRepository\Subscriber\Event\DeleteQueryEvent;
+use Efabrica\NetteDatabaseRepository\Subscriber\Event\InsertRepositoryEvent;
+use Efabrica\NetteDatabaseRepository\Subscriber\Event\SelectQueryEvent;
+use Efabrica\NetteDatabaseRepository\Subscriber\Event\UpdateQueryEvent;
 use Efabrica\NetteDatabaseRepository\Subscriber\Events;
 use Efabrica\NetteDatabaseRepository\Subscriber\EventSubscriber;
-use Generator;
-use Iterator;
-use IteratorAggregate;
-use Nette\Database\Table\ActiveRow;
 use Nette\Database\Table\Selection;
+use Traversable;
 
 /**
  * @template E of Entity
- * @mixin SelectionQuery // all methods of selection should be callable on query
  */
-class Query implements IteratorAggregate
+class Query extends Selection
 {
-    private Selection $selection;
-
     private bool $doesEvents;
 
     private Repository $repository;
 
     private Events $events;
 
-    private ?Iterator $innerIterator = null;
-
+    /**
+     * @param Repository<E,$this> $repository
+     * @param bool       $events
+     */
     public function __construct(Repository $repository, bool $events = true)
     {
         $this->repository = $repository;
         $this->doesEvents = $events;
         $this->events = clone $repository->getEvents();
-        $this->selection = new SelectionQuery($this);
+        parent::__construct($repository->getExplorer(), $repository->getExplorer()->getConventions(), $repository->getTableName());
     }
 
-    public static function fromSelection(Selection $selection, Repository $repository, bool $events = true): Query
+    /************************** Modifications *****************************/
+
+    /**
+     * @param E[]|E $data
+     * @return bool|int|E
+     */
+    public function insert(iterable $data)
     {
-        $query = new self($repository, $events);
-        $query->selection = $selection;
-        return $query;
+        if (!$this->doesEvents()) {
+            /** @var bool|int|E $return */
+            $return = parent::insert($data);
+            return $return;
+        }
+        if ($data instanceof Entity) {
+            $data = [$data];
+        }
+        return (new InsertRepositoryEvent($this->repository, $data))->handle()->getReturn();
     }
+
+    public function update(iterable $data): int
+    {
+        if (!$this->doesEvents()) {
+            return parent::update($data);
+        }
+        $data = $data instanceof Traversable ? iterator_to_array($data) : $data;
+        return (new UpdateQueryEvent($this))->handle($data);
+    }
+
+    public function delete(): int
+    {
+        if (!$this->doesEvents()) {
+            return parent::delete();
+        }
+        return (new DeleteQueryEvent($this))->handle();
+    }
+
+    protected function execute(): void
+    {
+        if ($this->rows === null && $this->doesEvents()) {
+            (new SelectQueryEvent($this))->handle();
+        }
+        parent::execute();
+    }
+
+    /********************************** Events ***************************/
 
     /**
      * @param class-string<EventSubscriber> ...$eventClasses
@@ -79,36 +117,46 @@ class Query implements IteratorAggregate
         return $this->doesEvents;
     }
 
-    public function getPrimary()
+    /************************* Types **************************/
+    /* This section is here to help IDEs with type inference */
+    /********************************************************/
+
+    protected function createRow(array $row): Entity
     {
-        return $this->selection->getPrimary();
+        $entityClass = $this->repository->getEntityClass();
+        return new $entityClass($row, $this);
     }
 
-    /************************** Modification methods **************************/
-    /**
-     * @param Entity ...$entities
-     * @return bool|int|Entity
-     */
-    public function insert(Entity ...$entities)
+    public function createSelectionInstance(?string $table = null): Query
     {
-        $result = $this->selection->insert($entities);
-        if ($result instanceof ActiveRow) {
-            return $this->repository->toEntity($result);
-        }
-        return $result;
+        return new Query($this->repository, $this->doesEvents);
     }
 
-
-    /************************** Fetching methods **************************/
     /**
-     * @return Generator<E>
+     * @param mixed|Entity $condition
+     * @param mixed ...$params
+     * @return $this
      */
-    public function getIterator(): Generator
+    public function where($condition, ...$params): self
     {
-        foreach ($this->selection as $row) {
-            yield $this->repository->toEntity($row);
+        if ($condition instanceof Entity) {
+            return $this->wherePrimary($condition->getPrimary());
         }
-        yield from [];
+        parent::where($condition, $params);
+        return $this;
+    }
+
+    /**
+     * @param mixed|Entity $key
+     * @return $this
+     */
+    public function wherePrimary($key): self
+    {
+        if ($key instanceof Entity) {
+            $key = $key->getPrimary();
+        }
+        parent::wherePrimary($key);
+        return $this;
     }
 
     /**
@@ -116,41 +164,18 @@ class Query implements IteratorAggregate
      */
     public function fetch(): ?Entity
     {
-        $row = $this->selection->fetch();
-        if (!$row) {
-            return null;
-        }
-        return $this->repository->toEntity($row);
+        /** @var E|null $entity */
+        $entity = parent::fetch();
+        return $entity;
     }
 
     /**
-     * @return Entity[]
+     * @return E[]
      */
     public function fetchAll(): array
     {
-        return iterator_to_array($this->getIterator());
-    }
-
-    public function fetchPairs($key = null, $value = null): array
-    {
-        $pairs = [];
-        foreach ($this->selection->fetchPairs($key, $value) as $iKey => $iValue) {
-            if ($iValue instanceof ActiveRow) {
-                $iValue = $this->repository->toEntity($iValue);
-            }
-            $pairs[$iKey] = $iValue;
-        }
-        return $pairs;
-    }
-
-    /****************** Pass-thru **************************/
-    public function __call(string $name, $arguments)
-    {
-        // if iterator method, use entity iterator
-        if (in_array($name, ['current', 'key', 'next', 'rewind', 'valid'])) {
-            $this->innerIterator ??= new CachingIterator($this->getIterator());
-            return $this->innerIterator->$name(...$arguments);
-        }
-        return $this->selection->$name(...$arguments);
+        /** @var E[] $rows */
+        $rows = parent::fetchAll();
+        return $rows;
     }
 }

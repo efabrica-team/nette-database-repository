@@ -16,10 +16,16 @@ abstract class RepositoryEvent
     /**
      * @var EventSubscriber[]
      */
-    protected array $subscribers;
+    protected array $subscribers = [];
 
+    /**
+     * @var Repository<E, Query<E>>
+     */
     private Repository $repository;
 
+    /**
+     * @param Repository<E, Query<E>> $repository
+     */
     public function __construct(Repository $repository)
     {
         $this->repository = $repository;
@@ -48,6 +54,7 @@ abstract class RepositoryEvent
 
     /**
      * Stop the execution of the event chain.
+     * @return mixed
      */
     abstract public function stopPropagation();
 }

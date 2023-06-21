@@ -3,7 +3,6 @@
 namespace Efabrica\NetteDatabaseRepository\Model;
 
 use Generator;
-use InvalidArgumentException;
 
 /**
  * This class is used to store cached metadata about entities and use them to modify entities.
@@ -15,75 +14,52 @@ class EntityMeta
      */
     private static array $meta = [];
 
-    public static function getMeta(Entity $entity): EntityMetaInstance
+    /**
+     * @param class-string<Entity> $class
+     */
+    public static function getMeta(string $class): EntityMetaInstance
     {
-        $class = get_class($entity);
         return self::$meta[$class] ??= new EntityMetaInstance($class);
     }
 
-    public static function toIterable(Entity $entity): Generator
+    /**
+     * @param class-string<Entity> $class
+     */
+    public static function getProperty(string $class, string $name): ?EntityProperty
     {
-        foreach (self::getMeta($entity)->properties as $name => $property) {
-            yield $name => $property->getValue($entity);
-        }
-    }
-
-    public static function toArray(Entity $entity): array
-    {
-        $result = [];
-        foreach (self::getMeta($entity)->properties as $name => $property) {
-            $result[$name] = $property->getValue($entity);
-        }
-        return $result;
-    }
-
-    public static function isSet(Entity $entity, string $key): bool
-    {
-        return isset(self::getMeta($entity)->properties[$key]);
+        return self::getMeta($class)->properties[$name] ?? null;
     }
 
     /**
-     * Does not call any setters. Used to populate directly from database.
-     * @param Entity   $entity
-     * @param iterable $data
-     * @return void
+     * @param class-string<Entity> $class
+     * @return EntityProperty[]
      */
-    public static function populate(Entity $entity, iterable $data): void
+    public static function getProperties(string $class): array
     {
-        $props = self::getMeta($entity)->properties;
-        foreach ($data as $columnName => $value) {
-            if (isset($props[$columnName])) {
-                $props[$columnName]->setValue($entity, $value);
+        return self::getMeta($class)->properties;
+    }
+
+    /**
+     * @param class-string<Entity> $class
+     */
+    public static function getAnnotatedProperty(string $class, string $annotation): ?EntityProperty
+    {
+        foreach (self::getAnnotatedProperties($class, $annotation) as $property) {
+            return $property;
+        }
+        return null;
+    }
+
+    /**
+     * @param class-string<Entity> $class
+     * @return Generator<EntityProperty>
+     */
+    public static function getAnnotatedProperties(string $class, string $annotation): iterable
+    {
+        foreach (self::getMeta($class)->properties as $property) {
+            if ($property->hasAnnotation($annotation)) {
+                yield $property;
             }
         }
-    }
-
-    /**
-     * Calls the getter for the given column.
-     * @return mixed|null
-     */
-    public static function get(Entity $entity, string $columnName)
-    {
-        $getters = self::getMeta($entity)->getters;
-        if (isset($getters[$columnName])) {
-            $method = $getters[$columnName];
-            return $entity->$method();
-        }
-        throw new InvalidArgumentException("Could not find getter for $columnName in " . get_class($entity));
-    }
-
-    /**
-     * Calls the setter for the given column.
-     * @param mixed $value
-     */
-    public static function set(Entity $entity, string $columnName, $value): void
-    {
-        $setters = self::getMeta($entity)->setters;
-        if (isset($setters[$columnName])) {
-            $method = $setters[$columnName];
-            $entity->$method($value);
-            return;
-        }
-        throw new InvalidArgumentException("Could not find setter for $columnName in " . get_class($entity));
     }
 }

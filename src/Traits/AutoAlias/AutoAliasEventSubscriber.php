@@ -4,8 +4,8 @@ namespace Efabrica\NetteDatabaseRepository\Traits\AutoAlias;
 
 use Efabrica\NetteDatabaseRepository\Repository\Repository;
 use Efabrica\NetteDatabaseRepository\Repository\RepositoryManager;
+use Efabrica\NetteDatabaseRepository\Subscriber\Event\InsertEventResponse;
 use Efabrica\NetteDatabaseRepository\Subscriber\Event\InsertRepositoryEvent;
-use Efabrica\NetteDatabaseRepository\Subscriber\Event\InsertEntityEventResponse;
 use Efabrica\NetteDatabaseRepository\Subscriber\EventSubscriber;
 
 class AutoAliasEventSubscriber extends EventSubscriber
@@ -15,9 +15,9 @@ class AutoAliasEventSubscriber extends EventSubscriber
         return RepositoryManager::hasTrait($repository, AutoAliasBehavior::class);
     }
 
-    public function onInsert(InsertRepositoryEvent $event): InsertEntityEventResponse
+    public function onInsert(InsertRepositoryEvent $event): InsertEventResponse
     {
-        /** @var Repository&AutoAliasBehavior $repository */
+        /** @var AutoAliasRepository $repository */
         $repository = $event->getRepository();
         foreach ($event->getEntities() as $entity) {
             $repository->setEntityAlias($entity);

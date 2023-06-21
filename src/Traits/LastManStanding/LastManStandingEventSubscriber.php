@@ -32,7 +32,7 @@ class LastManStandingEventSubscriber extends EventSubscriber implements SoftDele
         return $event->handle();
     }
 
-    public function softDelete(SoftDeleteQueryEvent $event, array &$data): int
+    public function onSoftDelete(SoftDeleteQueryEvent $event, array &$data): int
     {
         $this->ensureLastMan($event->getRepository());
         return $event->handle($data);

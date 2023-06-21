@@ -3,26 +3,13 @@
 namespace Efabrica\NetteDatabaseRepository\Model;
 
 use ReflectionClass;
-use ReflectionException;
-use ReflectionMethod;
-use ReflectionProperty;
 
 class EntityMetaInstance
 {
     /**
-     * @var ReflectionProperty[]
+     * @var EntityProperty[]
      */
     public array $properties = [];
-
-    /**
-     * @var string[]
-     */
-    public array $getters = [];
-
-    /**
-     * @var string[]
-     */
-    public array $setters = [];
 
     /**
      * @param class-string<Entity> $class
@@ -30,26 +17,20 @@ class EntityMetaInstance
     public function __construct(string $class)
     {
         $refl = new ReflectionClass($class);
-        foreach ($refl->getProperties(ReflectionProperty::IS_PRIVATE) as $property) {
-            $property->setAccessible(true);
-            $this->properties[$property->getName()] = $property;
-        }
-        foreach ($refl->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
-            $name = $method->getName();
-            if (str_starts_with($name, 'get')) {
-                $this->getters[self::toSnakeCase(substr($name, 3))] = $name;
-            } elseif (str_starts_with($name, 'is')) {
-                $this->getters[self::toSnakeCase(substr($name, 2))] = $name;
-            } elseif (str_starts_with($name, 'has')) {
-                $this->getters[self::toSnakeCase(substr($name, 3))] = $name;
-            } elseif (str_starts_with($name, 'set')) {
-                $this->setters[self::toSnakeCase(substr($name, 3))] = $name;
-            }
-        }
+        do {
+            $this->parseProperties($refl);
+        } while (($refl = $refl->getParentClass()) && $refl->getName() !== Entity::class);
     }
 
-    private static function toSnakeCase(string $camelCase): string
+    public function parseProperties(ReflectionClass $refl): void
     {
-        return strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $camelCase));
+        $doc = $refl->getDocComment() ?: '';
+        if (preg_match_all('/@property\s+(\S+)\s+\$(\S+)\s+([^\n]+)/', $doc, $matches, PREG_SET_ORDER)) {
+            foreach ($matches as $match) {
+                if (isset($match[3])) {
+                    $this->properties[$match[2]] = new EntityProperty($match);
+                }
+            }
+        }
     }
 }

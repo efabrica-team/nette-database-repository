@@ -2,8 +2,6 @@
 
 namespace Efabrica\NetteDatabaseRepository\Subscriber\Event;
 
-use Closure;
-use Efabrica\NetteDatabaseRepository\Repository\Query;
 use Efabrica\NetteDatabaseRepository\Subscriber\EventSubscriber;
 
 class SelectQueryEvent extends QueryEvent

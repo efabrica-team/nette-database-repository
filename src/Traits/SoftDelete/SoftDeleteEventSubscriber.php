@@ -2,10 +2,10 @@
 
 namespace Efabrica\NetteDatabaseRepository\Traits\SoftDelete;
 
-use DateTime;
+use DateTimeImmutable;
 use Efabrica\NetteDatabaseRepository\Model\Entity;
+use Efabrica\NetteDatabaseRepository\Model\EntityMeta;
 use Efabrica\NetteDatabaseRepository\Repository\Repository;
-use Efabrica\NetteDatabaseRepository\Subscriber\AnnotationReader;
 use Efabrica\NetteDatabaseRepository\Subscriber\Event\DeleteQueryEvent;
 use Efabrica\NetteDatabaseRepository\Subscriber\Event\SelectQueryEvent;
 use Efabrica\NetteDatabaseRepository\Subscriber\Event\SelectQueryResponse;
@@ -16,30 +16,23 @@ class SoftDeleteEventSubscriber extends EventSubscriber
 {
     public const ANNOTATION = '@SoftDelete';
 
-    private AnnotationReader $annotationReader;
-
-    public function __construct(AnnotationReader $annotationReader)
-    {
-        $this->annotationReader = $annotationReader;
-    }
-
     public function supportsRepository(Repository $repository): bool
     {
-        return $this->annotationReader->findProperty($repository->getEntityClass(), self::ANNOTATION) !== null;
+        return EntityMeta::getAnnotatedProperty($repository->getEntityClass(), self::ANNOTATION) !== null;
     }
 
     public function onSelect(SelectQueryEvent $event): SelectQueryResponse
     {
-        $prop = $this->annotationReader->findProperty($event->getEntityClass(), self::ANNOTATION);
+        $prop = EntityMeta::getAnnotatedProperty($event->getRepository()->getEntityClass(), self::ANNOTATION);
         if ($prop !== null) {
-            $event->getQuery()->where($event->getRepository()->getTableName() . '.' . $prop->getName() . ' != NULL', false);
+            $event->getQuery()->where($event->getRepository()->getTableName() . '.' . $prop->getName() . ' = NULL', false);
         }
         return $event->handle();
     }
 
     public function onDelete(DeleteQueryEvent $event): int
     {
-        $prop = $this->annotationReader->findProperty($event->getEntityClass(), self::ANNOTATION);
+        $prop = EntityMeta::getAnnotatedProperty($event->getRepository()->getEntityClass(), self::ANNOTATION);
         if ($prop === null) {
             return $event->handle();
         }
@@ -47,7 +40,7 @@ class SoftDeleteEventSubscriber extends EventSubscriber
         if ($prop->getType() === 'bool') {
             $data[$prop->getName()] = true;
         } elseif ($prop->getType() === 'DateTimeInterface') {
-            $data[$prop->getName()] = new DateTime();
+            $data[$prop->getName()] = new DateTimeImmutable();
         } else {
             throw new LogicException('Unsupported soft delete property type ' . $prop->getType() . '. Supported types are bool and DateTimeInterface.');
         }
@@ -56,7 +49,7 @@ class SoftDeleteEventSubscriber extends EventSubscriber
 
     public function restore(Repository $repository, Entity $entity): int
     {
-        $prop = $this->annotationReader->findProperty(get_class($entity), self::ANNOTATION);
+        $prop = EntityMeta::getAnnotatedProperty($repository->getEntityClass(), self::ANNOTATION);
         if ($prop === null) {
             throw new LogicException('Cannot restore entity without soft delete property.');
         }

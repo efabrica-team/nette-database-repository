@@ -4,7 +4,7 @@ namespace Efabrica\NetteDatabaseRepository\Subscriber\Event;
 
 use LogicException;
 
-abstract class EntityEventResponse
+abstract class RepositoryEventResponse
 {
     public function __construct(RepositoryEvent $event)
     {
@@ -12,5 +12,4 @@ abstract class EntityEventResponse
             throw new LogicException('Event has not ended yet');
         }
     }
-
 }

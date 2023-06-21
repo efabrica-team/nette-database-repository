@@ -3,10 +3,10 @@
 namespace Efabrica\NetteDatabaseRepository\Traits\Account;
 
 use Efabrica\IrisClient\IrisUser;
+use Efabrica\NetteDatabaseRepository\Model\EntityMeta;
 use Efabrica\NetteDatabaseRepository\Repository\Repository;
-use Efabrica\NetteDatabaseRepository\Subscriber\AnnotationReader;
+use Efabrica\NetteDatabaseRepository\Subscriber\Event\InsertEventResponse;
 use Efabrica\NetteDatabaseRepository\Subscriber\Event\InsertRepositoryEvent;
-use Efabrica\NetteDatabaseRepository\Subscriber\Event\InsertEntityEventResponse;
 use Efabrica\NetteDatabaseRepository\Subscriber\Event\SelectQueryEvent;
 use Efabrica\NetteDatabaseRepository\Subscriber\Event\SelectQueryResponse;
 use Efabrica\NetteDatabaseRepository\Subscriber\Event\UpdateQueryEvent;
@@ -18,17 +18,14 @@ class AccountEventSubscriber extends EventSubscriber
 
     private IrisUser $irisUser;
 
-    private AnnotationReader $annotationReader;
-
-    public function __construct(IrisUser $irisUser, AnnotationReader $annotationReader)
+    public function __construct(IrisUser $irisUser)
     {
         $this->irisUser = $irisUser;
-        $this->annotationReader = $annotationReader;
     }
 
     public function supportsRepository(Repository $repository): bool
     {
-        return $this->annotationReader->findProperty($repository->getEntityClass(), self::ANNOTATION) !== null;
+        return EntityMeta::getAnnotatedProperty($repository->getEntityClass(), self::ANNOTATION) !== null;
     }
 
     private function getAccountId(): ?string
@@ -41,7 +38,7 @@ class AccountEventSubscriber extends EventSubscriber
 
     public function onSelect(SelectQueryEvent $event): SelectQueryResponse
     {
-        $field = $this->annotationReader->findProperty($event->getEntityClass(), self::ANNOTATION);
+        $field = EntityMeta::getAnnotatedProperty($event->getEntityClass(), self::ANNOTATION);
         if ($field === null) {
             return $event->handle();
         }
@@ -59,12 +56,14 @@ class AccountEventSubscriber extends EventSubscriber
         return $event->handle();
     }
 
-    public function onInsert(InsertRepositoryEvent $event): InsertEntityEventResponse
+    public function onInsert(InsertRepositoryEvent $event): InsertEventResponse
     {
-        $prop = $this->annotationReader->findProperty($event->getEntityClass(), self::ANNOTATION);
+        $prop = EntityMeta::getAnnotatedProperty($event->getEntityClass(), self::ANNOTATION);
         if ($prop !== null) {
             foreach ($event->getEntities() as $entity) {
-                $prop->setValue($entity, $this->getAccountId());
+                if (!isset($entity[$prop->getName()])) {
+                    $entity[$prop->getName()] = $this->getAccountId();
+                }
             }
         }
         return $event->handle();
@@ -72,7 +71,7 @@ class AccountEventSubscriber extends EventSubscriber
 
     public function onUpdate(UpdateQueryEvent $event, array &$data): int
     {
-        $field = $this->annotationReader->findProperty($event->getEntityClass(), self::ANNOTATION);
+        $field = EntityMeta::getAnnotatedProperty($event->getEntityClass(), self::ANNOTATION);
         if ($field === null) {
             return $event->handle($data);
         }

@@ -2,9 +2,7 @@
 
 namespace Efabrica\NetteDatabaseRepository\Subscriber\Event;
 
-use LogicException;
-
-final class InsertEntityEventResponse extends EntityEventResponse
+final class InsertEventResponse extends RepositoryEventResponse
 {
     private $return;
 

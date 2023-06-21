@@ -2,7 +2,6 @@
 
 namespace Efabrica\NetteDatabaseRepository\Subscriber;
 
-use Efabrica\NetteDatabaseRepository\Model\Entity;
 use Efabrica\NetteDatabaseRepository\Repository\Repository;
 use Generator;
 use IteratorAggregate;
@@ -17,7 +16,7 @@ final class Events implements IteratorAggregate
 
     public function __construct(Container $container)
     {
-        foreach ($container->getByType(EventSubscriber::class) as $eventSubscriberName) {
+        foreach ($container->findByType(EventSubscriber::class) as $eventSubscriberName) {
             $eventSubscriber = $container->getService($eventSubscriberName);
             if ($eventSubscriber instanceof EventSubscriber) {
                 $this->subscribers[get_class($eventSubscriber)] = $eventSubscriber;
@@ -73,6 +72,8 @@ final class Events implements IteratorAggregate
      */
     public function get(string $eventClass): ?EventSubscriber
     {
-        return $this->subscribers[$eventClass] ?? null;
+        $subscriber = $this->subscribers[$eventClass] ?? null;
+        assert($subscriber instanceof $eventClass || $subscriber === null);
+        return $subscriber;
     }
 }

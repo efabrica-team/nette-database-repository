@@ -15,11 +15,6 @@ class RepositoryManager
         $this->container = $container;
     }
 
-    public function addRepository(Repository $repository): void
-    {
-        $this->repositories[get_class($repository)] = $repository;
-    }
-
     /**
      * @template R of Repository
      * @param class-string<R> $class
@@ -38,7 +33,7 @@ class RepositoryManager
     public static function hasTrait($repository, string $trait): bool
     {
         foreach ([-1 => $repository] + class_parents($repository) as $parent) {
-            if (in_array($trait, class_uses($parent), true)) {
+            if (in_array($trait, class_uses($parent) ?: [], true)) {
                 return true;
             }
         }

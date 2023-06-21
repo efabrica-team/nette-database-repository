@@ -2,31 +2,75 @@
 
 namespace Efabrica\NetteDatabaseRepository\Model;
 
-use ArrayAccess;
-use IteratorAggregate;
+use Efabrica\NetteDatabaseRepository\Repository\Query;
+use Nette\Database\Table\ActiveRow;
+use Nette\Database\Table\GroupedSelection;
 
-/**
- * @implements ArrayAccess<string, mixed> Allows to access entity properties by calling getters and setters internally.
- * @implements IteratorAggregate<string, mixed> Allows to iterate over entity properties and their values.
- */
-abstract class Entity implements IteratorAggregate, ArrayAccess
+abstract class Entity extends ActiveRow
 {
-    use EntityAccess;
+    private array $_modified = [];
 
-    /**
-     * Each entity has its own relations object that caches the results of the relations.
-     * The relations object is injected by the repository query.
-     * @var EntityRelations|null $rel
-     */
-    private ?EntityRelations $rel = null;
+    private Query $query;
 
-    protected function relToOne(bool $cached, string $repositoryClass, $value, $column = null): ?Entity
+    public function __construct(array $data, Query $query)
     {
-        return $this->rel !== null ? $this->rel->relToOne($cached, $repositoryClass, $value, $column) : null;
+        parent::__construct($data, $query);
+        $this->query = $query;
     }
 
-    protected function relToMany(bool $cached, string $repositoryClass, $value, $column = null): iterable
+    public function diff(): array
     {
-        return $this->rel !== null ? $this->rel->relToMany($cached, $repositoryClass, $value, $column) : [];
+        return $this->_modified;
+    }
+
+    /**
+     * @param mixed $key
+     */
+    public function __isset($key): bool
+    {
+        return parent::__isset($key) || isset($this->_modified[$key]);
+    }
+
+    public function &__get(string $key)
+    {
+        return array_key_exists($key, $this->_modified) ? $this->_modified[$key] : parent::__get($key);
+    }
+
+    /**
+     * @param string $column
+     * @param mixed $value
+     */
+    public function __set($column, $value): void
+    {
+        $this->_modified[$column] = $value;
+    }
+
+    /**
+     * @param string $key
+     */
+    public function __unset($key)
+    {
+        unset($this->_modified[$key]);
+    }
+
+    /**
+     * @deprecated Do not use, call repositories directly.
+     */
+    public function ref(string $key, ?string $throughColumn = null): ?ActiveRow
+    {
+        return parent::ref($key, $throughColumn);
+    }
+
+    /**
+     * @deprecated Do not use, call repositories directly.
+     */
+    public function related(string $key, ?string $throughColumn = null): GroupedSelection
+    {
+        return parent::related($key, $throughColumn);
+    }
+
+    public function getTableName(): string
+    {
+        return $this->query->getName();
     }
 }

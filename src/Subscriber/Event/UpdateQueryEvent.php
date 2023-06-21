@@ -13,7 +13,7 @@ class UpdateQueryEvent extends QueryEvent
         if ($subscriber instanceof EventSubscriber) {
             return $subscriber->onUpdate($this, $data);
         }
-        return $this->query->getRepository()->query(false)->update($data);
+        return $this->query->withoutEvents()->update($data);
     }
 
     public function stopPropagation(): int

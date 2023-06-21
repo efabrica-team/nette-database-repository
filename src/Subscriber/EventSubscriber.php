@@ -2,13 +2,10 @@
 
 namespace Efabrica\NetteDatabaseRepository\Subscriber;
 
-use Efabrica\NetteDatabaseRepository\Model\Entity;
 use Efabrica\NetteDatabaseRepository\Repository\Repository;
 use Efabrica\NetteDatabaseRepository\Subscriber\Event\DeleteQueryEvent;
+use Efabrica\NetteDatabaseRepository\Subscriber\Event\InsertEventResponse;
 use Efabrica\NetteDatabaseRepository\Subscriber\Event\InsertRepositoryEvent;
-use Efabrica\NetteDatabaseRepository\Subscriber\Event\InsertEntityEventResponse;
-use Efabrica\NetteDatabaseRepository\Subscriber\Event\LoadRepositoryEvent;
-use Efabrica\NetteDatabaseRepository\Subscriber\Event\LoadEntityResponse;
 use Efabrica\NetteDatabaseRepository\Subscriber\Event\SelectQueryEvent;
 use Efabrica\NetteDatabaseRepository\Subscriber\Event\SelectQueryResponse;
 use Efabrica\NetteDatabaseRepository\Subscriber\Event\UpdateQueryEvent;
@@ -27,9 +24,9 @@ abstract class EventSubscriber
     }
 
     /**
-     * @return InsertEntityEventResponse returned by $event->handle() or $event->stopPropagation()
+     * @return InsertEventResponse returned by $event->handle() or $event->stopPropagation()
      */
-    public function onInsert(InsertRepositoryEvent $event): InsertEntityEventResponse
+    public function onInsert(InsertRepositoryEvent $event): InsertEventResponse
     {
         return $event->handle();
     }
@@ -54,16 +51,6 @@ abstract class EventSubscriber
      * @return SelectQueryResponse returned by $event->handle() or $event->stopPropagation()
      */
     public function onSelect(SelectQueryEvent $event): SelectQueryResponse
-    {
-        return $event->handle();
-    }
-
-    /**
-     * Modify the entity after it is loaded from the database.
-     * @param LoadRepositoryEvent $event The event
-     * @return LoadEntityResponse returned by $event->handle() or $event->stopPropagation()
-     */
-    public function onLoad(LoadRepositoryEvent $event): LoadEntityResponse
     {
         return $event->handle();
     }

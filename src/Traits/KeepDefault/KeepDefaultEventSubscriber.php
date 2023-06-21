@@ -2,11 +2,12 @@
 
 namespace Efabrica\NetteDatabaseRepository\Traits\KeepDefault;
 
+use Efabrica\NetteDatabaseRepository\Model\EntityMeta;
 use Efabrica\NetteDatabaseRepository\Repository\Repository;
 use Efabrica\NetteDatabaseRepository\Subscriber\AnnotationReader;
 use Efabrica\NetteDatabaseRepository\Subscriber\Event\DeleteQueryEvent;
+use Efabrica\NetteDatabaseRepository\Subscriber\Event\InsertEventResponse;
 use Efabrica\NetteDatabaseRepository\Subscriber\Event\InsertRepositoryEvent;
-use Efabrica\NetteDatabaseRepository\Subscriber\Event\InsertEntityEventResponse;
 use Efabrica\NetteDatabaseRepository\Subscriber\Event\UpdateQueryEvent;
 use Efabrica\NetteDatabaseRepository\Subscriber\EventSubscriber;
 use Efabrica\NetteDatabaseRepository\Traits\SoftDelete\SoftDeleteQueryEvent;
@@ -15,22 +16,15 @@ use LogicException;
 
 class KeepDefaultEventSubscriber extends EventSubscriber implements SoftDeleteSubscriber
 {
-    private AnnotationReader $annotationReader;
-
-    public function __construct(AnnotationReader $annotationReader)
-    {
-        $this->annotationReader = $annotationReader;
-    }
-
     public function supportsRepository(Repository $repository): bool
     {
         return $repository instanceof KeepDefaultRepository;
     }
 
     private function ensureDefault(Repository $repository): void
-        /** @var Repository&KeepDefaultRepository $defaultField */
     {
-        $defaultField = $this->annotationReader->findProperty($repository->getEntityClass(), KeepDefaultRepository::ANNOTATION);
+        /** @var Repository&KeepDefaultRepository $repository */
+        $defaultField = EntityMeta::getAnnotatedProperty($repository->getEntityClass(), KeepDefaultRepository::ANNOTATION);
         if ($defaultField === null) {
             throw new LogicException('@KeepDefault annotation not found');
         }
@@ -57,7 +51,7 @@ class KeepDefaultEventSubscriber extends EventSubscriber implements SoftDeleteSu
         }
     }
 
-    public function onInsert(InsertRepositoryEvent $event): InsertEntityEventResponse
+    public function onInsert(InsertRepositoryEvent $event): InsertEventResponse
     {
         /** @var Repository&KeepDefaultRepository $repository */
         $repository = $event->getRepository();
@@ -71,7 +65,7 @@ class KeepDefaultEventSubscriber extends EventSubscriber implements SoftDeleteSu
         $result = $event->handle($data);
         /** @var Repository&KeepDefaultRepository $repository */
         $repository = $event->getRepository();
-        $defaultField = $this->annotationReader->findProperty($repository->getEntityClass(), KeepDefaultRepository::ANNOTATION);
+        $defaultField = EntityMeta::getAnnotatedProperty($repository->getEntityClass(), KeepDefaultRepository::ANNOTATION);
         if ($defaultField === null) {
             throw new LogicException('@KeepDefault annotation not found');
         }
@@ -89,7 +83,7 @@ class KeepDefaultEventSubscriber extends EventSubscriber implements SoftDeleteSu
         return $result;
     }
 
-    public function softDelete(SoftDeleteQueryEvent $event, array &$data): int
+    public function onSoftDelete(SoftDeleteQueryEvent $event, array &$data): int
     {
         $result = $event->handle($data);
         $this->ensureDefault($event->getRepository());

@@ -3,18 +3,13 @@
 namespace Efabrica\NetteDatabaseRepository\Repository;
 
 use Efabrica\NetteDatabaseRepository\Model\Entity;
-use Efabrica\NetteDatabaseRepository\Model\EntityManager;
-use Efabrica\NetteDatabaseRepository\Model\EntityRelations;
-use Efabrica\NetteDatabaseRepository\Subscriber\Event\LoadRepositoryEvent;
 use Efabrica\NetteDatabaseRepository\Subscriber\Events;
 use Nette\Application\BadRequestException;
 use Nette\Database\Explorer;
-use Nette\Database\Table\Selection;
-use ReflectionClass;
-use ReflectionProperty;
 
 /**
  * @template E of Entity
+ * @template Q of Query<E>
  */
 abstract class Repository
 {
@@ -27,76 +22,64 @@ abstract class Repository
 
     private Events $events;
 
-    private EntityRelations $entityRelations;
-
-    private ReflectionProperty $relationsProp;
-
-    /** @var E&Entity */
-    private Entity $prototype;
+    /** @var class-string<Q> */
+    private string $queryClass;
 
     /**
      * @param class-string<E> $entityClass
+     * @param class-string<Q> $queryClass
      */
-    public function __construct(string $tableName, string $entityClass, RepositoryDependencies $deps)
+    public function __construct(string $tableName, string $entityClass, string $queryClass, RepositoryDependencies $deps)
     {
         $this->explorer = $deps->getExplorer();
         $this->tableName = $tableName;
-        $refl = new ReflectionClass($entityClass);
-        $this->entityClass = $entityClass;
-        $this->prototype = $refl->newInstanceWithoutConstructor();
-        assert($this->prototype instanceof Entity, 'Entity class must extend ' . Entity::class);
         $this->events = $deps->getEvents()->forRepository($this);
-        $this->entityRelations = $deps->getEntityRelations();
-
-        $prop = $refl->getProperty('core');
-        $prop->setAccessible(true);
-        $this->relationsProp = $prop;
+        assert(is_a($entityClass, Entity::class, true));
+        $this->entityClass = $entityClass;
+        assert(is_a($queryClass, Query::class, true));
+        $this->queryClass = $queryClass;
     }
 
     /**
-     * @return Query<E>
+     * @param bool $events
+     * @return Query<E>&Q
      */
     public function query(bool $events = true): Query
     {
-        return new Query($this, $this->tableName, $events);
-    }
-
-    /**
-     * @deprecated Try not to use. Will not be removed.
-     */
-    public function selection(bool $events): SelectionQuery
-    {
-        return new SelectionQuery($this->query($events));
+        return new ($this->queryClass)($this, $events);
     }
 
     /********************************
      * Fetching entities
      ******************************/
+
     /**
-     * @param string|int|array $id
+     * @param string|int|array|E $id
      */
     public function find($id, bool $events = true): ?Entity
     {
+        if ($id instanceof Entity) {
+            $id = $id->getPrimary();
+        }
         return $this->query($events)->wherePrimary($id)->fetch();
     }
 
+    /**
+     * @return E|null
+     */
     public function findOneBy(array $conditions, bool $events = true): ?Entity
     {
-        return $this->query($events)->fetch();
-    }
-
-    public function findBy($condition = [], ...$params): Query
-    {
-        return $this->query()->where($condition, ...$params);
+        return $this->query($events)->limit(1)->fetch();
     }
 
     /**
-     * @param E&Entity $entity entity to find
-     * @param bool     $events whether to fire events
+     * @param array<int|string,string>|(E&Entity) $condition
+     * @param mixed                      ...$params
+     * @return Q&Query<E>
      */
-    protected function findByEntity(Entity $entity, bool $events = true): Query
+    public function findBy($condition = [], ...$params): Query
     {
-        return $this->query($events)->whereEntity($entity);
+        return $this->query()->where($condition, ...$params);
     }
 
     /**
@@ -116,24 +99,12 @@ abstract class Repository
         throw new BadRequestException('Entity not found');
     }
 
-    /**
-     * @return E
-     */
-    public function toEntity(iterable $data): Entity
-    {
-        $entity = $this->getPrototype();
-        $entity->set($data);
-        $this->relationsProp->setValue($entity, clone $this->entityRelations);
-        EntityManager::saveOriginal($entity);
-        (new LoadRepositoryEvent($this, $entity))->handle();
-        return $entity;
-    }
-
     /********************************
      * Database modifications
      ******************************/
+
     /**
-     * @param E&Entity ...$entities
+     * @param E ...$entities
      */
     public function insert(Entity ...$entities): void
     {
@@ -143,16 +114,15 @@ abstract class Repository
     }
 
     /**
-     * @param E&Entity $entity
+     * @param E&Entity ...$entities
      */
-    public function update(Entity $entity): int
+    public function update(Entity ...$entities): int
     {
-        $original = EntityManager::getOriginal($entity);
-        $result = $this->findByEntity($entity)->update(array_diff_assoc($entity->toArray(), $original));
-        if ($result > 0) {
-            EntityManager::saveOriginal($entity);
+        $i = 0;
+        foreach ($entities as $entity) {
+            $i += $this->findBy($entity)->update($entity->diff());
         }
-        return $result;
+        return $i;
     }
 
     /**
@@ -160,7 +130,7 @@ abstract class Repository
      */
     public function delete(Entity $entity): int
     {
-        return $this->findByEntity($entity)->delete();
+        return $this->findBy($entity)->delete();
     }
 
     /********************************
@@ -174,11 +144,6 @@ abstract class Repository
     public function getEvents(): Events
     {
         return $this->events;
-    }
-
-    public function getEntityRelations(): EntityRelations
-    {
-        return $this->entityRelations;
     }
 
     public function getTableName(): string
@@ -195,12 +160,11 @@ abstract class Repository
     }
 
     /**
-     * @return E&Entity returns a new instance of the entity without calling the constructor and sets the relations property
+     * @return E
      */
-    public function getPrototype(): Entity
+    public function createRow(): Entity
     {
-        $prototype = clone $this->prototype;
-        $this->relationsProp->setValue($prototype, clone $this->entityRelations);
-        return $prototype;
+        $class = $this->entityClass;
+        return new $class([], $this->query());
     }
 }

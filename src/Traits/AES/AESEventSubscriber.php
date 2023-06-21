@@ -3,13 +3,14 @@
 namespace Efabrica\NetteDatabaseRepository\Traits\AES;
 
 use Efabrica\NetteDatabaseRepository\Repository\Repository;
+use Efabrica\NetteDatabaseRepository\Subscriber\Event\InsertEventResponse;
 use Efabrica\NetteDatabaseRepository\Subscriber\Event\InsertRepositoryEvent;
-use Efabrica\NetteDatabaseRepository\Subscriber\Event\InsertEntityEventResponse;
 use Efabrica\NetteDatabaseRepository\Subscriber\Event\SelectQueryEvent;
 use Efabrica\NetteDatabaseRepository\Subscriber\Event\SelectQueryResponse;
 use Efabrica\NetteDatabaseRepository\Subscriber\Event\UpdateQueryEvent;
 use Efabrica\NetteDatabaseRepository\Subscriber\EventSubscriber;
 use Nette\Database\Row;
+use Nette\Database\Table\ActiveRow;
 
 class AESEventSubscriber extends EventSubscriber
 {
@@ -30,9 +31,10 @@ class AESEventSubscriber extends EventSubscriber
         return $event->handle();
     }
 
-    public function onInsert(InsertRepositoryEvent $event): InsertEntityEventResponse
+    public function onInsert(InsertRepositoryEvent $event): InsertEventResponse
     {
         /** @var Repository&AESRepository $repository */
+        $repository = $event->getRepository();
         foreach ($event->getEntities() as $entity) {
             foreach ($repository->encryptedFields() as $field) {
                 $entity[$field] = $this->encryptValue($repository, $entity[$field]);
@@ -64,20 +66,26 @@ class AESEventSubscriber extends EventSubscriber
 
     protected function encryptValue(Repository $repository, string $value): string
     {
-        /** @var Repository&AESBehavior $repository */
+        /** @var Repository&AESRepository $repository */
         $ivFunction = $this->ivFunction($repository);
         if ($ivFunction) {
+            /** @var literal-string $ivFunction */
+            /** @var ActiveRow $initVector */
             $initVector = $repository->getExplorer()->fetch($ivFunction);
             $randomBytes = addslashes($initVector->random);
 
-            /** @var Row $row */
-            $row = $repository->getExplorer()->fetch('SELECT HEX(CONCAT("' . $randomBytes . '", AES_ENCRYPT("' . addslashes($value) . '", ' . $repository->keyFunction() . ', "' . $randomBytes . '"))) AS encrypted');
-            return $row->encrypted;
+            /** @var literal-string $queryString */
+            $queryString = 'SELECT HEX(CONCAT("' . $randomBytes . '", AES_ENCRYPT("' . addslashes($value) . '", ' . $repository->keyFunction() . ', "' . $randomBytes . '"))) AS encrypted';
+            /** @var  ActiveRow $row */
+            $row = $repository->getExplorer()->fetch($queryString);
+            return $row['encrypted'];
         }
 
-        /** @var Row $row */
-        $row = $repository->getExplorer()->fetch('SELECT HEX(AES_ENCRYPT("' . addslashes($value) . '", ' . $repository->keyFunction() . $this->ivFunction() . ')) AS encrypted');
-        return $row->encrypted;
+        /** @var literal-string $queryString */
+        $queryString = 'SELECT HEX(AES_ENCRYPT("' . addslashes($value) . '", ' . $repository->keyFunction() . $this->ivFunction($repository) . ')) AS encrypted';
+        /** @var ActiveRow $row */
+        $row = $repository->getExplorer()->fetch($queryString);
+        return $row['encrypted'];
     }
 
     private function ivFunction(Repository $repository): string
