@@ -9,7 +9,6 @@ use Efabrica\NetteDatabaseRepository\Subscriber\Event\SelectQueryEvent;
 use Efabrica\NetteDatabaseRepository\Subscriber\Event\SelectQueryResponse;
 use Efabrica\NetteDatabaseRepository\Subscriber\Event\UpdateQueryEvent;
 use Efabrica\NetteDatabaseRepository\Subscriber\EventSubscriber;
-use Nette\Database\Row;
 use Nette\Database\Table\ActiveRow;
 
 class AESEventSubscriber extends EventSubscriber

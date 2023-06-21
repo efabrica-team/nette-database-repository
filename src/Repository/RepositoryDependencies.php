@@ -3,7 +3,6 @@
 namespace Efabrica\NetteDatabaseRepository\Repository;
 
 use Efabrica\NetteDatabaseRepository\Subscriber\Events;
-use Efabrica\NetteDatabaseRepository\Subscriber\EventSubscriber;
 use Nette\Database\Explorer;
 use Nette\DI\Container;
 

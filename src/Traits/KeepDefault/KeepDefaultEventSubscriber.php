@@ -4,7 +4,6 @@ namespace Efabrica\NetteDatabaseRepository\Traits\KeepDefault;
 
 use Efabrica\NetteDatabaseRepository\Model\EntityMeta;
 use Efabrica\NetteDatabaseRepository\Repository\Repository;
-use Efabrica\NetteDatabaseRepository\Subscriber\AnnotationReader;
 use Efabrica\NetteDatabaseRepository\Subscriber\Event\DeleteQueryEvent;
 use Efabrica\NetteDatabaseRepository\Subscriber\Event\InsertEventResponse;
 use Efabrica\NetteDatabaseRepository\Subscriber\Event\InsertRepositoryEvent;

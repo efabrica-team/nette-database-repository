@@ -119,8 +119,6 @@ class Query extends Selection
 
     /************************* Types **************************/
     /* This section is here to help IDEs with type inference */
-    /********************************************************/
-
     protected function createRow(array $row): Entity
     {
         $entityClass = $this->repository->getEntityClass();
