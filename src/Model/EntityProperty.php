@@ -4,17 +4,22 @@ namespace Efabrica\NetteDatabaseRepository\Model;
 
 class EntityProperty
 {
-    private string $type;
+    protected string $type;
 
-    private string $name;
+    protected string $name;
 
-    private string $annotations;
+    /**
+     * @var string contains everything after the property name and native type
+     */
+    protected string $annotations;
+    private ?string $dbType;
 
-    public function __construct(array $matches)
+    public function __construct(string $_, string $type, string $name, ?string $nativeType, string $annotations)
     {
-        $this->type = $matches[1];
-        $this->name = $matches[2];
-        $this->annotations = $matches[3];
+        $this->type = $type;
+        $this->name = $name;
+        $this->annotations = $annotations;
+        $this->dbType = $nativeType;
     }
 
     public function getType(): string
@@ -35,5 +40,20 @@ class EntityProperty
     public function hasAnnotation(string $annotation): bool
     {
         return str_contains($this->annotations, $annotation);
+    }
+
+    public function getDbType(): ?string
+    {
+        return $this->dbType;
+    }
+
+    public function toString(string $originalAnnotations = ''): string
+    {
+        foreach (explode(' ', $originalAnnotations) as $annotation) {
+            if (!str_contains($this->annotations, $annotation)) {
+                $this->annotations .= ' ' . $annotation;
+            }
+        }
+        return "@property {$this->type} \${$this->name} ({$this->dbType}) {$this->annotations}";
     }
 }

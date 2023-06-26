@@ -3,6 +3,7 @@
 namespace Efabrica\NetteDatabaseRepository\Repository;
 
 use Efabrica\NetteDatabaseRepository\Model\Entity;
+use Efabrica\NetteDatabaseRepository\Subscriber\Event\DeleteQueryEvent;
 use Efabrica\NetteDatabaseRepository\Subscriber\Events;
 use Nette\Application\BadRequestException;
 use Nette\Database\Explorer;
@@ -69,17 +70,15 @@ abstract class Repository
      */
     public function findOneBy(array $conditions, bool $events = true): ?Entity
     {
-        return $this->query($events)->limit(1)->fetch();
+        return $this->query($events)->where($conditions)->limit(1)->fetch();
     }
 
     /**
-     * @param array<int|string,string>|(E&Entity) $condition
-     * @param mixed                      ...$params
      * @return Q&Query<E>
      */
-    public function findBy($condition = [], ...$params): Query
+    public function findBy(array $conditions): Query
     {
-        return $this->query()->where($condition, ...$params);
+        return $this->query()->where($conditions);
     }
 
     /**
@@ -87,7 +86,7 @@ abstract class Repository
      * Made to be used in presenter actions. Throws BadRequestException if not found.
      * @param Entity|string|int|array $id
      */
-    public function look($id): Entity
+    public function lookup($id): Entity
     {
         if ($id instanceof Entity) {
             return $id;
@@ -118,19 +117,30 @@ abstract class Repository
      */
     public function update(Entity ...$entities): int
     {
-        $i = 0;
-        foreach ($entities as $entity) {
-            $i += $this->findBy($entity)->update($entity->diff());
+        if (count($entities) === 1) {
+            $chunks = [$entities];
+        } else {
+            $chunks = [];
+            foreach ($entities as $entity) {
+                $diff = $entity->diff();
+                ksort($diff);
+                $chunks[serialize($diff)][] = $entity;
+            }
         }
-        return $i;
+        /** @var Entity[] $chunk */
+        foreach ($chunks as $chunk) {
+            $this->query()->where($chunk)->update($chunk[0]->diff());
+        }
+        return count($entities);
     }
 
     /**
-     * @param E&Entity $entity
+     * @param E&Entity ...$entities
      */
-    public function delete(Entity $entity): int
+    public function delete(Entity ...$entities): int
     {
-        return $this->findBy($entity)->delete();
+        $query = $this->query()->where($entities);
+        return (new DeleteQueryEvent($query, $entities))->handle();
     }
 
     /********************************
@@ -152,6 +162,18 @@ abstract class Repository
     }
 
     /**
+     * @return string[]
+     */
+    public function getPrimary(): array
+    {
+        $primary = $this->explorer->getConventions()->getPrimary($this->tableName);
+        if (!is_array($primary)) {
+            return [$primary];
+        }
+        return $primary;
+    }
+
+    /**
      * @return class-string<E>
      */
     public function getEntityClass(): string
@@ -162,9 +184,13 @@ abstract class Repository
     /**
      * @return E
      */
-    public function createRow(): Entity
+    public function createRow(array $row = [], ?Query $query = null): Entity
     {
-        $class = $this->entityClass;
-        return new $class([], $this->query());
+        $entity = new ($this->entityClass)($row, $this->query());
+        $events = $query !== null ? $query->getEvents() : $this->getEvents();
+        foreach ($events as $event) {
+            $event->onCreate($entity);
+        }
+        return $entity;
     }
 }

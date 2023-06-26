@@ -56,10 +56,8 @@ class EntityMeta
      */
     public static function getAnnotatedProperties(string $class, string $annotation): iterable
     {
-        foreach (self::getMeta($class)->properties as $property) {
-            if ($property->hasAnnotation($annotation)) {
-                yield $property;
-            }
+        foreach (self::getMeta($class)->getPropertiesWithAnnotation($annotation) as $property) {
+            yield $property;
         }
     }
 }

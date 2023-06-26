@@ -10,6 +10,7 @@ use Efabrica\NetteDatabaseRepository\Subscriber\Event\UpdateQueryEvent;
 use Efabrica\NetteDatabaseRepository\Subscriber\Events;
 use Efabrica\NetteDatabaseRepository\Subscriber\EventSubscriber;
 use Nette\Database\Table\Selection;
+use Nette\Utils\Arrays;
 use Traversable;
 
 /**
@@ -25,7 +26,7 @@ class Query extends Selection
 
     /**
      * @param Repository<E,$this> $repository
-     * @param bool       $events
+     * @param bool                $events
      */
     public function __construct(Repository $repository, bool $events = true)
     {
@@ -121,18 +122,17 @@ class Query extends Selection
     /* This section is here to help IDEs with type inference */
     protected function createRow(array $row): Entity
     {
-        $entityClass = $this->repository->getEntityClass();
-        return new $entityClass($row, $this);
+        return $this->repository->createRow($row, $this);
     }
 
-    public function createSelectionInstance(?string $table = null): Query
+    public function createSelectionInstance(?string $table = null): self
     {
-        return new Query($this->repository, $this->doesEvents);
+        return new static($this->repository, $this->doesEvents);
     }
 
     /**
-     * @param mixed|Entity $condition
-     * @param mixed ...$params
+     * @param array|string|Entity|Entity[] $condition
+     * @param mixed                        ...$params
      * @return $this
      */
     public function where($condition, ...$params): self
@@ -140,20 +140,17 @@ class Query extends Selection
         if ($condition instanceof Entity) {
             return $this->wherePrimary($condition->getPrimary());
         }
-        parent::where($condition, $params);
-        return $this;
-    }
-
-    /**
-     * @param mixed|Entity $key
-     * @return $this
-     */
-    public function wherePrimary($key): self
-    {
-        if ($key instanceof Entity) {
-            $key = $key->getPrimary();
+        if (Arrays::isList($condition) && ($condition[0] ?? null) instanceof Entity) {
+            $where = [];
+            foreach ($this->getPrimary() as $column) {
+                foreach ($condition as $entity) {
+                    $where[$column][] = $entity[$column];
+                }
+            }
+            $condition = $where;
+            $params = [];
         }
-        parent::wherePrimary($key);
+        parent::where($condition, $params);
         return $this;
     }
 

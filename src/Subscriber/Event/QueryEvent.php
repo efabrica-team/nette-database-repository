@@ -15,9 +15,15 @@ abstract class QueryEvent extends RepositoryEvent
      */
     protected array $subscribers;
 
-    public function __construct(Query $query)
+    /**
+     * @var Entity[]|null
+     */
+    private ?array $entities;
+
+    public function __construct(Query $query, ?array $entities = null)
     {
         $this->query = $query;
+        $this->entities = $entities;
         $this->subscribers = $query->getEvents()->toArray();
         parent::__construct($query->getRepository());
     }
@@ -28,5 +34,13 @@ abstract class QueryEvent extends RepositoryEvent
     public function getQuery(): Query
     {
         return $this->query;
+    }
+
+    /**
+     * @return Entity[]
+     */
+    public function getEntities(): array
+    {
+        return $this->entities ??= $this->query->fetchAll();
     }
 }

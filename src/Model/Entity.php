@@ -23,6 +23,35 @@ abstract class Entity extends ActiveRow
         return $this->_modified;
     }
 
+    public function save(bool $events = true): bool
+    {
+        return $this->query->getRepository()
+                ->query($events)
+                ->wherePrimary($this->getPrimary())
+                ->update($this->diff()) > 0;
+    }
+
+    /**
+     * @deprecated call setters and use save() instead
+     * @param iterable $data
+     * @return bool
+     */
+    public function update(iterable $data = []): bool
+    {
+        foreach ($data as $key => $value) {
+            $this->$key = $value;
+        }
+        return $this->query->getRepository()->update($this) > 0;
+    }
+
+    public function delete(bool $events = true): int
+    {
+        return $this->query->getRepository()
+            ->query($events)
+            ->wherePrimary($this->getPrimary())
+            ->delete();
+    }
+
     /**
      * @param mixed $key
      */
@@ -38,11 +67,15 @@ abstract class Entity extends ActiveRow
 
     /**
      * @param string $column
-     * @param mixed $value
+     * @param mixed  $value
      */
     public function __set($column, $value): void
     {
-        $this->_modified[$column] = $value;
+        if (parent::__get($column) === $value) {
+            unset($this->_modified[$column]);
+        } else {
+            $this->_modified[$column] = $value;
+        }
     }
 
     /**
@@ -51,6 +84,16 @@ abstract class Entity extends ActiveRow
     public function __unset($key)
     {
         unset($this->_modified[$key]);
+    }
+
+    public function toArray(): array
+    {
+        return $this->_modified + parent::toArray();
+    }
+
+    public function toOriginalArray(): array
+    {
+        return parent::toArray();
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace Efabrica\NetteDatabaseRepository\Subscriber;
 
+use Efabrica\NetteDatabaseRepository\Model\Entity;
 use Efabrica\NetteDatabaseRepository\Repository\Repository;
 use Efabrica\NetteDatabaseRepository\Subscriber\Event\DeleteQueryEvent;
 use Efabrica\NetteDatabaseRepository\Subscriber\Event\InsertEventResponse;
@@ -9,6 +10,7 @@ use Efabrica\NetteDatabaseRepository\Subscriber\Event\InsertRepositoryEvent;
 use Efabrica\NetteDatabaseRepository\Subscriber\Event\SelectQueryEvent;
 use Efabrica\NetteDatabaseRepository\Subscriber\Event\SelectQueryResponse;
 use Efabrica\NetteDatabaseRepository\Subscriber\Event\UpdateQueryEvent;
+use Traversable;
 
 abstract class EventSubscriber
 {
@@ -53,5 +55,12 @@ abstract class EventSubscriber
     public function onSelect(SelectQueryEvent $event): SelectQueryResponse
     {
         return $event->handle();
+    }
+
+    /**
+     * Called when an entity is loaded from the database.
+     */
+    public function onCreate(Entity $entity): void
+    {
     }
 }

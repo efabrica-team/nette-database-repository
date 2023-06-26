@@ -2,11 +2,15 @@
 
 namespace Efabrica\NetteDatabaseRepository\Subscriber;
 
+use Efabrica\NetteDatabaseRepository\Model\Entity;
 use Efabrica\NetteDatabaseRepository\Repository\Repository;
 use Generator;
 use IteratorAggregate;
 use Nette\DI\Container;
 
+/**
+ * @implements IteratorAggregate<EventSubscriber>
+ */
 final class Events implements IteratorAggregate
 {
     /**
