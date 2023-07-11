@@ -2,11 +2,12 @@
 
 namespace Efabrica\NetteDatabaseRepository\Repository;
 
+use Efabrica\NetteDatabaseRepository\Event\DeleteQueryEvent;
 use Efabrica\NetteDatabaseRepository\Model\Entity;
-use Efabrica\NetteDatabaseRepository\Subscriber\Event\DeleteQueryEvent;
 use Efabrica\NetteDatabaseRepository\Subscriber\Events;
 use Nette\Application\BadRequestException;
 use Nette\Database\Explorer;
+use Nette\Database\Table\ActiveRow;
 
 /**
  * @template E of Entity
@@ -57,20 +58,20 @@ abstract class Repository
     /**
      * @param string|int|array|E $id
      */
-    public function find($id, bool $events = true): ?Entity
+    public function find($id, bool $defaultWhere = true): ?Entity
     {
-        if ($id instanceof Entity) {
+        if ($id instanceof ActiveRow) {
             $id = $id->getPrimary();
         }
-        return $this->query($events)->wherePrimary($id)->fetch();
+        return $this->query($defaultWhere)->wherePrimary($id)->limit(1)->fetch();
     }
 
     /**
      * @return E|null
      */
-    public function findOneBy(array $conditions, bool $events = true): ?Entity
+    public function findOneBy(array $conditions, bool $defaultWhere = true): ?Entity
     {
-        return $this->query($events)->where($conditions)->limit(1)->fetch();
+        return $this->query($defaultWhere)->where($conditions)->limit(1)->fetch();
     }
 
     /**

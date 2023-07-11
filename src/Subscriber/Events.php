@@ -18,13 +18,10 @@ final class Events implements IteratorAggregate
      */
     private array $subscribers = [];
 
-    public function __construct(Container $container)
+    public function __construct(EventSubscriber ...$subscribers)
     {
-        foreach ($container->findByType(EventSubscriber::class) as $eventSubscriberName) {
-            $eventSubscriber = $container->getService($eventSubscriberName);
-            if ($eventSubscriber instanceof EventSubscriber) {
-                $this->subscribers[get_class($eventSubscriber)] = $eventSubscriber;
-            }
+        foreach ($subscribers as $subscriber) {
+            $this->subscribers[get_class($subscriber)] = $subscriber;
         }
     }
 

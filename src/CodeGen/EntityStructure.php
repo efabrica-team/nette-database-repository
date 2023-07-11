@@ -9,96 +9,69 @@ use LogicException;
 use Nette\Database\Structure;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\PhpNamespace;
+use Nette\PhpGenerator\Printer;
 use Nette\Utils\Strings;
 use RuntimeException;
 
 class EntityStructure
 {
-    private const TYPE_MAP = [
-        'datetime' => DateTimeInterface::class,
-        'date' => DateTimeInterface::class,
-        'time' => DateTimeInterface::class,
-
-        'tinyint' => 'int',
-        'int' => 'int',
-        'smallint' => 'int',
-        'mediumint' => 'int',
-        'bigint' => 'int',
-        'decimal' => 'string',
-
-        'varchar' => 'string',
-        'char' => 'string',
-        'text' => 'string',
-        'tinytext' => 'string',
-        'mediumtext' => 'string',
-        'longtext' => 'string',
-
-        'blob' => 'string',
-        'tinyblob' => 'string',
-        'mediumblob' => 'string',
-        'longblob' => 'string',
-
-        'enum' => 'string',
-    ];
-
     /** @var EntityProperty[] */
-    private array $properties = [];
+    private array $properties;
     private string $tableName;
     private string $className;
-    private PhpNamespace $repositoryNamespace;
-    private PhpNamespace $entityNamespace;
-    private PhpNamespace $queryNamespace;
-    private PhpNamespace $generatedNamespace;
+    public PhpNamespace $repositoryNamespace;
+    public PhpNamespace $entityNamespace;
+    public PhpNamespace $queryNamespace;
+    public PhpNamespace $repositoryGenNamespace;
+    public PhpNamespace $queryGenNamespace;
+    public string $dbDir;
+    public string $repositoryDir;
+    public string $entityDir;
+    public string $queryDir;
+    public string $repositoryGenDir;
+    public string $queryGenDir;
+    private Inflector $inflector;
 
-    public function __construct(Structure $structure, Inflector $inflector, string $table)
+    /**
+     * @param EntityProperty[] $properties
+     */
+    public function __construct(array $properties, string $table, string $namespace, string $dbDir, Inflector $inflector)
     {
         $this->tableName = $table;
         $this->inflector = $inflector;
         $this->className = $this->toClassName($table);
-        $this->repositoryNamespace = new PhpNamespace('App\\Core\\Repository');
-        $this->entityNamespace = new PhpNamespace('App\\Core\\Repository\\Entity');
-        $this->queryNamespace = new PhpNamespace('App\\Core\\Repository\\Query');
-        $this->generatedNamespace = new PhpNamespace('App\\Core\\Repository\\Generated');
-        $columns = $structure->getColumns($table);
-        foreach ($columns as $column) {
-            $type = Strings::lower($column['nativetype']);
+        $this->properties = $properties;
 
-            $nativeType = $column['nativetype'];
-            if (($column['size'] ?? null) !== null) {
-                $nativeType .= '[' . $column['size'];
-                if (($column['scale'] ?? null) !== null) {
-                    $nativeType .= ',' . $column['scale'];
-                }
-                $nativeType .= ']';
-            }
-            $annotation = '';
-
-            if ($type === 'json') {
-                $type = 'array';
-                $annotation .= ' @JSON';
-            } elseif ($type === 'tinyint' && $column['size'] === 1) {
-                $type = 'bool';
-            } elseif (isset(self::TYPE_MAP[$type])) {
-                $type = self::TYPE_MAP[$type];
-            } else {
-                throw new LogicException("Unknown type $type");
-            }
-            if ($type === DateTimeInterface::class) {
+        $this->dbDir = $dbDir;
+        $this->repositoryNamespace = new PhpNamespace($namespace . '\\Repository');
+        $this->repositoryDir = $dbDir . '/Repository';
+        $this->queryNamespace = new PhpNamespace($namespace . '\\Repository\\Query');
+        $this->queryDir = $dbDir . '/Repository/Query';
+        $this->repositoryGenNamespace = new PhpNamespace($namespace . '\\Repository\\Generated');
+        $this->repositoryGenDir = $dbDir . '/Repository/Generated';
+        $this->queryGenNamespace = new PhpNamespace($namespace . '\\Repository\\Query\\Generated');
+        $this->queryGenDir = $dbDir . '/Repository/Query/Generated';
+        $this->entityNamespace = new PhpNamespace($namespace . '\\Repository\\Entity');
+        $this->entityDir = $dbDir . '/Repository/Entity';
+        foreach ($properties as $property) {
+            if ($property->getType() === DateTimeInterface::class) {
                 $this->entityNamespace->addUse(DateTimeInterface::class);
+                break;
             }
-            if ($column['nullable']) {
-                $type .= '|null';
-            }
-            $this->properties[$column['name']] = new EntityProperty('', $type, $column['name'], $nativeType, $annotation);
         }
     }
 
     public function toClassName(string $string): string
     {
+        return self::toClassCase($this->inflector, $string);
+    }
+
+    public static function toClassCase(Inflector $inflector, string $string)
+    {
         if (!Strings::endsWith($string, 'data')) {
-            $string = $this->inflector->singularize($string);
+            $string = $inflector->singularize($string);
         }
-        return $this->toPropertyName($string);
+        return Strings::firstUpper($inflector->camelize($string));
     }
 
     public function toPropertyName(string $string): string
@@ -122,26 +95,6 @@ class EntityStructure
     public function getProperties(): array
     {
         return $this->properties;
-    }
-
-    public function getRepositoryNamespace(): PhpNamespace
-    {
-        return $this->repositoryNamespace;
-    }
-
-    public function getEntityNamespace(): PhpNamespace
-    {
-        return $this->entityNamespace;
-    }
-
-    public function getQueryNamespace(): PhpNamespace
-    {
-        return $this->queryNamespace;
-    }
-
-    public function getGeneratedNamespace(): PhpNamespace
-    {
-        return $this->generatedNamespace;
     }
 
     public function writeClass(ClassType $classType, PhpNamespace $namespace, string $dir): void

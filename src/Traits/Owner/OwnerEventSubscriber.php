@@ -3,11 +3,11 @@
 namespace Efabrica\NetteDatabaseRepository\Traits\Owner;
 
 use Efabrica\IrisClient\IrisUser;
+use Efabrica\NetteDatabaseRepository\Event\InsertEventResponse;
+use Efabrica\NetteDatabaseRepository\Event\InsertRepositoryEvent;
+use Efabrica\NetteDatabaseRepository\Event\UpdateQueryEvent;
 use Efabrica\NetteDatabaseRepository\Model\EntityMeta;
 use Efabrica\NetteDatabaseRepository\Repository\Repository;
-use Efabrica\NetteDatabaseRepository\Subscriber\Event\InsertEventResponse;
-use Efabrica\NetteDatabaseRepository\Subscriber\Event\InsertRepositoryEvent;
-use Efabrica\NetteDatabaseRepository\Subscriber\Event\UpdateQueryEvent;
 use Efabrica\NetteDatabaseRepository\Subscriber\EventSubscriber;
 
 class OwnerEventSubscriber extends EventSubscriber

@@ -2,8 +2,8 @@
 
 namespace Efabrica\NetteDatabaseRepository\Traits\SoftDelete;
 
+use Efabrica\NetteDatabaseRepository\Event\UpdateQueryEvent;
 use Efabrica\NetteDatabaseRepository\Repository\Query;
-use Efabrica\NetteDatabaseRepository\Subscriber\Event\UpdateQueryEvent;
 use Efabrica\NetteDatabaseRepository\Subscriber\EventSubscriber;
 
 class SoftDeleteQueryEvent extends UpdateQueryEvent

@@ -2,87 +2,115 @@
 
 namespace Efabrica\NetteDatabaseRepository\CodeGen;
 
-use Efabrica\NetteDatabaseRepository\Model\Entity;
 use Efabrica\NetteDatabaseRepository\Repository\Repository;
 use Efabrica\NetteDatabaseRepository\Repository\RepositoryDependencies;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\Parameter;
-use RuntimeException;
+use ReflectionClass;
 
 class RepositoryWriter
 {
     private static function createRepositoryBase(EntityStructure $structure): ClassType
     {
-        $class = new ClassType($structure->getClassName() . 'RepositoryBase', $structure->getGeneratedNamespace());
-        $structure->getGeneratedNamespace()
-            ->addUse($structure->getEntityNamespace()->getName() . '\\' . $structure->getClassName())
-            ->addUse($structure->getRepositoryNamespace()->getName() . '\\' . $structure->getClassName() . 'Repository')
+        $class = new ClassType($structure->getClassName() . 'RepositoryBase', $structure->repositoryGenNamespace);
+        $queryClass = $structure->queryNamespace->getName() . '\\' . $structure->getClassName() . 'Query';
+        $entityClass = $structure->entityNamespace->getName() . '\\' . $structure->getClassName();
+        $structure->repositoryGenNamespace
+            ->addUse($entityClass)
+            ->addUse($queryClass)
             ->addUse(Repository::class)
             ->addUse(RepositoryDependencies::class)
         ;
         $class->setExtends(Repository::class);
         $class->addComment('@generated');
         $class->addComment('@method ' . $structure->getClassName() . 'Query query(bool $events = true)');
-        $class->addComment("@method {$structure->getClassName()}|null find(string|int|array|{$structure->getClassName()} \$id)");
+        $class->addComment("@method {$structure->getClassName()}|null find(string|int|array|{$structure->getClassName()} \$id, bool \$defaultWhere = true)");
         $class->addComment("@method {$structure->getClassName()}      lookup({$structure->getClassName()}|string|int|array \$id)");
-        $class->addComment("@method {$structure->getClassName()}|null findOneBy(array \$conditions, bool \$events = true)");
+        $class->addComment("@method {$structure->getClassName()}|null findOneBy(array \$conditions, bool \$defaultWhere = true)");
         $class->addComment("@method {$structure->getClassName()}Query findBy(array \$conditions)");
         $class->addComment("@method insert({$structure->getClassName()} ...\$entities)");
         $class->addComment("@method update({$structure->getClassName()} ...\$entities)");
         $class->addComment("@method delete({$structure->getClassName()} ...\$entities)");
-        $class->addComment("@method class-string<{$structure->getClassName()}> getEntityClass()");
+        $class->addComment("@method class
+        -string<{$structure->getClassName()}> getEntityClass()");
         $class->addComment("@method {$structure->getClassName()} createRow(array \$row = [])");
 
         $class->addMethod('__construct')
             ->setParameters([
-                (new Parameter('deps'))->setType('RepositoryDependencies'),
+                (new Parameter('deps'))->setType(RepositoryDependencies::class),
             ])
             ->setBody("parent::__construct('{$structure->getTableName()}', {$structure->getClassName()}::class, {$structure->getClassName()}Query::class, \$deps);")
         ;
+
         return $class;
     }
 
-    public static function writeRepositoryBase(EntityStructure $structure, string $appDir): void
+    public static function writeRepositoryBase(EntityStructure $structure): void
     {
         $class = self::createRepositoryBase($structure);
-        $namespace = $structure->getGeneratedNamespace();
-        $filename = "$appDir/modules/Core/Repository/Generated/{$class->getName()}.php";
-        if (!@mkdir(dirname($filename), 0777, true) && !is_dir(dirname($filename))) {
-            throw new RuntimeException("Cannot create directory $filename");
-        }
-        file_put_contents(
-            $filename,
-            "<?php\n\n" . $namespace . $class
-        );
+        $namespace = $structure->repositoryGenNamespace;
+        $structure->writeClass($class, $namespace, $structure->repositoryGenDir);
     }
 
     private static function createRepository(EntityStructure $structure): ClassType
     {
-        $class = new ClassType($structure->getClassName() . 'Repository', $structure->getRepositoryNamespace());
-        $baseClassName = $structure->getGeneratedNamespace()->getName() . '\\' . $structure->getClassName() . 'RepositoryBase';
-        $structure->getRepositoryNamespace()->addUse($baseClassName);
+        $class = new ClassType($structure->getClassName() . 'Repository', $structure->repositoryNamespace);
+        $baseClassName = $structure->repositoryGenNamespace->getName() . '\\' . $structure->getClassName() . 'RepositoryBase';
+        $structure->repositoryNamespace->addUse($baseClassName);
         $class->setExtends($baseClassName);
         return $class;
     }
 
-    private static function modifyRepository(EntityStructure $structure): ClassType
+    private static function modifyRepository(EntityStructure $structure): void
     {
-        $class = ClassType::from($structure->getRepositoryNamespace()->getName() . '\\' . $structure->getClassName() . 'Repository', true);
-        $baseClassName = $structure->getGeneratedNamespace()->getName() . '\\' . $structure->getClassName() . 'RepositoryBase';
-        $class->getNamespace()->addUse($baseClassName);
-        $class->setExtends($baseClassName);
-        return $class;
+        $class = new ReflectionClass($structure->repositoryNamespace->getName() . '\\' . $structure->getClassName() . 'Repository');
+        $shortBaseClassName = $structure->getClassName() . 'RepositoryBase';
+        $baseClassName = $structure->repositoryGenNamespace->getName() . '\\' . $shortBaseClassName;
+
+        $lines = file($class->getFileName(), FILE_IGNORE_NEW_LINES);
+        $extends = str_contains($lines[$class->getStartLine()], 'extends')
+            ? $lines[$class->getStartLine()]
+            : $lines[$class->getStartLine() - 1];
+        if (str_contains($extends, $shortBaseClassName) || !str_contains($extends, 'extends')) {
+            return;
+        }
+        $lines[$class->getStartLine() - 1] = preg_replace(
+            '/ extends\s+\w+/',
+            " extends " . $shortBaseClassName, $extends
+        );
+
+        $useLine = null;
+        $namespaceLine = null;
+        foreach ($lines as $i => $line) {
+            if (str_starts_with($line, 'use ')) {
+                $useLine = $i;
+                break;
+            }
+            if (str_starts_with($line, 'namespace ')) {
+                $namespaceLine = $i;
+            }
+        }
+        if ($useLine === null && $namespaceLine === null) {
+            return;
+        }
+
+        if ($useLine !== null) {
+            $lines[$useLine] .= "\nuse $baseClassName;";
+        } elseif ($namespaceLine !== null) {
+            array_splice($lines, $namespaceLine + 1, 0, "\nuse $baseClassName;");
+        }
+
+        file_put_contents($class->getFileName(), implode("\n", $lines));
     }
 
-    public static function writeRepository(EntityStructure $structure, string $appDir): void
+    public static function writeRepository(EntityStructure $structure): void
     {
-        $repoClass = $structure->getRepositoryNamespace()->getName() . '\\' . $structure->getClassName() . 'Repository';
+        $repoClass = $structure->repositoryNamespace->getName() . '\\' . $structure->getClassName() . 'Repository';
         if (class_exists($repoClass)) {
-            $class = self::modifyRepository($structure);
+            self::modifyRepository($structure);
         } else {
             $class = self::createRepository($structure);
+            $structure->writeClass($class, $class->getNamespace(), $structure->repositoryDir);
         }
-        $namespace = $class->getNamespace();
-        $structure->writeClass($class, $namespace, "$appDir/modules/Core/Repository");
     }
 }

@@ -12,6 +12,10 @@
     "license": "MIT",
     "authors": [
         {
+            "name": "Richard Popelis",
+            "email": "richard@popelis.sk"
+        },
+        {
             "name": "Martin Petricko",
             "email": "matopetricko@gmail.com"
         },
@@ -22,10 +26,6 @@
         {
             "name": "Michal Lulco",
             "email": "michal.lulco@gmail.com"
-        },
-        {
-            "name": "Tomas Majer",
-            "email": "tomas.majer@gmail.com"
         }
     ],
     "repositories": [

@@ -4,6 +4,7 @@ namespace Efabrica\NetteDatabaseRepository\CodeGen;
 
 use Efabrica\NetteDatabaseRepository\Model\EntityMetaInstance;
 use Nette\PhpGenerator\ClassType;
+use Nette\PhpGenerator\PhpNamespace;
 use Nette\Utils\Strings;
 use ReflectionClass;
 use RuntimeException;
@@ -13,7 +14,7 @@ class EntityWriter
 {
     private static function createClass(EntityStructure $structure): ClassType
     {
-        $entityClass = new ClassType($structure->getClassName(), $structure->getEntityNamespace());
+        $entityClass = new ClassType($structure->getClassName(), $structure->entityNamespace);
         $entityClass->setExtends(Entity::class);
         foreach ($structure->getProperties() as $prop) {
             $entityClass->addComment($prop->toString());
@@ -24,7 +25,7 @@ class EntityWriter
 
     private static function modifyClass(EntityStructure $structure): ClassType
     {
-        $entityClassName = "{$structure->getEntityNamespace()->getName()}\\{$structure->getClassName()}";
+        $entityClassName = "{$structure->entityNamespace->getName()}\\{$structure->getClassName()}";
         $entityClass = ClassType::from($entityClassName, true);
         $entityClass->getNamespace()->addUse(Entity::class);
         $entityClass->setExtends(Entity::class);
@@ -34,16 +35,16 @@ class EntityWriter
         return $entityClass;
     }
 
-    public static function writeEntity(EntityStructure $structure, string $appDir): void
+    public static function writeEntity(EntityStructure $structure): void
     {
-        $structure->getEntityNamespace()->addUse(Entity::class);
-        $entityClassName = "{$structure->getEntityNamespace()->getName()}\\{$structure->getClassName()}";
+        $structure->entityNamespace->addUse(Entity::class);
+        $entityClassName = "{$structure->entityNamespace->getName()}\\{$structure->getClassName()}";
         if (class_exists($entityClassName)) {
             $entity = self::modifyClass($structure);
         } else {
             $entity = self::createClass($structure);
         }
-        $structure->writeClass($entity, $structure->getEntityNamespace(), $appDir.'/modules/Core/Repository/Entity');
+        $structure->writeClass($entity, $structure->entityNamespace, $structure->entityDir);
     }
 
     public static function updateDocComments(string $entityClassName, ClassType $entityClass, EntityStructure $structure): array

@@ -1,6 +1,6 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\Subscriber\Event;
+namespace Efabrica\NetteDatabaseRepository\Event;
 
 use Efabrica\NetteDatabaseRepository\Model\Entity;
 use Efabrica\NetteDatabaseRepository\Repository\Repository;

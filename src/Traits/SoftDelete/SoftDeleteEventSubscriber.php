@@ -3,12 +3,12 @@
 namespace Efabrica\NetteDatabaseRepository\Traits\SoftDelete;
 
 use DateTimeImmutable;
+use Efabrica\NetteDatabaseRepository\Event\DeleteQueryEvent;
+use Efabrica\NetteDatabaseRepository\Event\SelectQueryEvent;
+use Efabrica\NetteDatabaseRepository\Event\SelectQueryResponse;
 use Efabrica\NetteDatabaseRepository\Model\Entity;
 use Efabrica\NetteDatabaseRepository\Model\EntityMeta;
 use Efabrica\NetteDatabaseRepository\Repository\Repository;
-use Efabrica\NetteDatabaseRepository\Subscriber\Event\DeleteQueryEvent;
-use Efabrica\NetteDatabaseRepository\Subscriber\Event\SelectQueryEvent;
-use Efabrica\NetteDatabaseRepository\Subscriber\Event\SelectQueryResponse;
 use Efabrica\NetteDatabaseRepository\Subscriber\EventSubscriber;
 use LogicException;
 

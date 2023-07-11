@@ -2,12 +2,12 @@
 
 namespace Efabrica\NetteDatabaseRepository\Traits\AES;
 
+use Efabrica\NetteDatabaseRepository\Event\InsertEventResponse;
+use Efabrica\NetteDatabaseRepository\Event\InsertRepositoryEvent;
+use Efabrica\NetteDatabaseRepository\Event\SelectQueryEvent;
+use Efabrica\NetteDatabaseRepository\Event\SelectQueryResponse;
+use Efabrica\NetteDatabaseRepository\Event\UpdateQueryEvent;
 use Efabrica\NetteDatabaseRepository\Repository\Repository;
-use Efabrica\NetteDatabaseRepository\Subscriber\Event\InsertEventResponse;
-use Efabrica\NetteDatabaseRepository\Subscriber\Event\InsertRepositoryEvent;
-use Efabrica\NetteDatabaseRepository\Subscriber\Event\SelectQueryEvent;
-use Efabrica\NetteDatabaseRepository\Subscriber\Event\SelectQueryResponse;
-use Efabrica\NetteDatabaseRepository\Subscriber\Event\UpdateQueryEvent;
 use Efabrica\NetteDatabaseRepository\Subscriber\EventSubscriber;
 use Nette\Database\Table\ActiveRow;
 

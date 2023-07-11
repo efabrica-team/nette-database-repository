@@ -2,8 +2,8 @@
 
 namespace Efabrica\NetteDatabaseRepository\Traits\LastManStanding;
 
+use Efabrica\NetteDatabaseRepository\Event\DeleteQueryEvent;
 use Efabrica\NetteDatabaseRepository\Repository\Repository;
-use Efabrica\NetteDatabaseRepository\Subscriber\Event\DeleteQueryEvent;
 use Efabrica\NetteDatabaseRepository\Subscriber\EventSubscriber;
 use Efabrica\NetteDatabaseRepository\Traits\SoftDelete\SoftDeleteQueryEvent;
 use Efabrica\NetteDatabaseRepository\Traits\SoftDelete\SoftDeleteSubscriber;

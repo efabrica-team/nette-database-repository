@@ -2,11 +2,11 @@
 
 namespace Efabrica\NetteDatabaseRepository\Repository;
 
+use Efabrica\NetteDatabaseRepository\Event\DeleteQueryEvent;
+use Efabrica\NetteDatabaseRepository\Event\InsertRepositoryEvent;
+use Efabrica\NetteDatabaseRepository\Event\SelectQueryEvent;
+use Efabrica\NetteDatabaseRepository\Event\UpdateQueryEvent;
 use Efabrica\NetteDatabaseRepository\Model\Entity;
-use Efabrica\NetteDatabaseRepository\Subscriber\Event\DeleteQueryEvent;
-use Efabrica\NetteDatabaseRepository\Subscriber\Event\InsertRepositoryEvent;
-use Efabrica\NetteDatabaseRepository\Subscriber\Event\SelectQueryEvent;
-use Efabrica\NetteDatabaseRepository\Subscriber\Event\UpdateQueryEvent;
 use Efabrica\NetteDatabaseRepository\Subscriber\Events;
 use Efabrica\NetteDatabaseRepository\Subscriber\EventSubscriber;
 use Nette\Database\Table\Selection;
@@ -86,7 +86,7 @@ class Query extends Selection
      * @param class-string<EventSubscriber> ...$eventClasses
      * @return Query cloned instance
      */
-    public function withoutEvent(string ...$eventClasses): Query
+    public function withoutEvent(string ...$eventClasses): self
     {
         $clone = clone $this;
         foreach ($eventClasses as $eventClass) {
@@ -95,7 +95,7 @@ class Query extends Selection
         return $clone;
     }
 
-    public function withoutEvents(): Query
+    public function withoutEvents(): self
     {
         $clone = clone $this;
         $clone->doesEvents = false;
@@ -118,9 +118,7 @@ class Query extends Selection
         return $this->doesEvents;
     }
 
-    /************************* Types **************************/
-    /* This section is here to help IDEs with type inference */
-    protected function createRow(array $row): Entity
+    protected function createRow(array $row = []): Entity
     {
         return $this->repository->createRow($row, $this);
     }
@@ -140,15 +138,24 @@ class Query extends Selection
         if ($condition instanceof Entity) {
             return $this->wherePrimary($condition->getPrimary());
         }
-        if (Arrays::isList($condition) && ($condition[0] ?? null) instanceof Entity) {
-            $where = [];
-            foreach ($this->getPrimary() as $column) {
-                foreach ($condition as $entity) {
-                    $where[$column][] = $entity[$column];
+        if (is_array($condition)) {
+            if (Arrays::isList($condition) && ($condition[0] ?? null) instanceof Entity) {
+                $where = [];
+                foreach ($this->getPrimary() as $column) {
+                    foreach ($condition as $entity) {
+                        $where[$column][] = $entity[$column];
+                    }
+                }
+                $condition = $where;
+                $params = [];
+            } else {
+                foreach ($condition as $key => $value) {
+                    if (preg_match('/^\w+$/', $key)) {
+                        unset($condition[$key]);
+                        $condition[$this->getName() . '.' . $key] = $value;
+                    }
                 }
             }
-            $condition = $where;
-            $params = [];
         }
         parent::where($condition, $params);
         return $this;

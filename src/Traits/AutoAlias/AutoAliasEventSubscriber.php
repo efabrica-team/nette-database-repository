@@ -2,10 +2,10 @@
 
 namespace Efabrica\NetteDatabaseRepository\Traits\AutoAlias;
 
+use Efabrica\NetteDatabaseRepository\Event\InsertEventResponse;
+use Efabrica\NetteDatabaseRepository\Event\InsertRepositoryEvent;
 use Efabrica\NetteDatabaseRepository\Repository\Repository;
 use Efabrica\NetteDatabaseRepository\Repository\RepositoryManager;
-use Efabrica\NetteDatabaseRepository\Subscriber\Event\InsertEventResponse;
-use Efabrica\NetteDatabaseRepository\Subscriber\Event\InsertRepositoryEvent;
 use Efabrica\NetteDatabaseRepository\Subscriber\EventSubscriber;
 
 class AutoAliasEventSubscriber extends EventSubscriber
