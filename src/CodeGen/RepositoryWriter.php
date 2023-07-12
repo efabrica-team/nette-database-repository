@@ -6,6 +6,7 @@ use Efabrica\NetteDatabaseRepository\Repository\Repository;
 use Efabrica\NetteDatabaseRepository\Repository\RepositoryDependencies;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\Parameter;
+use Nette\Utils\Strings;
 use ReflectionClass;
 
 class RepositoryWriter
@@ -64,14 +65,24 @@ class RepositoryWriter
     private static function modifyRepository(EntityStructure $structure): void
     {
         $class = new ReflectionClass($structure->repositoryNamespace->getName() . '\\' . $structure->getClassName() . 'Repository');
-        $shortBaseClassName = $structure->getClassName() . 'RepositoryBase';
-        $baseClassName = $structure->repositoryGenNamespace->getName() . '\\' . $shortBaseClassName;
 
         $lines = file($class->getFileName(), FILE_IGNORE_NEW_LINES);
+        self::modifyExtends($structure, $class, $lines);
+        self::migrateMagicMethods($lines, $structure);
+
+        file_put_contents($class->getFileName(), implode("\n", $lines));
+    }
+
+    public static function modifyExtends(EntityStructure $structure, ReflectionClass $class, array &$lines): void
+    {
+        $shortBaseClassName = $structure->getClassName() . 'RepositoryBase';
+        $baseClassName = $structure->repositoryGenNamespace->getName() . '\\' . $shortBaseClassName;
+        $queryClassName = $structure->queryNamespace->getName() . '\\' . $structure->getClassName() . 'Query';
+        $entityClassName = $structure->entityNamespace->getName() . '\\' . $structure->getClassName();
         $extends = str_contains($lines[$class->getStartLine()], 'extends')
             ? $lines[$class->getStartLine()]
             : $lines[$class->getStartLine() - 1];
-        if (str_contains($extends, $shortBaseClassName) || !str_contains($extends, 'extends')) {
+        if (!str_contains($extends, 'extends') || str_contains($extends, $shortBaseClassName)) {
             return;
         }
         $lines[$class->getStartLine() - 1] = preg_replace(
@@ -94,13 +105,48 @@ class RepositoryWriter
             return;
         }
 
+        $useText = "\nuse $baseClassName;\nuse $queryClassName;\nuse $entityClassName;";
         if ($useLine !== null) {
-            $lines[$useLine] .= "\nuse $baseClassName;";
+            $lines[$useLine] .= $useText;
         } elseif ($namespaceLine !== null) {
-            array_splice($lines, $namespaceLine + 1, 0, "\nuse $baseClassName;");
+            array_splice($lines, $namespaceLine + 1, 0, $useText);
         }
+    }
 
-        file_put_contents($class->getFileName(), implode("\n", $lines));
+    public static function migrateMagicMethods(array &$lines, EntityStructure $structure): void
+    {
+        foreach ($lines as $i => $line) {
+            if (preg_match('/@method.*\s+find(\w+)\(/', $line, $matches)) {
+                unset($lines[$i]);
+            } elseif (str_contains($line, ' \$tableName = ')) {
+                unset($lines[$i]);
+                continue;
+            } else {
+                continue;
+            }
+            $methodName = $matches[1];
+            $findColumn = Strings::after($methodName, 'By');
+            $findColumn = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $findColumn));
+            $one = str_starts_with($methodName, 'OneBy');
+            $returnType = $one ? $structure->getClassName() : $structure->getClassName() . 'Query';
+            $methodCode = [
+                "    /**",
+                "     * @deprecated",
+                "     * @param mixed \$value",
+                "     */",
+                "    public function find{$methodName}(\$value): $returnType",
+                "    {",
+                "        return \$this->find" . ($one ? 'One' : '') . "By([{$structure->getClassName()}::$findColumn => \$value]);",
+                "    }",
+            ];
+            $endingLine = null;
+            foreach ($lines as $j => $l) {
+                if (str_contains($l, '}')) {
+                    $endingLine = $j;
+                }
+            }
+            array_splice($lines, $endingLine - 1, 0, $methodCode);
+        }
     }
 
     public static function writeRepository(EntityStructure $structure): void

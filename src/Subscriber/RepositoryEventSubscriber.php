@@ -8,62 +8,56 @@ use Efabrica\NetteDatabaseRepository\Event\InsertRepositoryEvent;
 use Efabrica\NetteDatabaseRepository\Event\SelectQueryEvent;
 use Efabrica\NetteDatabaseRepository\Event\SelectQueryResponse;
 use Efabrica\NetteDatabaseRepository\Event\UpdateQueryEvent;
-use Efabrica\NetteDatabaseRepository\Model\Entity;
 use Efabrica\NetteDatabaseRepository\Repository\Repository;
+use Efabrica\NetteDatabaseRepository\Repository\RepositoryManager;
 use Efabrica\NetteDatabaseRepository\Subscriber\Inline\DeleteEventSubscriber;
 use Efabrica\NetteDatabaseRepository\Subscriber\Inline\InsertEventSubscriber;
 use Efabrica\NetteDatabaseRepository\Subscriber\Inline\SelectEventSubscriber;
 use Efabrica\NetteDatabaseRepository\Subscriber\Inline\UpdateEventSubscriber;
 
-abstract class EventSubscriber implements InsertEventSubscriber, UpdateEventSubscriber, DeleteEventSubscriber, SelectEventSubscriber
+class RepositoryEventSubscriber extends EventSubscriber
 {
-    /**
-     * @param Repository $repository
-     * @return bool should the event subscriber be used for this repository?
-     * If it returns false, the event subscriber will not be added to the repository.
-     * @see Events::forRepository()
-     */
     public function supportsRepository(Repository $repository): bool
     {
-        return true;
+        return $repository instanceof InsertEventSubscriber
+            || $repository instanceof UpdateEventSubscriber
+            || $repository instanceof DeleteEventSubscriber
+            || $repository instanceof SelectEventSubscriber;
     }
 
-    /**
-     * @return InsertEventResponse returned by $event->handle() or $event->stopPropagation()
-     */
     public function onInsert(InsertRepositoryEvent $event): InsertEventResponse
     {
+        $repository = $event->getRepository();
+        if ($repository instanceof InsertEventSubscriber) {
+            return $repository->onInsert($event);
+        }
         return $event->handle();
     }
 
-    /**
-     * @return int number of affected rows. returned by $event->handle($event->getData())
-     */
     public function onUpdate(UpdateQueryEvent $event, array &$data): int
     {
+        $repository = $event->getRepository();
+        if ($repository instanceof UpdateEventSubscriber) {
+            return $repository->onUpdate($event, $data);
+        }
         return $event->handle($data);
     }
 
-    /**
-     * @return int number of affected rows. returned by $event->handle()
-     */
     public function onDelete(DeleteQueryEvent $event): int
     {
+        $repository = $event->getRepository();
+        if ($repository instanceof DeleteEventSubscriber) {
+            return $repository->onDelete($event);
+        }
         return $event->handle();
     }
 
-    /**
-     * @return SelectQueryResponse returned by $event->handle() or $event->stopPropagation()
-     */
     public function onSelect(SelectQueryEvent $event): SelectQueryResponse
     {
+        $repository = $event->getRepository();
+        if ($repository instanceof SelectEventSubscriber) {
+            return $repository->onSelect($event);
+        }
         return $event->handle();
-    }
-
-    /**
-     * Called when an entity is loaded from the database.
-     */
-    public function onCreate(Entity $entity): void
-    {
     }
 }

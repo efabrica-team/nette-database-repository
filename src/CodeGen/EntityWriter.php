@@ -4,10 +4,7 @@ namespace Efabrica\NetteDatabaseRepository\CodeGen;
 
 use Efabrica\NetteDatabaseRepository\Model\EntityMetaInstance;
 use Nette\PhpGenerator\ClassType;
-use Nette\PhpGenerator\PhpNamespace;
 use Nette\Utils\Strings;
-use ReflectionClass;
-use RuntimeException;
 use Efabrica\NetteDatabaseRepository\Model\Entity;
 
 class EntityWriter

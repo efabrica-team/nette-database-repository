@@ -9,6 +9,7 @@ use Efabrica\NetteDatabaseRepository\Event\UpdateQueryEvent;
 use Efabrica\NetteDatabaseRepository\Model\Entity;
 use Efabrica\NetteDatabaseRepository\Subscriber\Events;
 use Efabrica\NetteDatabaseRepository\Subscriber\EventSubscriber;
+use Generator;
 use Nette\Database\Table\Selection;
 use Nette\Utils\Arrays;
 use Traversable;
@@ -18,6 +19,8 @@ use Traversable;
  */
 class Query extends Selection
 {
+    protected const CHUNK_SIZE = 100;
+
     private bool $doesEvents;
 
     private Repository $repository;
@@ -179,5 +182,33 @@ class Query extends Selection
         /** @var E[] $rows */
         $rows = parent::fetchAll();
         return $rows;
+    }
+
+    /**
+     * @param int $chunkSize
+     * @return Generator<E>
+     */
+    public function fetchAllChunked(int $chunkSize = self::CHUNK_SIZE): Generator
+    {
+        foreach ($this->chunks($chunkSize) as $chunk) {
+            yield from $chunk;
+        }
+    }
+
+    /**
+     * @param int $chunkSize
+     * @return Generator<self>
+     */
+    public function chunks(int $chunkSize = self::CHUNK_SIZE): Generator
+    {
+        $page = 1;
+        $chunk = (clone $this)->page(1, $chunkSize);
+        while (true) {
+            yield $chunk;
+            if (count($chunk) < $chunkSize) {
+                break;
+            }
+            $chunk = (clone $this)->page(++$page, $chunkSize);
+        }
     }
 }

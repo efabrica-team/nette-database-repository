@@ -5,9 +5,12 @@ namespace Efabrica\NetteDatabaseRepository\Repository;
 use Efabrica\NetteDatabaseRepository\Event\DeleteQueryEvent;
 use Efabrica\NetteDatabaseRepository\Model\Entity;
 use Efabrica\NetteDatabaseRepository\Subscriber\Events;
+use LogicException;
 use Nette\Application\BadRequestException;
 use Nette\Database\Explorer;
 use Nette\Database\Table\ActiveRow;
+use PDOException;
+use Throwable;
 
 /**
  * @template E of Entity
@@ -82,6 +85,17 @@ abstract class Repository
         return $this->query()->where($conditions);
     }
 
+    public function countBy(array $conditions): int
+    {
+        return $this->findBy($conditions)->count();
+    }
+
+    public function sumBy(string $column, array $conditions = []): int
+    {
+        return $this->findBy($conditions)->sum($column);
+    }
+
+
     /**
      * Makes sure the returned entity is not null and exists.
      * Made to be used in presenter actions. Throws BadRequestException if not found.
@@ -118,6 +132,7 @@ abstract class Repository
      */
     public function update(Entity ...$entities): int
     {
+        // Group entities by diff to reduce number of queries
         if (count($entities) === 1) {
             $chunks = [$entities];
         } else {
@@ -133,6 +148,17 @@ abstract class Repository
             $this->query()->where($chunk)->update($chunk[0]->diff());
         }
         return count($entities);
+    }
+
+    /**
+     * @deprecated Use Entity setters ideally or query()->update()
+     * @param array $conditions
+     * @param array $values
+     * @return int
+     */
+    public function updateBy(array $conditions, array $values): int
+    {
+        return $this->query()->where($conditions)->update($values);
     }
 
     /**
@@ -193,5 +219,141 @@ abstract class Repository
             $event->onCreate($entity);
         }
         return $entity;
+    }
+
+    /*******************************
+     * Transactions
+     ******************************/
+
+    /**
+     * Run new transaction if no transaction is running, do nothing otherwise
+     * @template T
+     * @param callable(): T $callback
+     * @return T
+     * @throws Throwable
+     */
+    final public function transaction(callable $callback)
+    {
+        $explorer = $this->getExplorer();
+        try {
+            $inTransaction = $explorer->getConnection()->getPdo()->inTransaction();
+            if (!$inTransaction) {
+                $explorer->beginTransaction();
+            }
+
+            $result = $callback();
+
+            if (!$inTransaction) {
+                $explorer->commit();
+            }
+
+            return $result;
+        } catch (Throwable $e) {
+            if (isset($inTransaction) && !$inTransaction && $e instanceof PDOException) {
+                $explorer->rollBack();
+            }
+            throw $e;
+        }
+    }
+
+    /**
+     * @template T
+     * @param callable(): T $callback
+     * @param int           $retryTimes
+     * @param bool          $reconnect
+     * @return T
+     * @throws Throwable
+     */
+    final public function retry(callable $callback, int $retryTimes = 3, bool $reconnect = true)
+    {
+        $attempts = 1;
+        while ($attempts < $retryTimes) {
+            try {
+                return $callback($this);
+            } catch (Throwable $e) {
+                if ($attempts++ === $retryTimes) {
+                    throw $e;
+                }
+                if ($reconnect) {
+                    $this->getExplorer()->getConnection()->reconnect();
+                }
+            }
+        }
+        throw new LogicException('Unreachable');
+    }
+
+    /*******************************
+     * Deprecations
+     ******************************/
+
+
+    /**
+     * @deprecated Use query() instead
+     * @deprecated instead of overriding, implement SelectEventSubscriber in the repository
+     */
+    final public function findAll(): Query
+    {
+        return $this->query();
+    }
+
+    /**
+     * @deprecated Use getExplorer() instead
+     */
+    final public function getConnection(): Explorer
+    {
+        return $this->getExplorer();
+    }
+
+    /**
+     * @deprecated use query(false) instead
+     * @deprecated instead of overriding, implement SelectEventSubscriber in the repository
+     */
+    final public function getTable(): Query
+    {
+        return $this->query(false);
+    }
+
+    /**
+     * @deprecated use query()->fetchPairs() instead
+     */
+    final public function fetchPairs(string $key, ?string $value = null, ?string $order = null, array $where = []): array
+    {
+        $query = $this->query()->where($where);
+        if ($order !== null) {
+            $query->order($order);
+        }
+        return $query->fetchPairs($key, $value);
+    }
+
+    /**
+     * @deprecated use insert() instead
+     */
+    final public function multiInsert(array $data): int
+    {
+        $this->query()->insert($data);
+        return count($data);
+    }
+
+    /**
+     * @param callable(): T $callback
+     * @param int           $retryTimes
+     * @return T
+     * @throws Throwable
+     * @deprecated use retry() instead
+     * @template T
+     */
+    final public function ensure(callable $callback, int $retryTimes = 2)
+    {
+        return $this->retry($callback, $retryTimes);
+    }
+
+    /**
+     * @deprecated use query()->chunks() instead
+     */
+    final public function chunk(Query $query, ?int $limit, callable $callback, ?int $count = null): void
+    {
+        foreach ($query->chunks($limit) as $chunk) {
+            $callback($chunk);
+        }
     }
 }

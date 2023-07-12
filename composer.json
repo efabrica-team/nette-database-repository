@@ -37,6 +37,7 @@
     "require": {
         "php": "^7.4|^8.0",
         "ext-json": "*",
+        "ext-pdo": "*",
         "nette/database": "^3.1",
         "nette/di": "^3.1",
         "nette/caching": "^3.1",
@@ -45,7 +46,7 @@
         "nette/php-generator": "^3.6",
         "symfony/console": "^5.4",
         "doctrine/inflector": "^2.0",
-        "nikic/php-parser": "^4.16"
+        "nikic/php-parser": "^4.16",
     },
     "require-dev": {
         "nette/bootstrap": "^3.1",

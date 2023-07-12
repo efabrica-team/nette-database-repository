@@ -24,7 +24,10 @@ class QueryWriter
         $baseClass = new ClassType("{$structure->getClassName()}QueryBase", $structure->queryGenNamespace);
         $baseClass->addComment('@generated');
         $baseClass->addComment("@method insert({$structure->getClassName()}|{$structure->getClassName()}[] \$data)");
-        $baseClass->addComment("@method {$structure->getClassName()}|{$structure->getClassName()}[] fetchAll()");
+        $baseClass->addComment("@method {$structure->getClassName()}[] fetchAll()");
+        $baseClass->addComment("@method {$structure->getClassName()}|null fetch()");
+        $baseClass->addComment("@method {$structure->getClassName()} createRow(array \$data = [])");
+        $baseClass->addComment("@method {$structure->getClassName()}Repository getRepository()");
         $baseClass->setExtends(Query::class);
 
         $constructor = $baseClass->addMethod('__construct')
@@ -32,32 +35,7 @@ class QueryWriter
         ;
         $constructor->addParameter('repository')->setType($repositoryClass);
         $constructor->addParameter('events')->setType('bool')->setDefaultValue(true);
-        $baseClass->addMethod('getRepository')
-            ->setReturnType($repositoryClass)
-            ->setBody(implode("\n", [
-                'assert($this->repository instanceof ' . $structure->getClassName() . 'Repository);',
-                'return $this->repository;',
-            ]))
-        ;
 
-        $baseClass->addMethod('fetch')
-            ->setReturnType($entityClass)
-            ->setReturnNullable()
-            ->setBody(implode("\n", [
-                '$row = parent::fetch();',
-                'if ($row instanceof ' . $structure->getClassName() . ') {',
-                '    return $row;',
-                '}',
-                'return null;',
-            ]))
-        ;
-        $baseClass->addMethod('createRow')
-            ->setReturnType($entityClass)
-            ->setBody(implode("\n", [
-                'return $this->getRepository()->createRow($data);',
-            ]))
-            ->addParameter('data')->setType('array')->setNullable()->setDefaultValue([])
-        ;
         return $baseClass;
     }
 
