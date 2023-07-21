@@ -7,9 +7,12 @@ use Efabrica\NetteDatabaseRepository\Event\InsertRepositoryEvent;
 use Efabrica\NetteDatabaseRepository\Event\SelectQueryEvent;
 use Efabrica\NetteDatabaseRepository\Event\UpdateQueryEvent;
 use Efabrica\NetteDatabaseRepository\Model\Entity;
-use Efabrica\NetteDatabaseRepository\Subscriber\Events;
+use Efabrica\NetteDatabaseRepository\Subscriber\RepositoryEvents;
 use Efabrica\NetteDatabaseRepository\Subscriber\EventSubscriber;
+use Efabrica\Translatte\Helper\Arr;
 use Generator;
+use LogicException;
+use Nette\Database\Table\ActiveRow;
 use Nette\Database\Table\Selection;
 use Nette\Utils\Arrays;
 use Traversable;
@@ -25,7 +28,8 @@ class Query extends Selection
 
     private Repository $repository;
 
-    private Events $events;
+    private RepositoryEvents $events;
+    private RepositoryBehaviors $behaviors;
 
     /**
      * @param Repository<E,$this> $repository
@@ -36,23 +40,31 @@ class Query extends Selection
         $this->repository = $repository;
         $this->doesEvents = $events;
         $this->events = clone $repository->getEvents();
+        $this->behaviors = clone $repository->behaviors();
         parent::__construct($repository->getExplorer(), $repository->getExplorer()->getConventions(), $repository->getTableName());
     }
 
     /************************** Modifications *****************************/
 
     /**
-     * @param E[]|E $data
-     * @return bool|int|E
+     * @param E[]|E|array $data Supports multi-insert
+     * @return E|int
      */
     public function insert(iterable $data)
     {
         if (!$this->doesEvents()) {
-            /** @var bool|int|E $return */
-            $return = parent::insert($data);
-            return $return;
+            if (Arrays::isList($data) && count($data) === 1) {
+                $data = reset($data);
+            }
+            return parent::insert($data);
         }
-        if ($data instanceof Entity) {
+        if (is_array($data)) {
+            if (Arrays::isList($data)) {
+                $data = array_map(fn ($row) => $row instanceof Entity ? $row : $this->repository->createRow($row), $data);
+            } else {
+                $data = [$this->repository->createRow($data)];
+            }
+        } elseif ($data instanceof Entity) {
             $data = [$data];
         }
         return (new InsertRepositoryEvent($this->repository, $data))->handle()->getReturn();
@@ -111,9 +123,14 @@ class Query extends Selection
         return $this->repository;
     }
 
-    public function getEvents(): Events
+    public function getEvents(): RepositoryEvents
     {
         return $this->events;
+    }
+
+    public function getBehaviors(): RepositoryBehaviors
+    {
+        return $this->behaviors;
     }
 
     public function doesEvents(): bool
@@ -132,35 +149,51 @@ class Query extends Selection
     }
 
     /**
-     * @param array|string|Entity|Entity[] $condition
-     * @param mixed                        ...$params
+     * @param array|string|ActiveRow $condition
+     * @param mixed                  ...$params
      * @return $this
      */
     public function where($condition, ...$params): self
     {
-        if ($condition instanceof Entity) {
+        if ($condition instanceof ActiveRow) {
             return $this->wherePrimary($condition->getPrimary());
         }
-        if (is_array($condition)) {
-            if (Arrays::isList($condition) && ($condition[0] ?? null) instanceof Entity) {
-                $where = [];
-                foreach ($this->getPrimary() as $column) {
-                    foreach ($condition as $entity) {
-                        $where[$column][] = $entity[$column];
-                    }
-                }
-                $condition = $where;
-                $params = [];
-            } else {
-                foreach ($condition as $key => $value) {
-                    if (preg_match('/^\w+$/', $key)) {
-                        unset($condition[$key]);
-                        $condition[$this->getName() . '.' . $key] = $value;
-                    }
-                }
-            }
+        parent::where($condition, ...$params);
+        return $this;
+    }
+
+    /**
+     * @param ActiveRow|array|scalar ...$entities primary value, ActiveRow or associative array of primary values
+     * @return $this
+     */
+    public function whereRows(iterable ...$entities): self
+    {
+        $where = [];
+        $values = [];
+        $primary = $this->repository->getPrimary();
+        if ($primary === []) {
+            throw new LogicException('Primary key is not set');
         }
-        parent::where($condition, $params);
+        if (count($primary) === 1) {
+            $primaryKey = reset($primary);
+            foreach ($entities as $entity) {
+                $values[] = is_scalar($entity) ? $entity : $entity[$primaryKey];
+            }
+            return $this->where($primaryKey, $values);
+        }
+        foreach ($entities as $row) {
+            $key = [];
+            foreach ($primary as $i => $primaryKey) {
+                $key[] = $primaryKey . ' = ?';
+                $value = $row[$primaryKey] ?? $row[$i] ?? null;
+                if ($value === null) {
+                    throw new LogicException("Primary key value for $primaryKey is not set");
+                }
+                $values[] = $value;
+            }
+            $where[] = implode(' AND ', $key);
+        }
+        parent::where(implode(' OR ', $where), ...$values);
         return $this;
     }
 
@@ -186,7 +219,7 @@ class Query extends Selection
 
     /**
      * @param int $chunkSize
-     * @return Generator<E>
+     * @return Generator<E> foreach($query->fetchAllChunked() as $entity) { ... }
      */
     public function fetchAllChunked(int $chunkSize = self::CHUNK_SIZE): Generator
     {
@@ -197,18 +230,24 @@ class Query extends Selection
 
     /**
      * @param int $chunkSize
-     * @return Generator<self>
+     * @return Generator<self> foreach($query->chunks() as $chunk) { $chunk->fetchAll()->doSomething(); }
      */
     public function chunks(int $chunkSize = self::CHUNK_SIZE): Generator
     {
         $page = 1;
+        $limit = $this->sqlBuilder->getLimit();
         $chunk = (clone $this)->page(1, $chunkSize);
         while (true) {
             yield $chunk;
-            if (count($chunk) < $chunkSize) {
+            if (count($chunk->fetchAll()) < $chunkSize) {
                 break;
             }
             $chunk = (clone $this)->page(++$page, $chunkSize);
         }
+    }
+
+    public function count(?string $column = null): int
+    {
+        return parent::count($column ?? '*');
     }
 }

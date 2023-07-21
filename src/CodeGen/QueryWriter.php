@@ -2,75 +2,59 @@
 
 namespace Efabrica\NetteDatabaseRepository\CodeGen;
 
-use DateTimeInterface;
-use Efabrica\NetteDatabaseRepository\Model\EntityProperty;
 use Efabrica\NetteDatabaseRepository\Repository\Query;
 use Nette\PhpGenerator\ClassType;
-use Nette\PhpGenerator\PhpNamespace;
-use Nette\PhpGenerator\Printer;
-use RuntimeException;
 
 class QueryWriter
 {
-    public static function createBaseQuery(EntityStructure $structure): ClassType
+    public static function createQueryBase(EntityStructure $structure): ClassType
     {
         $repositoryClass = $structure->repositoryNamespace->getName() . '\\' . $structure->getClassName() . 'Repository';
-        $entityClass = $structure->entityNamespace->getName() . '\\' . $structure->getClassName();
+        $entityClass = $structure->entityGenNamespace->getName() . '\\' . $structure->getClassName();
         $structure->queryGenNamespace
             ->addUse($entityClass)
             ->addUse($repositoryClass)
             ->addUse(Query::class)
         ;
         $baseClass = new ClassType("{$structure->getClassName()}QueryBase", $structure->queryGenNamespace);
+        $baseClass->setAbstract();
+        $baseClass->addComment('@internal Typehint extended classes only');
         $baseClass->addComment('@generated');
-        $baseClass->addComment("@method insert({$structure->getClassName()}|{$structure->getClassName()}[] \$data)");
+        $baseClass->addComment("@method insert({$structure->getClassName()}|array \$data)");
         $baseClass->addComment("@method {$structure->getClassName()}[] fetchAll()");
         $baseClass->addComment("@method {$structure->getClassName()}|null fetch()");
         $baseClass->addComment("@method {$structure->getClassName()} createRow(array \$data = [])");
+        $baseClass->addComment("@method {$structure->getClassName()} current()");
         $baseClass->addComment("@method {$structure->getClassName()}Repository getRepository()");
         $baseClass->setExtends(Query::class);
-
-        $constructor = $baseClass->addMethod('__construct')
-            ->setBody("parent::__construct(\$repository, \$events);")
-        ;
-        $constructor->addParameter('repository')->setType($repositoryClass);
-        $constructor->addParameter('events')->setType('bool')->setDefaultValue(true);
 
         return $baseClass;
     }
 
     public static function writeQueryBase(EntityStructure $structure): void
     {
-        $structure->writeClass(self::createBaseQuery($structure), $structure->queryGenNamespace, $structure->queryGenDir);
+        $structure->writeClass(self::createQueryBase($structure), $structure->queryGenDir);
     }
 
     private static function createQuery(EntityStructure $structure): ClassType
     {
-        $class = new ClassType($structure->getClassName() . 'Query', $structure->queryNamespace);
-        $baseClassName = $structure->queryGenNamespace->getName() . '\\' . $structure->getClassName() . 'QueryBase';
-        $structure->queryNamespace->addUse($baseClassName);
-        $class->setExtends($baseClassName);
-        return $class;
-    }
+        $queryGenClass = $structure->queryGenNamespace->getName() . '\\' . $structure->getClassName() . 'QueryBase';
+        $structure->queryNamespace->addUse($structure->entityGenNamespace->getName() . '\\' . $structure->getClassName());
+        $structure->queryNamespace->addUse($queryGenClass);
 
-    private static function modifyQuery(EntityStructure $structure): ClassType
-    {
-        $class = ClassType::from($structure->queryNamespace->getName() . '\\' . $structure->getClassName() . 'Query', true);
-        $baseClassName = $structure->queryGenNamespace->getName() . '\\' . $structure->getClassName() . 'QueryBase';
-        $class->getNamespace()->addUse($baseClassName);
-        $class->setExtends($baseClassName);
+        $class = new ClassType($structure->getClassName() . 'Query', $structure->queryNamespace);
+        $class->setFinal();
+        $class->setExtends($queryGenClass);
+
         return $class;
     }
 
     public static function writeQuery(EntityStructure $structure): void
     {
-        $repoClass = $structure->queryNamespace->getName() . '\\' . $structure->getClassName() . 'Query';
-        if (class_exists($repoClass)) {
-            $class = self::modifyQuery($structure);
-        } else {
-            $class = self::createQuery($structure);
+        $queryClass = $structure->queryNamespace->getName() . '\\' . $structure->getClassName() . 'Query';
+        if (class_exists($queryClass)) {
+            return;
         }
-        $namespace = $class->getNamespace();
-        $structure->writeClass($class, $namespace, $structure->queryDir);
+        $structure->writeClass(self::createQuery($structure), $structure->queryDir);
     }
 }

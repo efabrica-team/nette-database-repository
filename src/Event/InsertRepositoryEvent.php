@@ -34,8 +34,12 @@ class InsertRepositoryEvent extends RepositoryEvent
         if ($subscriber instanceof EventSubscriber) {
             return $subscriber->onInsert($this);
         }
+        $entities = [];
+        foreach ($this->entities as $entity) {
+            $entities[] = $entity->toArray();
+        }
         return $this->stopPropagation(
-            $this->getRepository()->query(false)->insert($this->entities)
+            $this->getRepository()->query(false)->insert($entities)
         );
     }
 

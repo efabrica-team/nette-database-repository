@@ -3,6 +3,7 @@
 namespace Efabrica\NetteDatabaseRepository\Traits\LastManStanding;
 
 use Efabrica\NetteDatabaseRepository\Event\DeleteQueryEvent;
+use Efabrica\NetteDatabaseRepository\Event\RepositoryEvent;
 use Efabrica\NetteDatabaseRepository\Repository\Repository;
 use Efabrica\NetteDatabaseRepository\Subscriber\EventSubscriber;
 use Efabrica\NetteDatabaseRepository\Traits\SoftDelete\SoftDeleteQueryEvent;
@@ -13,28 +14,27 @@ class LastManStandingEventSubscriber extends EventSubscriber implements SoftDele
 {
     public function supportsRepository(Repository $repository): bool
     {
-        return $repository instanceof LastManStandingRepository;
+        return $repository->behaviors()->has(LastManStandingBehavior::class);
     }
 
-    private function ensureLastMan(Repository $repository): void
+    private function ensureLastMan(RepositoryEvent $event): void
     {
-        if (!$repository instanceof LastManStandingRepository) {
-            throw new LogicException('Repository must implement LastManStandingRepository');
-        }
-        if ($repository->lastManQuery()->count('*') <= 1) {
+        /** @var LastManStandingBehavior $behavior */
+        $behavior = $event->getBehaviors()->get(LastManStandingBehavior::class);
+        if ($behavior->getQuery()->count('*') <= 1) {
             throw new LogicException('At least one record must exist in table');
         }
     }
 
     public function onDelete(DeleteQueryEvent $event): int
     {
-        $this->ensureLastMan($event->getRepository());
+        $this->ensureLastMan($event);
         return $event->handle();
     }
 
     public function onSoftDelete(SoftDeleteQueryEvent $event, array &$data): int
     {
-        $this->ensureLastMan($event->getRepository());
+        $this->ensureLastMan($event);
         return $event->handle($data);
     }
 }

@@ -2,14 +2,8 @@
 
 namespace Efabrica\NetteDatabaseRepository\CodeGen;
 
-use Nette\Database\Structure;
-use Nette\Neon\Entity;
-use Nette\Neon\Neon;
-use Nette\PhpGenerator\PhpNamespace;
-
 class ModuleWriter
 {
-
     public static function writeConfigNeon(EntityStructure $structure, string $dbDir): void
     {
         $config = [];
@@ -18,7 +12,7 @@ class ModuleWriter
         }
 
         $repoClass = $structure->repositoryNamespace->getName() . '\\' . $structure->getClassName() . 'Repository';
-        $serviceName = lcfirst($structure->getClassName()) . 'Repository';
+        $serviceName = self::getRepoServiceName($structure);
 
         $defLine = null;
         $servicesLine = null;
@@ -27,7 +21,7 @@ class ModuleWriter
                 $defLine = $i;
                 break;
             }
-            if (preg_match("/^\\s*services:/", $line)) {
+            if (preg_match('/^\\s*services:/', $line)) {
                 $servicesLine = $i;
             }
         }
@@ -41,5 +35,10 @@ class ModuleWriter
         }
 
         file_put_contents($structure->dbDir . '/config.neon', implode("\n", $config));
+    }
+
+    public static function getRepoServiceName(EntityStructure $structure): string
+    {
+        return lcfirst($structure->getClassName()) . 'Repository';
     }
 }

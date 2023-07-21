@@ -8,7 +8,7 @@ use Efabrica\NetteDatabaseRepository\Repository\Repository;
 /**
  * @mixin Repository
  */
-trait SortingBehavior
+trait SortingTrait
 {
     public function sortingField(): string
     {
@@ -38,8 +38,7 @@ trait SortingBehavior
         $upperSorting = $upperRecord[$this->sortingField()];
         $upperRecord[$this->sortingField()] = $record[$this->sortingField()];
         $record[$this->sortingField()] = $upperSorting;
-        $this->update($upperRecord);
-        $this->update($record);
+        $this->updateEntities($upperRecord, $record);
         return true;
     }
 
@@ -98,8 +97,7 @@ trait SortingBehavior
         $query = $this->findBy($where)->order(implode(',', [$sortField, $this->query()->getPrimary()]))->fetchAll();
         foreach ($query as $row) {
             $sorting += $sortingStep;
-            $row[$this->sortingField()] = $sorting;
-            $this->update($row);
+            $this->update($row, [$this->sortingField() => $sorting]);
         }
     }
 }

@@ -3,6 +3,7 @@
 namespace Efabrica\NetteDatabaseRepository\CodeGen;
 
 use Efabrica\NetteDatabaseRepository\Repository\Repository;
+use Efabrica\NetteDatabaseRepository\Repository\RepositoryBehaviors;
 use Efabrica\NetteDatabaseRepository\Repository\RepositoryDependencies;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\Parameter;
@@ -15,25 +16,39 @@ class RepositoryWriter
     {
         $class = new ClassType($structure->getClassName() . 'RepositoryBase', $structure->repositoryGenNamespace);
         $queryClass = $structure->queryNamespace->getName() . '\\' . $structure->getClassName() . 'Query';
-        $entityClass = $structure->entityNamespace->getName() . '\\' . $structure->getClassName();
+        $entityClass = $structure->entityGenNamespace->getName() . '\\' . $structure->getClassName();
         $structure->repositoryGenNamespace
             ->addUse($entityClass)
             ->addUse($queryClass)
             ->addUse(Repository::class)
             ->addUse(RepositoryDependencies::class)
         ;
+
+        if (count($structure->getPrimaries()) > 1) {
+            $primaryType = "array"; // generics dont work in @method
+        } else {
+            $primaries = $structure->getPrimaries();
+            $primaryType = reset($primaries);
+        }
+        $primaryName = 'id';
+        if (count($structure->getPrimaries()) === 1) {
+            $primaryName = array_keys($structure->getPrimaries())[0];
+        }
+
+        $class->setAbstract();
         $class->setExtends(Repository::class);
         $class->addComment('@generated');
-        $class->addComment('@method ' . $structure->getClassName() . 'Query query(bool $events = true)');
-        $class->addComment("@method {$structure->getClassName()}|null find(string|int|array|{$structure->getClassName()} \$id, bool \$defaultWhere = true)");
-        $class->addComment("@method {$structure->getClassName()}      lookup({$structure->getClassName()}|string|int|array \$id)");
+        $class->addComment("@method {$structure->getClassName()}Query query(bool \$events = true)");
+        $class->addComment("@method {$structure->getClassName()}[] fetchAll(bool \$events = true)");
+        $class->addComment("@method {$structure->getClassName()}|null find($primaryType|{$structure->getClassName()} \$$primaryName, bool \$defaultWhere = true)");
+        $class->addComment("@method {$structure->getClassName()}      lookup($primaryType|{$structure->getClassName()} \$$primaryName)");
         $class->addComment("@method {$structure->getClassName()}|null findOneBy(array \$conditions, bool \$defaultWhere = true)");
         $class->addComment("@method {$structure->getClassName()}Query findBy(array \$conditions)");
-        $class->addComment("@method insert({$structure->getClassName()} ...\$entities)");
-        $class->addComment("@method update({$structure->getClassName()} ...\$entities)");
-        $class->addComment("@method delete({$structure->getClassName()} ...\$entities)");
-        $class->addComment("@method class
-        -string<{$structure->getClassName()}> getEntityClass()");
+        $class->addComment("@method {$structure->getClassName()}|int insert({$structure->getClassName()}|iterable ...\$entities)");
+        $class->addComment("@method int update({$structure->getClassName()}|$primaryType \$entity, iterable \$data, bool \$events = true)");
+        $class->addComment("@method void updateEntities({$structure->getClassName()}|$primaryType ...\$entities)");
+        $class->addComment("@method int delete({$structure->getClassName()}|$primaryType ...\$entities)");
+        $class->addComment("@method class-string<{$structure->getClassName()}> getEntityClass()");
         $class->addComment("@method {$structure->getClassName()} createRow(array \$row = [])");
 
         $class->addMethod('__construct')
@@ -48,21 +63,34 @@ class RepositoryWriter
 
     public static function writeRepositoryBase(EntityStructure $structure): void
     {
-        $class = self::createRepositoryBase($structure);
-        $namespace = $structure->repositoryGenNamespace;
-        $structure->writeClass($class, $namespace, $structure->repositoryGenDir);
+        $structure->writeClass(self::createRepositoryBase($structure), $structure->repositoryGenDir);
     }
 
     private static function createRepository(EntityStructure $structure): ClassType
     {
+        $repositoryClass = $structure->repositoryGenNamespace->getName() . '\\' . $structure->getClassName() . 'RepositoryBase';
+        $structure->repositoryNamespace
+            ->addUse(RepositoryDependencies::class)
+            ->addUse(RepositoryBehaviors::class)
+            ->addUse($repositoryClass)
+            ->addUse($structure->queryNamespace->getName() . '\\' . $structure->getClassName() . 'Query')
+            ->addUse($structure->entityGenNamespace->getName() . '\\' . $structure->getClassName())
+        ;
+
         $class = new ClassType($structure->getClassName() . 'Repository', $structure->repositoryNamespace);
-        $baseClassName = $structure->repositoryGenNamespace->getName() . '\\' . $structure->getClassName() . 'RepositoryBase';
-        $structure->repositoryNamespace->addUse($baseClassName);
-        $class->setExtends($baseClassName);
+        $class->setFinal();
+        $class->setExtends($repositoryClass);
+
+        $class->addMethod('configure')
+            ->setReturnType('void')
+            ->setProtected()
+            ->addParameter('behavior')->setType(RepositoryBehaviors::class)
+        ;
+
         return $class;
     }
 
-    private static function modifyRepository(EntityStructure $structure): void
+    private static function migrateRepository(EntityStructure $structure): void
     {
         $class = new ReflectionClass($structure->repositoryNamespace->getName() . '\\' . $structure->getClassName() . 'Repository');
 
@@ -78,7 +106,7 @@ class RepositoryWriter
         $shortBaseClassName = $structure->getClassName() . 'RepositoryBase';
         $baseClassName = $structure->repositoryGenNamespace->getName() . '\\' . $shortBaseClassName;
         $queryClassName = $structure->queryNamespace->getName() . '\\' . $structure->getClassName() . 'Query';
-        $entityClassName = $structure->entityNamespace->getName() . '\\' . $structure->getClassName();
+        $entityClassName = $structure->entityGenNamespace->getName() . '\\' . $structure->getClassName();
         $extends = str_contains($lines[$class->getStartLine()], 'extends')
             ? $lines[$class->getStartLine()]
             : $lines[$class->getStartLine() - 1];
@@ -87,7 +115,8 @@ class RepositoryWriter
         }
         $lines[$class->getStartLine() - 1] = preg_replace(
             '/ extends\s+\w+/',
-            " extends " . $shortBaseClassName, $extends
+            ' extends ' . $shortBaseClassName,
+            $extends
         );
 
         $useLine = null;
@@ -115,11 +144,17 @@ class RepositoryWriter
 
     public static function migrateMagicMethods(array &$lines, EntityStructure $structure): void
     {
+        $linesToUnset = [];
         foreach ($lines as $i => $line) {
             if (preg_match('/@method.*\s+find(\w+)\(/', $line, $matches)) {
-                unset($lines[$i]);
-            } elseif (str_contains($line, ' \$tableName = ')) {
-                unset($lines[$i]);
+                $linesToUnset[] = $i;
+            } elseif (str_contains($line, ' $tableName = ')) {
+                $linesToUnset[] = $i;
+                if (trim($lines[$i - 1]) === '') {
+                    $linesToUnset[] = $i - 1;
+                } elseif (trim($lines[$i + 1]) === '') {
+                    $linesToUnset[] = $i + 1;
+                }
                 continue;
             } else {
                 continue;
@@ -130,33 +165,42 @@ class RepositoryWriter
             $one = str_starts_with($methodName, 'OneBy');
             $returnType = $one ? $structure->getClassName() : $structure->getClassName() . 'Query';
             $methodCode = [
-                "    /**",
-                "     * @deprecated",
-                "     * @param mixed \$value",
-                "     */",
+                '    /**',
+                '     * @deprecated',
+                '     * @param mixed $value',
+                '     */',
                 "    public function find{$methodName}(\$value): $returnType",
-                "    {",
-                "        return \$this->find" . ($one ? 'One' : '') . "By([{$structure->getClassName()}::$findColumn => \$value]);",
-                "    }",
+                '    {',
+                '        return $this->find' . ($one ? 'One' : '') . "By([{$structure->getClassName()}::$findColumn => \$value]);",
+                '    }',
             ];
             $endingLine = null;
             foreach ($lines as $j => $l) {
+                if ($l === '}') {
+                    $endingLine = $j;
+                    break;
+                }
                 if (str_contains($l, '}')) {
                     $endingLine = $j;
                 }
             }
-            array_splice($lines, $endingLine - 1, 0, $methodCode);
+            array_splice($lines, $endingLine, 0, $methodCode);
+        }
+        foreach ($linesToUnset as $i) {
+            unset($lines[$i]);
         }
     }
 
-    public static function writeRepository(EntityStructure $structure): void
+    public static function writeRepository(EntityStructure $structure, bool $migrate): void
     {
         $repoClass = $structure->repositoryNamespace->getName() . '\\' . $structure->getClassName() . 'Repository';
         if (class_exists($repoClass)) {
-            self::modifyRepository($structure);
+            if ($migrate) {
+                self::migrateRepository($structure);
+            }
         } else {
             $class = self::createRepository($structure);
-            $structure->writeClass($class, $class->getNamespace(), $structure->repositoryDir);
+            $structure->writeClass($class, $structure->repositoryDir);
         }
     }
 }

@@ -2,18 +2,27 @@
 
 namespace Efabrica\NetteDatabaseRepository\Traits\AES;
 
-use Efabrica\NetteDatabaseRepository\Repository\Query;
-use Efabrica\NetteDatabaseRepository\Repository\Repository;
+use Efabrica\NetteDatabaseRepository\Traits\RepositoryBehavior;
 
-/**
- * @mixin Repository
- * @mixin AESRepository
- */
-trait AESBehavior
+class AESBehavior extends RepositoryBehavior
 {
-    // don't forget to implement AESRepository!
-    protected function nonEncryptedQuery(array $where = []): Query
+    public string $keyFunction;
+
+    public array $encryptedFields;
+
+    public function __construct(string $keyFunction, array $encryptedFields)
     {
-        return $this->query()->withoutEvent(AESEventSubscriber::class);
+        $this->keyFunction = $keyFunction;
+        $this->encryptedFields = $encryptedFields;
+    }
+
+    public function keyFunction(): string
+    {
+        return $this->keyFunction;
+    }
+
+    public function encryptedFields(): array
+    {
+        return $this->encryptedFields;
     }
 }

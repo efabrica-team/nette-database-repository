@@ -1,6 +1,6 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\Model;
+namespace Efabrica\NetteDatabaseRepository\CodeGen;
 
 class EntityProperty
 {
@@ -12,14 +12,15 @@ class EntityProperty
      * @var string contains everything after the property name and native type
      */
     protected string $annotations;
+
     private ?string $dbType;
 
-    public function __construct(string $_, string $type, string $name, ?string $nativeType, string $annotations)
+    public function __construct(string $_, string $type, string $name, ?string $dbType, string $annotations)
     {
         $this->type = $type;
         $this->name = $name;
-        $this->annotations = $annotations;
-        $this->dbType = $nativeType;
+        $this->annotations = trim($annotations);
+        $this->dbType = $dbType;
     }
 
     public function getType(): string
@@ -55,5 +56,10 @@ class EntityProperty
             }
         }
         return "@property {$this->type} \${$this->name} ({$this->dbType}) {$this->annotations}";
+    }
+
+    public function setType($getName): void
+    {
+        $this->type = $getName;
     }
 }

@@ -9,7 +9,7 @@ use Efabrica\NetteDatabaseRepository\Repository\Repository;
 /**
  * @mixin Repository
  */
-trait ChoozerBehavior
+trait ChoozerTrait
 {
     abstract protected function choozerFieldsToSearchIn(): array;
 

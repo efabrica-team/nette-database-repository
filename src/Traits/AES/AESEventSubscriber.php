@@ -15,16 +15,17 @@ class AESEventSubscriber extends EventSubscriber
 {
     public function supportsRepository(Repository $repository): bool
     {
-        return $repository instanceof AESRepository;
+        return $repository->behaviors()->has(AESBehavior::class);
     }
 
     public function onSelect(SelectQueryEvent $event): SelectQueryResponse
     {
-        /** @var AESRepository&Repository $repository */
+        /** @var AESBehavior $behavior */
+        $behavior = $event->getBehaviors()->get(AESBehavior::class);
         $repository = $event->getRepository();
         $selectParts = [$repository->getTableName() . '.*'];
-        foreach ($repository->encryptedFields() as $field) {
-            $selectParts[] = $this->convertEncryptedField($repository, $field) . ' AS ' . $field;
+        foreach ($behavior->encryptedFields() as $field) {
+            $selectParts[] = $this->convertEncryptedField($repository, $behavior, $field) . ' AS ' . $field;
         }
         $event->getQuery()->select($selectParts);
         return $event->handle();
@@ -32,11 +33,12 @@ class AESEventSubscriber extends EventSubscriber
 
     public function onInsert(InsertRepositoryEvent $event): InsertEventResponse
     {
-        /** @var Repository&AESRepository $repository */
+        /** @var AESBehavior $behavior */
+        $behavior = $event->getBehaviors()->get(AESBehavior::class);
         $repository = $event->getRepository();
         foreach ($event->getEntities() as $entity) {
-            foreach ($repository->encryptedFields() as $field) {
-                $entity[$field] = $this->encryptValue($repository, $entity[$field]);
+            foreach ($behavior->encryptedFields() as $field) {
+                $entity[$field] = $this->encryptValue($repository, $behavior, $entity[$field]);
             }
         }
         return $event->handle();
@@ -44,28 +46,27 @@ class AESEventSubscriber extends EventSubscriber
 
     public function onUpdate(UpdateQueryEvent $event, array &$data): int
     {
-        /** @var AESRepository&Repository $repository */
+        /** @var AESBehavior $behavior */
+        $behavior = $event->getBehaviors()->get(AESBehavior::class);
         $repository = $event->getRepository();
-        foreach ($repository->encryptedFields() as $field) {
+        foreach ($behavior->encryptedFields() as $field) {
             if (isset($data[$field])) {
-                $data[$field] = $this->encryptValue($repository, $data[$field]);
+                $data[$field] = $this->encryptValue($repository, $behavior, $data[$field]);
             }
         }
         return $event->handle($data);
     }
 
-    protected function convertEncryptedField(Repository $repository, string $field): string
+    protected function convertEncryptedField(Repository $repository, AESBehavior $behavior, string $field): string
     {
-        /** @var Repository&AESRepository $repository */
         if ($this->ivFunction($repository)) {
-            return 'CONVERT(AES_DECRYPT(UNHEX(SUBSTRING(' . $repository->getTableName() . '.' . $field . ', 33)), ' . $repository->keyFunction() . ', UNHEX(SUBSTRING(' . $repository->getTableName() . '.' . $field . ', 1, 32))) USING utf8)';
+            return 'CONVERT(AES_DECRYPT(UNHEX(SUBSTRING(' . $repository->getTableName() . '.' . $field . ', 33)), ' . $behavior->keyFunction() . ', UNHEX(SUBSTRING(' . $repository->getTableName() . '.' . $field . ', 1, 32))) USING utf8)';
         }
-        return 'CONVERT(AES_DECRYPT(UNHEX(' . $repository->getTableName() . '.' . $field . '), ' . $repository->keyFunction() . $this->ivFunction($repository) . ') USING utf8)';
+        return 'CONVERT(AES_DECRYPT(UNHEX(' . $repository->getTableName() . '.' . $field . '), ' . $behavior->keyFunction() . $this->ivFunction($repository) . ') USING utf8)';
     }
 
-    protected function encryptValue(Repository $repository, string $value): string
+    protected function encryptValue(Repository $repository, AESBehavior $behavior, string $value): string
     {
-        /** @var Repository&AESRepository $repository */
         $ivFunction = $this->ivFunction($repository);
         if ($ivFunction) {
             /** @var literal-string $ivFunction */
@@ -74,14 +75,14 @@ class AESEventSubscriber extends EventSubscriber
             $randomBytes = addslashes($initVector->random);
 
             /** @var literal-string $queryString */
-            $queryString = 'SELECT HEX(CONCAT("' . $randomBytes . '", AES_ENCRYPT("' . addslashes($value) . '", ' . $repository->keyFunction() . ', "' . $randomBytes . '"))) AS encrypted';
+            $queryString = 'SELECT HEX(CONCAT("' . $randomBytes . '", AES_ENCRYPT("' . addslashes($value) . '", ' . $behavior->keyFunction() . ', "' . $randomBytes . '"))) AS encrypted';
             /** @var  ActiveRow $row */
             $row = $repository->getExplorer()->fetch($queryString);
             return $row['encrypted'];
         }
 
         /** @var literal-string $queryString */
-        $queryString = 'SELECT HEX(AES_ENCRYPT("' . addslashes($value) . '", ' . $repository->keyFunction() . $this->ivFunction($repository) . ')) AS encrypted';
+        $queryString = 'SELECT HEX(AES_ENCRYPT("' . addslashes($value) . '", ' . $behavior->keyFunction() . $this->ivFunction($repository) . ')) AS encrypted';
         /** @var ActiveRow $row */
         $row = $repository->getExplorer()->fetch($queryString);
         return $row['encrypted'];

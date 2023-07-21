@@ -46,14 +46,15 @@
         "nette/php-generator": "^3.6",
         "symfony/console": "^5.4",
         "doctrine/inflector": "^2.0",
-        "nikic/php-parser": "^4.16",
+        "nikic/php-parser": "^4.16"
     },
     "require-dev": {
         "nette/bootstrap": "^3.1",
         "tracy/tracy": "^2.9",
         "nette/http": "^3.2",
         "phpunit/phpunit": "^9.6",
-        "nette/application": "^3.1"
+        "nette/application": "^3.1",
+        "nesbot/carbon": "^2.68"
     },
     "autoload": {
         "psr-4": {

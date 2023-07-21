@@ -2,87 +2,78 @@
 
 namespace Efabrica\NetteDatabaseRepository\CodeGen;
 
-use Efabrica\NetteDatabaseRepository\Model\EntityMetaInstance;
-use Nette\PhpGenerator\ClassType;
-use Nette\Utils\Strings;
+use DateTimeInterface;
 use Efabrica\NetteDatabaseRepository\Model\Entity;
+use Efabrica\NetteDatabaseRepository\Repository\Repository;
+use Efabrica\NetteDatabaseRepository\Traits\Cast\CastBehavior;
+use Nette\DI\Container;
+use Nette\PhpGenerator\ClassType;
 
 class EntityWriter
 {
-    private static function createClass(EntityStructure $structure): ClassType
+    private static function createBody(EntityStructure $structure): ClassType
     {
-        $entityClass = new ClassType($structure->getClassName(), $structure->entityNamespace);
-        $entityClass->setExtends(Entity::class);
-        foreach ($structure->getProperties() as $prop) {
-            $entityClass->addComment($prop->toString());
-            $entityClass->addConstant($prop->getName(), $prop->getName())->setPublic();
-        }
-        return $entityClass;
+        $structure->entityNamespace->addUse($structure->entityGenNamespace->getName() . '\\' . $structure->getClassName());
+
+        $class = new ClassType($structure->getClassName() . 'Body', $structure->entityNamespace);
+        $class->setTrait();
+        $class->addComment("@mixin {$structure->getClassName()}");
+
+        return $class;
     }
 
-    private static function modifyClass(EntityStructure $structure): ClassType
+    private static function createClass(EntityStructure $structure, Container $container): ClassType
     {
-        $entityClassName = "{$structure->entityNamespace->getName()}\\{$structure->getClassName()}";
-        $entityClass = ClassType::from($entityClassName, true);
-        $entityClass->getNamespace()->addUse(Entity::class);
-        $entityClass->setExtends(Entity::class);
-        self::updateDocComments($entityClassName, $entityClass, $structure);
-        self::updateConstants($structure, $entityClassName, $entityClass);
+        $structure->entityGenNamespace->addUse(Entity::class);
+        $structure->entityGenNamespace->addUse($structure->entityNamespace->getName() . '\\' . $structure->getClassName() . 'Body');
 
-        return $entityClass;
-    }
+        $class = new ClassType($structure->getClassName(), $structure->entityGenNamespace);
+        $class->setExtends(Entity::class);
+        $class->setFinal();
+        $class->addComment("@generated Do Not Modify!\n");
+        $class->addTrait($structure->entityNamespace->getName() . '\\' . $structure->getClassName() . 'Body');
 
-    public static function writeEntity(EntityStructure $structure): void
-    {
-        $structure->entityNamespace->addUse(Entity::class);
-        $entityClassName = "{$structure->entityNamespace->getName()}\\{$structure->getClassName()}";
-        if (class_exists($entityClassName)) {
-            $entity = self::modifyClass($structure);
-        } else {
-            $entity = self::createClass($structure);
-        }
-        $structure->writeClass($entity, $structure->entityNamespace, $structure->entityDir);
-    }
-
-    public static function updateDocComments(string $entityClassName, ClassType $entityClass, EntityStructure $structure): array
-    {
-        $meta = new EntityMetaInstance($entityClassName);
-        $comments = explode("\n", $entityClass->getComment());
-        $props = $structure->getProperties();
-        foreach ($comments as $i => $comment) {
-            if (!Strings::startsWith($comment, '@property')) {
-                continue;
-            }
-            foreach ($props as $property) {
-                if (Strings::contains($comment, $property->getName())) {
-                    $metaProp = $meta->properties[$property->getName()];
-                    $comments[$i] = $property->toString($metaProp->getAnnotations());
+        /** @var Repository $repo */
+        $casts = [];
+        if ($container->hasService(ModuleWriter::getRepoServiceName($structure))) {
+            $repo = $container->getByName(ModuleWriter::getRepoServiceName($structure));
+            foreach ($repo->behaviors()->all() as $behavior) {
+                if ($behavior instanceof CastBehavior) {
+                    $casts[$behavior->getField()] = $behavior->getCastType();
                 }
             }
         }
-        $entityClass->setComment(implode("\n", $comments));
-        $comment = $entityClass->getComment();
-        foreach ($props as $property) {
-            if (!str_contains($comment, '$' . $property->getName() . ' ')) {
-                $entityClass->addComment($property->toString());
+
+        foreach ($structure->getProperties() as $prop) {
+            $propName = $casts[$prop->getName()] ?? null;
+            if (isset($propName)) {
+                if (str_contains($prop->getType(), '|null')) {
+                    $propName .= '|null';
+                }
+                $prop->setType($propName);
             }
+            $class->addComment($prop->toString());
+            if (\str_contains($prop->getType(), DateTimeInterface::class)) {
+                $structure->entityGenNamespace->addUse(DateTimeInterface::class);
+            }
+            $class->addConstant($prop->getName(), $prop->getName())->setPublic();
         }
-        return [$props, $property];
+        return $class;
     }
 
-    public static function updateConstants(EntityStructure $structure, string $entityClassName, ClassType $entityClass): void
+    public static function writeBody(EntityStructure $structure): void
     {
-        $props = $structure->getProperties();
-        $constants = $entityClass->getConstants();
-        foreach ($constants as $constant) {
-            if ($constant->isPublic() && $constant->getComment() === null && !isset($props[$constant->getName()])) {
-                $entityClass->removeConstant($constant->getName());
-            }
+        if (!class_exists($structure->entityNamespace->getName() . '\\' . $structure->getClassName() . 'Body')) {
+            $structure->writeClass(self::createBody($structure), $structure->entityGenDir);
         }
-        foreach ($props as $property) {
-            if (!isset($constants[$property->getName()])) {
-                $entityClass->addConstant($property->getName(), $property->getName())->setPublic();
-            }
+    }
+
+    public static function writeEntity(EntityStructure $structure, Container $container): void
+    {
+        $entityClassName = "{$structure->entityNamespace->getName()}\\{$structure->getClassName()}";
+        if (!class_exists($entityClassName)) {
+            $entity = self::createClass($structure, $container);
+            $structure->writeClass($entity, $structure->entityGenDir);
         }
     }
 }

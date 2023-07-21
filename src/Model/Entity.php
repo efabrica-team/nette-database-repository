@@ -3,53 +3,66 @@
 namespace Efabrica\NetteDatabaseRepository\Model;
 
 use Efabrica\NetteDatabaseRepository\Repository\Query;
+use Efabrica\NetteDatabaseRepository\Repository\Repository;
 use Nette\Database\Table\ActiveRow;
 use Nette\Database\Table\GroupedSelection;
+use ReflectionProperty;
 
 abstract class Entity extends ActiveRow
 {
-    private array $_modified = [];
+    protected array $_modified = [];
 
-    private Query $query;
+    private Query $_query;
+
+    private static ReflectionProperty $data;
 
     public function __construct(array $data, Query $query)
     {
         parent::__construct($data, $query);
-        $this->query = $query;
-    }
-
-    public function diff(): array
-    {
-        return $this->_modified;
-    }
-
-    public function save(bool $events = true): bool
-    {
-        return $this->query->getRepository()
-                ->query($events)
-                ->wherePrimary($this->getPrimary())
-                ->update($this->diff()) > 0;
+        $this->_query = $query;
     }
 
     /**
-     * @deprecated call setters and use save() instead
-     * @param iterable $data
+     * Sync state of entity into database
+     * @param bool $events
+     * @return bool
+     */
+    public function save(bool $events = true): bool
+    {
+        $query = $this->_query->getRepository()->query($events);
+        if (!isset(self::$data)) {
+            self::$data = new ReflectionProperty(ActiveRow::class, 'data');
+            self::$data->setAccessible(true);
+        }
+        if (self::$data->getValue($this) === []) {
+            $insert = $query->insert($this->_modified);
+            if ($insert instanceof ActiveRow) {
+                self::$data->setValue($this, $insert->toArray());
+                $this->_modified = [];
+            }
+            return $insert !== null;
+        }
+        return $this->update() > 0;
+    }
+
+    /**
+     * @param iterable<self::*,mixed> $data
      * @return bool
      */
     public function update(iterable $data = []): bool
     {
-        foreach ($data as $key => $value) {
-            $this->$key = $value;
-        }
-        return $this->query->getRepository()->update($this) > 0;
+        $result = parent::update($data + $this->_modified);
+        $this->_modified = [];
+        return $result;
     }
 
     public function delete(bool $events = true): int
     {
-        return $this->query->getRepository()
+        return $this->_query->getRepository()
             ->query($events)
             ->wherePrimary($this->getPrimary())
-            ->delete();
+            ->delete()
+        ;
     }
 
     /**
@@ -57,12 +70,17 @@ abstract class Entity extends ActiveRow
      */
     public function __isset($key): bool
     {
-        return parent::__isset($key) || isset($this->_modified[$key]);
+        return isset($this->_modified[$key]) || parent::__isset($key);
     }
 
     public function &__get(string $key)
     {
-        return array_key_exists($key, $this->_modified) ? $this->_modified[$key] : parent::__get($key);
+        if (array_key_exists($key, $this->_modified)) {
+            return $this->_modified[$key];
+        }
+        /** @var mixed $value */
+        $value = parent::__get($key);
+        return $value;
     }
 
     /**
@@ -71,7 +89,7 @@ abstract class Entity extends ActiveRow
      */
     public function __set($column, $value): void
     {
-        if (parent::__get($column) === $value) {
+        if (parent::__isset($column) && parent::__get($column) === $value) {
             unset($this->_modified[$column]);
         } else {
             $this->_modified[$column] = $value;
@@ -83,7 +101,7 @@ abstract class Entity extends ActiveRow
      */
     public function __unset($key)
     {
-        unset($this->_modified[$key]);
+        $this->_modified[$key] = null;
     }
 
     public function toArray(): array
@@ -94,6 +112,11 @@ abstract class Entity extends ActiveRow
     public function toOriginalArray(): array
     {
         return parent::toArray();
+    }
+
+    public function diff(): array
+    {
+        return $this->_modified;
     }
 
     /**
@@ -112,8 +135,19 @@ abstract class Entity extends ActiveRow
         return parent::related($key, $throughColumn);
     }
 
+    /**
+     * @param class-string<Repository> $repository
+     * @return Query<Repository>
+     */
+    protected function query(string $repository, bool $events = true): Query
+    {
+        return $this->_query->getRepository()->getManager()
+            ->getRepository($repository)->query($events)
+        ;
+    }
+
     public function getTableName(): string
     {
-        return $this->query->getName();
+        return $this->_query->getName();
     }
 }

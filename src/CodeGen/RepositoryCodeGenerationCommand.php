@@ -5,33 +5,47 @@ namespace Efabrica\NetteDatabaseRepository\CodeGen;
 use Doctrine\Inflector\Inflector;
 use Doctrine\Inflector\InflectorFactory;
 use Nette\Database\Structure;
+use Nette\DI\Container;
 use Nette\PhpGenerator\ClassType;
 use Nette\Utils\Strings;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use SplFileInfo;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-
-class DatabaseCodeGenerationCommand extends Command
+class RepositoryCodeGenerationCommand extends Command
 {
     private string $appDir;
+
     private Inflector $inflector;
+
     private string $repoDir;
+
     private string $namespace;
+
     private EntityStructureFactory $structureFactory;
+
     private Structure $structure;
 
-    public function __construct(string $appDir, EntityStructureFactory $structureFactory, Structure $structure)
+    private Container $container;
+
+    public function __construct(string $appDir, EntityStructureFactory $structureFactory, Structure $structure, Container $container)
     {
-        parent::__construct('database:generate-code');
+        parent::__construct('repository:code-gen');
         $this->inflector = InflectorFactory::create()->build();
         $this->appDir = $appDir;
         $this->repoDir = 'modules/Core';
         $this->namespace = 'App\\Core';
         $this->structureFactory = $structureFactory;
         $this->structure = $structure;
+        $this->container = $container;
+    }
+
+    protected function configure(): void
+    {
+        $this->addOption('migrate', null, null, 'Migrate existing repositories to new structure');
     }
 
     public function setRepoDir(string $repoDir): self
@@ -57,7 +71,7 @@ class DatabaseCodeGenerationCommand extends Command
         foreach ($tables as $table) {
             $classNames[$table['name']] = EntityStructure::toClassCase($this->inflector, $table['name']);
         }
-        /** @var \SplFileInfo $file */
+        /** @var SplFileInfo $file */
         foreach ($rii as $file) {
             if (!str_ends_with($file->getPathname(), '.php')) {
                 continue;
@@ -66,7 +80,10 @@ class DatabaseCodeGenerationCommand extends Command
                 if ($file->getBaseName('.php') === $classNames[$table['name']] . 'Repository') {
                     $repoDirs[$table['name']] = Strings::before($file->getPathname(), '/Repositor') ?? dirname($file->getPathname(), 2);
                     $c = ClassType::fromCode(file_get_contents($file->getPathname()));
-                    $repoNamespaces[$table['name']] = Strings::before($c->getNamespace()->getName(), '\\Repositor') ?? $c->getNamespace()->getName();
+                    $repoNamespaces[$table['name']] = Strings::before(
+                        $c->getNamespace()->getName(),
+                        '\\Repositor'
+                    ) ?? $c->getNamespace()->getName();
                 }
             }
         }
@@ -76,8 +93,10 @@ class DatabaseCodeGenerationCommand extends Command
             $dbDir = $repoDirs[$table['name']] ?? ($this->appDir . '/' . $this->repoDir);
 
             $structure = $this->structureFactory->create($table['name'], $namespace, $dbDir);
+            $output->writeln("Generating {$structure->getClassName()} Entity Structure");
+            EntityWriter::writeBody($structure);
             $output->writeln("Generating {$structure->getClassName()} Entity");
-            EntityWriter::writeEntity($structure);
+            EntityWriter::writeEntity($structure, $this->container);
             $output->writeln("Generating {$structure->getClassName()} Query Base");
             QueryWriter::writeQueryBase($structure);
             $output->writeln("Generating {$structure->getClassName()} Query");
@@ -85,7 +104,7 @@ class DatabaseCodeGenerationCommand extends Command
             $output->writeln("Generating {$structure->getClassName()} Repository Base");
             RepositoryWriter::writeRepositoryBase($structure);
             $output->writeln("Generating {$structure->getClassName()} Repository");
-            RepositoryWriter::writeRepository($structure);
+            RepositoryWriter::writeRepository($structure, $input->getOption('migrate'));
             ModuleWriter::writeConfigNeon($structure, $dbDir);
         }
         return 0;

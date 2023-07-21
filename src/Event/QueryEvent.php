@@ -4,6 +4,7 @@ namespace Efabrica\NetteDatabaseRepository\Event;
 
 use Efabrica\NetteDatabaseRepository\Model\Entity;
 use Efabrica\NetteDatabaseRepository\Repository\Query;
+use Efabrica\NetteDatabaseRepository\Repository\RepositoryBehaviors;
 use Efabrica\NetteDatabaseRepository\Subscriber\EventSubscriber;
 
 abstract class QueryEvent extends RepositoryEvent
@@ -42,5 +43,13 @@ abstract class QueryEvent extends RepositoryEvent
     public function getEntities(): array
     {
         return $this->entities ??= $this->query->fetchAll();
+    }
+
+    /**
+     * @return RepositoryBehaviors Ensures behaviors that were removed after query() was called will still be available
+     */
+    public function getBehaviors(): RepositoryBehaviors
+    {
+        return $this->query->getBehaviors();
     }
 }

@@ -6,7 +6,6 @@ use Efabrica\NetteDatabaseRepository\Event\DeleteQueryEvent;
 use Efabrica\NetteDatabaseRepository\Event\InsertEventResponse;
 use Efabrica\NetteDatabaseRepository\Event\InsertRepositoryEvent;
 use Efabrica\NetteDatabaseRepository\Event\UpdateQueryEvent;
-use Efabrica\NetteDatabaseRepository\Model\EntityMeta;
 use Efabrica\NetteDatabaseRepository\Repository\Repository;
 use Efabrica\NetteDatabaseRepository\Subscriber\EventSubscriber;
 use Efabrica\NetteDatabaseRepository\Traits\SoftDelete\SoftDeleteQueryEvent;
@@ -14,34 +13,9 @@ use Efabrica\NetteDatabaseRepository\Traits\SoftDelete\SoftDeleteSubscriber;
 
 class TreeTraverseEventSubscriber extends EventSubscriber implements SoftDeleteSubscriber
 {
-    protected function getLeftColumnName(Repository $repository): string
+    public function supportsRepository(Repository $repository): bool
     {
-        $prop = EntityMeta::getAnnotatedProperty($repository->getEntityClass(), '@TreeLeft');
-        return $prop !== null ? $prop->getName() : 'lft';
-    }
-
-    protected function getRightColumnName(Repository $repository): string
-    {
-        $prop = EntityMeta::getAnnotatedProperty($repository->getEntityClass(), '@TreeRight');
-        return $prop !== null ? $prop->getName() : 'rgt';
-    }
-
-    protected function getDepthColumnName(Repository $repository): string
-    {
-        $prop = EntityMeta::getAnnotatedProperty($repository->getEntityClass(), '@TreeDepth');
-        return $prop !== null ? $prop->getName() : 'depth';
-    }
-
-    protected function getParentColumnName(Repository $repository): string
-    {
-        $prop = EntityMeta::getAnnotatedProperty($repository->getEntityClass(), '@TreeParent');
-        return $prop !== null ? $prop->getName() : 'parent_id';
-    }
-
-    protected function getSortingColumnName(Repository $repository): string
-    {
-        $prop = EntityMeta::getAnnotatedProperty($repository->getEntityClass(), '@TreeSorting');
-        return $prop !== null ? $prop->getName() : 'sorting';
+        return $repository->behaviors()->has(TreeTraverseBehavior::class);
     }
 
     public function onInsert(InsertRepositoryEvent $event): InsertEventResponse
@@ -72,33 +46,34 @@ class TreeTraverseEventSubscriber extends EventSubscriber implements SoftDeleteS
 
     protected function onTreeStructure(Repository $repository): void
     {
-        $select = 'id, ' . $this->getParentColumnName($repository) . ', ' . $this->getSortingColumnName($repository);
-        $order = $this->getSortingColumnName($repository);
+        /** @var TreeTraverseBehavior $behavior */
+        $behavior = $repository->behaviors()->get(TreeTraverseBehavior::class);
+        $order = $behavior->getSortingColumn();
+        $select = 'id, ' . $behavior->getParentColumn() . ', ' . $order;
 
         $treeStructure = [];
         foreach ($repository->query()->select($select)->order($order) as $row) {
-            if (!isset($treeStructure[$row[$this->getParentColumnName($repository)]])) {
-                $treeStructure[$row[$this->getParentColumnName($repository)]] = [];
+            if (!isset($treeStructure[$row[$behavior->getParentColumn()]])) {
+                $treeStructure[$row[$behavior->getParentColumn()]] = [];
             }
-            $treeStructure[$row[$this->getParentColumnName($repository)]][] = $row['id'];
+            $treeStructure[$row[$behavior->getParentColumn()]][] = $row['id'];
         }
-        $this->updateTreeStructure($treeStructure, $repository);
+        $this->updateTreeStructure($treeStructure, $repository, $behavior);
     }
 
-    /**
-     * Update tree structure, one request per row :-(
-     * @param int|null $id
-     * @param int      $value
-     * @param int      $depth
-     * @return int
-     */
-    protected function updateTreeStructure(array &$treeStructure, Repository $repository, int $id = null, int $value = 0, int $depth = 1): int
-    {
+    protected function updateTreeStructure(
+        array &$treeStructure,
+        Repository $repository,
+        TreeTraverseBehavior $behavior,
+        int $id = null,
+        int $value = 0,
+        int $depth = 1
+    ): int {
         // Update structure from null parent (root)
         if ($id === null) {
             if (isset($treeStructure[$id])) {
                 foreach ($treeStructure[$id] as $subId) {
-                    $value = $this->updateTreeStructure($treeStructure, $repository, $subId, $value, $depth);
+                    $value = $this->updateTreeStructure($treeStructure, $repository, $behavior, $subId, $value, $depth);
                     $value++;
                 }
             }
@@ -109,15 +84,15 @@ class TreeTraverseEventSubscriber extends EventSubscriber implements SoftDeleteS
         $lft = $value + 1;
         if (isset($treeStructure[$id])) {
             foreach ($treeStructure[$id] as $subId) {
-                $value = $this->updateTreeStructure($treeStructure, $repository, $subId, $value + 1, $depth + 1);
+                $value = $this->updateTreeStructure($treeStructure, $repository, $behavior, $subId, $value + 1, $depth + 1);
             }
         }
 
         $entity = $repository->find($id);
         if ($entity !== null) {
-            $entity[$this->getLeftColumnName($repository)] = $lft;
-            $entity[$this->getRightColumnName($repository)] = $value + 2;
-            $entity[$this->getDepthColumnName($repository)] = $depth;
+            $entity[$behavior->getLeftColumn()] = $lft;
+            $entity[$behavior->getRightColumn()] = $value + 2;
+            $entity[$behavior->getDepthColumn()] = $depth;
             $repository->update($entity);
         }
         return $value + 1;

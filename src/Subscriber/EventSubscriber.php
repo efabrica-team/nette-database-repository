@@ -21,7 +21,7 @@ abstract class EventSubscriber implements InsertEventSubscriber, UpdateEventSubs
      * @param Repository $repository
      * @return bool should the event subscriber be used for this repository?
      * If it returns false, the event subscriber will not be added to the repository.
-     * @see Events::forRepository()
+     * @see RepositoryEvents::forRepository()
      */
     public function supportsRepository(Repository $repository): bool
     {
@@ -63,7 +63,7 @@ abstract class EventSubscriber implements InsertEventSubscriber, UpdateEventSubs
     /**
      * Called when an entity is loaded from the database.
      */
-    public function onCreate(Entity $entity): void
+    public function onLoad(Entity $entity, Repository $repository): void
     {
     }
 }

@@ -8,14 +8,11 @@ use Efabrica\NetteDatabaseRepository\Event\InsertRepositoryEvent;
 use Efabrica\NetteDatabaseRepository\Event\SelectQueryEvent;
 use Efabrica\NetteDatabaseRepository\Event\SelectQueryResponse;
 use Efabrica\NetteDatabaseRepository\Event\UpdateQueryEvent;
-use Efabrica\NetteDatabaseRepository\Model\EntityMeta;
 use Efabrica\NetteDatabaseRepository\Repository\Repository;
 use Efabrica\NetteDatabaseRepository\Subscriber\EventSubscriber;
 
 class AccountEventSubscriber extends EventSubscriber
 {
-    public const ANNOTATION = '@AccountId';
-
     private IrisUser $irisUser;
 
     public function __construct(IrisUser $irisUser)
@@ -25,7 +22,7 @@ class AccountEventSubscriber extends EventSubscriber
 
     public function supportsRepository(Repository $repository): bool
     {
-        return EntityMeta::getAnnotatedProperty($repository->getEntityClass(), self::ANNOTATION) !== null;
+        return $repository->behaviors()->has(AccountBehavior::class);
     }
 
     private function getAccountId(): ?string
@@ -38,10 +35,10 @@ class AccountEventSubscriber extends EventSubscriber
 
     public function onSelect(SelectQueryEvent $event): SelectQueryResponse
     {
-        $field = EntityMeta::getAnnotatedProperty($event->getEntityClass(), self::ANNOTATION);
-        if ($field === null) {
-            return $event->handle();
-        }
+        /** @var AccountBehavior $behavior */
+        $behavior = $event->getRepository()->behaviors()->get(AccountBehavior::class);
+        $field = $behavior->getAccountField();
+
         $permissions = $this->irisUser->getByKey('permissions');
         if (isset($permissions['superuser'])) {
             return $event->handle();
@@ -49,36 +46,43 @@ class AccountEventSubscriber extends EventSubscriber
 
         $query = $event->getQuery();
         if (count($this->irisUser->getAccounts()) === 0) {
-            $query->where($query->getRepository()->getTableName() . '.' . $field->getName(), null);
+            $query->where($query->getRepository()->getTableName() . '.' . $field, null);
         } else {
-            $query->where($query->getRepository()->getTableName() . '.' . $field->getName(), $this->irisUser->getAccounts());
+            $query->where($query->getRepository()->getTableName() . '.' . $field, $this->irisUser->getAccounts());
         }
         return $event->handle();
     }
 
     public function onInsert(InsertRepositoryEvent $event): InsertEventResponse
     {
-        $prop = EntityMeta::getAnnotatedProperty($event->getEntityClass(), self::ANNOTATION);
-        if ($prop !== null) {
-            foreach ($event->getEntities() as $entity) {
-                if (!isset($entity[$prop->getName()])) {
-                    $entity[$prop->getName()] = $this->getAccountId();
-                }
+        /** @var AccountBehavior $behavior */
+        $behavior = $event->getRepository()->behaviors()->get(AccountBehavior::class);
+        $field = $behavior->getAccountField();
+
+        $permissions = $this->irisUser->getByKey('permissions');
+        if (isset($permissions['superuser'])) {
+            return $event->handle();
+        }
+
+        foreach ($event->getEntities() as $entity) {
+            if (!isset($entity->$field)) {
+                $entity->$field = $this->getAccountId();
             }
         }
+
         return $event->handle();
     }
 
     public function onUpdate(UpdateQueryEvent $event, array &$data): int
     {
-        $field = EntityMeta::getAnnotatedProperty($event->getEntityClass(), self::ANNOTATION);
-        if ($field === null) {
-            return $event->handle($data);
-        }
-        if (array_key_exists($field->getName(), $data) && empty($data[$field->getName()])) {
-            $data[$field->getName()] = null;
+        /** @var AccountBehavior $behavior */
+        $behavior = $event->getRepository()->behaviors()->get(AccountBehavior::class);
+        $field = $behavior->getAccountField();
+
+        if (array_key_exists($field, $data) && empty($data[$field])) {
+            $data[$field] = null;
         } else {
-            $data[$field->getName()] = $this->getAccountId();
+            $data[$field] = $this->getAccountId();
         }
         return $event->handle($data);
     }

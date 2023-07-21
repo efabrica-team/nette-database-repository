@@ -5,6 +5,7 @@ namespace Efabrica\NetteDatabaseRepository\Event;
 use Efabrica\NetteDatabaseRepository\Model\Entity;
 use Efabrica\NetteDatabaseRepository\Repository\Query;
 use Efabrica\NetteDatabaseRepository\Repository\Repository;
+use Efabrica\NetteDatabaseRepository\Repository\RepositoryBehaviors;
 use Efabrica\NetteDatabaseRepository\Subscriber\EventSubscriber;
 
 /**
@@ -50,6 +51,11 @@ abstract class RepositoryEvent
     public function getRepository(): Repository
     {
         return $this->repository;
+    }
+
+    public function getBehaviors(): RepositoryBehaviors
+    {
+        return $this->repository->behaviors();
     }
 
     /**

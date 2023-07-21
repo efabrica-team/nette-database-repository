@@ -4,11 +4,12 @@ namespace Efabrica\NetteDatabaseRepository\Repository;
 
 use Efabrica\NetteDatabaseRepository\Event\DeleteQueryEvent;
 use Efabrica\NetteDatabaseRepository\Model\Entity;
-use Efabrica\NetteDatabaseRepository\Subscriber\Events;
+use Efabrica\NetteDatabaseRepository\Subscriber\RepositoryEvents;
 use LogicException;
 use Nette\Application\BadRequestException;
 use Nette\Database\Explorer;
 use Nette\Database\Table\ActiveRow;
+use Nette\Utils\Arrays;
 use PDOException;
 use Throwable;
 
@@ -25,10 +26,14 @@ abstract class Repository
     /** @var class-string<E> */
     private string $entityClass;
 
-    private Events $events;
+    private RepositoryEvents $events;
 
     /** @var class-string<Q> */
     private string $queryClass;
+
+    private RepositoryBehaviors $behaviors;
+
+    private RepositoryManager $manager;
 
     /**
      * @param class-string<E> $entityClass
@@ -38,21 +43,20 @@ abstract class Repository
     {
         $this->explorer = $deps->getExplorer();
         $this->tableName = $tableName;
-        $this->events = $deps->getEvents()->forRepository($this);
         assert(is_a($entityClass, Entity::class, true));
         $this->entityClass = $entityClass;
         assert(is_a($queryClass, Query::class, true));
         $this->queryClass = $queryClass;
+        $this->behaviors = new RepositoryBehaviors();
+        $this->setupBehaviors($this->behaviors);
+        $this->events = $deps->getEvents()->forRepository($this);
+        $this->manager = $deps->getManager();
     }
 
     /**
-     * @param bool $events
-     * @return Query<E>&Q
+     * Do $behaviors->add() here.
      */
-    public function query(bool $events = true): Query
-    {
-        return new ($this->queryClass)($this, $events);
-    }
+    abstract protected function setupBehaviors(RepositoryBehaviors $behaviors): void;
 
     /********************************
      * Fetching entities
@@ -95,7 +99,6 @@ abstract class Repository
         return $this->findBy($conditions)->sum($column);
     }
 
-
     /**
      * Makes sure the returned entity is not null and exists.
      * Made to be used in presenter actions. Throws BadRequestException if not found.
@@ -119,18 +122,44 @@ abstract class Repository
 
     /**
      * @param E ...$entities
+     * @return E|int
      */
-    public function insert(Entity ...$entities): void
+    public function insert(iterable ...$entities)
     {
-        foreach ($entities as $entity) {
-            $this->query()->insert($entity);
-        }
+        return $this->query()->insert($entities);
     }
 
     /**
+     * @param E|array|string|int $row Entity, primary value (ID), or array where conditions
+     * @param iterable           $data Data to update
+     * @param bool               $events Whether to fire events
+     * @return int Number of affected rows
+     */
+    public function update($row, iterable $data, bool $events = true): int
+    {
+        $query = $this->query($events);
+        if (is_scalar($row)) {
+            $query->wherePrimary($row);
+        } elseif ($row instanceof ActiveRow) {
+            $query->wherePrimary($row->getPrimary());
+        } elseif (is_array($row)) {
+            if (Arrays::isList($row)) {
+                assert(reset($row) instanceof ActiveRow);
+                $query->whereRows($row);
+            } else {
+                $query->where($row);
+            }
+        } else {
+            throw new LogicException('Invalid row to update');
+        }
+        return $query->update($data);
+    }
+
+    /**
+     * Update all entities by their modified values, optimized for least queries
      * @param E&Entity ...$entities
      */
-    public function update(Entity ...$entities): int
+    public function updateEntities(Entity ...$entities): int
     {
         // Group entities by diff to reduce number of queries
         if (count($entities) === 1) {
@@ -140,45 +169,73 @@ abstract class Repository
             foreach ($entities as $entity) {
                 $diff = $entity->diff();
                 ksort($diff);
-                $chunks[serialize($diff)][] = $entity;
+                $found = false;
+                foreach ($chunks as $chunk) {
+                    if ($chunk[0]->diff() === $diff) {
+                        $chunk[] = $entity;
+                        $found = true;
+                        break;
+                    }
+                }
+                if (!$found) {
+                    $chunks[] = [$entity];
+                }
             }
         }
+        $count = 0;
         /** @var Entity[] $chunk */
         foreach ($chunks as $chunk) {
-            $this->query()->where($chunk)->update($chunk[0]->diff());
+            $count += $this->query()->whereRows($chunk)->update($chunk[0]->diff());
         }
-        return count($entities);
+        return $count;
     }
 
-    /**
-     * @deprecated Use Entity setters ideally or query()->update()
-     * @param array $conditions
-     * @param array $values
-     * @return int
-     */
-    public function updateBy(array $conditions, array $values): int
+    public function delete(iterable ...$entities): int
     {
-        return $this->query()->where($conditions)->update($values);
-    }
-
-    /**
-     * @param E&Entity ...$entities
-     */
-    public function delete(Entity ...$entities): int
-    {
-        $query = $this->query()->where($entities);
+        $query = $this->query()->whereRows(...$entities);
         return (new DeleteQueryEvent($query, $entities))->handle();
     }
 
     /********************************
      * Getters
      ******************************/
+
+    /**
+     * @return Q
+     */
+    public function query(bool $events = true): Query
+    {
+        return new ($this->queryClass)($this, $events);
+    }
+
+    /**
+     * @return iterable<E>
+     */
+    public function fetchAll(bool $events = true): iterable
+    {
+        return $this->query($events)->fetchAll();
+    }
+
+    public function fetchPairs(?string $key = null, ?string $value = null, ?string $order = null, array $where = []): array
+    {
+        $query = $this->query()->where($where);
+        if ($order !== null) {
+            $query->order($order);
+        }
+        return $query->fetchPairs($key, $value);
+    }
+
+    public function behaviors(): RepositoryBehaviors
+    {
+        return $this->behaviors;
+    }
+
     public function getExplorer(): Explorer
     {
         return $this->explorer;
     }
 
-    public function getEvents(): Events
+    public function getEvents(): RepositoryEvents
     {
         return $this->events;
     }
@@ -186,6 +243,11 @@ abstract class Repository
     public function getTableName(): string
     {
         return $this->tableName;
+    }
+
+    public function getManager(): RepositoryManager
+    {
+        return $this->manager;
     }
 
     /**
@@ -197,7 +259,7 @@ abstract class Repository
         if (!is_array($primary)) {
             return [$primary];
         }
-        return $primary;
+        return array_values($primary);
     }
 
     /**
@@ -216,7 +278,7 @@ abstract class Repository
         $entity = new ($this->entityClass)($row, $this->query());
         $events = $query !== null ? $query->getEvents() : $this->getEvents();
         foreach ($events as $event) {
-            $event->onCreate($entity);
+            $event->onLoad($entity, $this);
         }
         return $entity;
     }
@@ -264,7 +326,7 @@ abstract class Repository
      * @return T
      * @throws Throwable
      */
-    final public function retry(callable $callback, int $retryTimes = 3, bool $reconnect = true)
+    final public function ensure(callable $callback, int $retryTimes = 3, bool $reconnect = true)
     {
         $attempts = 1;
         while ($attempts < $retryTimes) {
@@ -285,7 +347,6 @@ abstract class Repository
     /*******************************
      * Deprecations
      ******************************/
-
 
     /**
      * @deprecated Use query() instead
@@ -314,18 +375,6 @@ abstract class Repository
     }
 
     /**
-     * @deprecated use query()->fetchPairs() instead
-     */
-    final public function fetchPairs(string $key, ?string $value = null, ?string $order = null, array $where = []): array
-    {
-        $query = $this->query()->where($where);
-        if ($order !== null) {
-            $query->order($order);
-        }
-        return $query->fetchPairs($key, $value);
-    }
-
-    /**
      * @deprecated use insert() instead
      */
     final public function multiInsert(array $data): int
@@ -342,9 +391,9 @@ abstract class Repository
      * @deprecated use retry() instead
      * @template T
      */
-    final public function ensure(callable $callback, int $retryTimes = 2)
+    final public function retry(callable $callback, int $retryTimes = 2)
     {
-        return $this->retry($callback, $retryTimes);
+        return $this->ensure($callback, $retryTimes, false);
     }
 
     /**

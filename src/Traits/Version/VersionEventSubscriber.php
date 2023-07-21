@@ -13,6 +13,7 @@ use Efabrica\NetteDatabaseRepository\Repository\Repository;
 use Efabrica\NetteDatabaseRepository\Subscriber\EventSubscriber;
 use Efabrica\NetteDatabaseRepository\Traits\SoftDelete\SoftDeleteQueryEvent;
 use Efabrica\NetteDatabaseRepository\Traits\SoftDelete\SoftDeleteSubscriber;
+use Nette\DI\Container;
 use Nette\Utils\Json;
 
 class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscriber
@@ -21,13 +22,18 @@ class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscr
 
     protected string $transactionId;
 
-    private VersionRepository $versionRepository;
+    private ?VersionRepository $versionRepository;
 
-    public function __construct(VersionRepository $versionRepository, IrisUser $irisUser)
+    public function __construct(Container $container, IrisUser $irisUser)
     {
-        $this->versionRepository = $versionRepository;
+        $this->versionRepository = $container->getByType(VersionRepository::class, false);
         $this->irisUser = $irisUser;
         $this->transactionId = uniqid('', true);
+    }
+
+    public function supportsRepository(Repository $repository): bool
+    {
+        return $repository->behaviors()->has(VersionBehavior::class);
     }
 
     /**

@@ -5,7 +5,7 @@ namespace Efabrica\NetteDatabaseRepository\CodeGen;
 use DateTimeInterface;
 use Doctrine\Inflector\Inflector;
 use Doctrine\Inflector\InflectorFactory;
-use Efabrica\NetteDatabaseRepository\Model\EntityProperty;
+use Efabrica\NetteDatabaseRepository\CodeGen\EntityProperty;
 use LogicException;
 use Nette\Database\Structure;
 use Nette\Utils\Strings;
@@ -41,6 +41,7 @@ class EntityStructureFactory
     ];
 
     private Structure $structure;
+
     private Inflector $inflector;
 
     public function __construct(Structure $structure)
@@ -52,6 +53,7 @@ class EntityStructureFactory
     public function create(string $table, string $namespace, string $dbDir): EntityStructure
     {
         $columns = $this->structure->getColumns($table);
+        $primaries = [];
         $properties = [];
         foreach ($columns as $column) {
             $type = Strings::lower($column['nativetype']);
@@ -64,12 +66,12 @@ class EntityStructureFactory
                 }
                 $nativeType .= ']';
             }
-            $annotation = '';
+            $annotations = [];
 
-            if ($type === 'json') {
-                $type = 'array';
-                $annotation .= ' @JSON';
-            } elseif ($type === 'tinyint' && $column['size'] === 1) {
+            if ($column['default'] !== null) {
+                $annotations[] = '@Default(' . var_export($column['default'], true) . ')';
+            }
+            if ($type === 'tinyint' && $column['size'] === 1) {
                 $type = 'bool';
             } elseif (isset(self::TYPE_MAP[$type])) {
                 $type = self::TYPE_MAP[$type];
@@ -79,8 +81,15 @@ class EntityStructureFactory
             if ($column['nullable']) {
                 $type .= '|null';
             }
-            $properties[$column['name']] = new EntityProperty('', $type, $column['name'], $nativeType, $annotation);
+            if ($column['primary']) {
+                $annotations[] = '@Primary';
+                $primaries[$column['name']] = $type;
+            }
+            if ($column['autoincrement']) {
+                $annotations[] = '@AutoIncrement';
+            }
+            $properties[$column['name']] = new EntityProperty('', $type, $column['name'], $nativeType, implode(" ", $annotations));
         }
-        return new EntityStructure($properties, $table, $namespace, $dbDir, $this->inflector);
+        return new EntityStructure($properties, $table, $namespace, $dbDir, $this->inflector, $primaries);
     }
 }

@@ -1,0 +1,16 @@
+services:
+    repoCodeGen: Efabrica\NetteDatabaseRepository\CodeGen\RepositoryCodeGenerationCommand(%appDir%)
+    - Efabrica\NetteDatabaseRepository\CodeGen\EntityStructureFactory
+    repoDeps: Efabrica\NetteDatabaseRepository\Repository\RepositoryDependencies
+    repoManager: Efabrica\NetteDatabaseRepository\Repository\RepositoryManager
+
+    accountEventSubscriber: Efabrica\NetteDatabaseRepository\Traits\Account\AccountEventSubscriber
+    aesEventSubscriber: Efabrica\NetteDatabaseRepository\Traits\AES\AESEventSubscriber
+    castEventSubscriber: Efabrica\NetteDatabaseRepository\Traits\Cast\CastEventSubscriber
+    dateEventSubscriber: Efabrica\NetteDatabaseRepository\Traits\Date\DateEventSubscriber
+    keepDefaultEventSubscriber: Efabrica\NetteDatabaseRepository\Traits\KeepDefault\KeepDefaultEventSubscriber
+    lastManStandingEventSubscriber: Efabrica\NetteDatabaseRepository\Traits\LastManStanding\LastManStandingEventSubscriber
+    ownerEventSubscriber: Efabrica\NetteDatabaseRepository\Traits\Owner\OwnerEventSubscriber
+    softDeleteEventSubscriber: Efabrica\NetteDatabaseRepository\Traits\SoftDelete\SoftDeleteEventSubscriber
+    treeTraverseEventSubscriber: Efabrica\NetteDatabaseRepository\Traits\TreeTraverse\TreeTraverseEventSubscriber
+    versionEventSubscriber: Efabrica\NetteDatabaseRepository\Traits\Version\VersionEventSubscriber
