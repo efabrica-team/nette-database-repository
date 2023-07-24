@@ -60,7 +60,7 @@ class Query extends Selection
         }
         if (is_array($data)) {
             if (Arrays::isList($data)) {
-                $data = array_map(fn ($row) => $row instanceof Entity ? $row : $this->repository->createRow($row), $data);
+                $data = array_map(fn($row) => $row instanceof Entity ? $row : $this->repository->createRow($row), $data);
             } else {
                 $data = [$this->repository->createRow($data)];
             }
@@ -194,6 +194,18 @@ class Query extends Selection
             $where[] = implode(' AND ', $key);
         }
         parent::where(implode(' OR ', $where), ...$values);
+        return $this;
+    }
+
+    public function search(array $columns, string $search): self
+    {
+        $where = [];
+        $values = [];
+        foreach ($columns as $column) {
+            $where[] = $column . ' LIKE ?';
+            $values[] = "%$search%";
+        }
+        parent::where('(' . implode(') OR (', $where) . ')', ...$values);
         return $this;
     }
 

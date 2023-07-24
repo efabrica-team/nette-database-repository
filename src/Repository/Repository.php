@@ -99,6 +99,11 @@ abstract class Repository
         return $this->findBy($conditions)->sum($column);
     }
 
+    public function search(array $columns, string $search, bool $defaultWhere = true): Query
+    {
+        return $this->query($defaultWhere)->search($columns, $search);
+    }
+
     /**
      * Makes sure the returned entity is not null and exists.
      * Made to be used in presenter actions. Throws BadRequestException if not found.
