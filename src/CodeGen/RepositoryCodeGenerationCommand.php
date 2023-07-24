@@ -43,6 +43,28 @@ class RepositoryCodeGenerationCommand extends Command
         $this->container = $container;
     }
 
+    public function findRepoDirs(array $tables, array &$repoDirs, array &$repoNamespaces): void
+    {
+        $rii = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($this->appDir));
+        /** @var SplFileInfo $file */
+        foreach ($rii as $file) {
+            if (!str_ends_with($file->getPathname(), '.php')) {
+                continue;
+            }
+            foreach ($tables as $table) {
+                $className = EntityStructure::toClassCase($this->inflector, $table['name']);
+                if ($file->getBaseName('.php') === $className . 'Repository') {
+                    $c = ClassType::fromCode(file_get_contents($file->getPathname()));
+                    $repoDirs[$table['name']] = Strings::before($file->getPathname(), '/Repositor') ?? dirname($file->getPathname(), 2);
+                    $repoNamespaces[$table['name']] = Strings::before(
+                        $c->getNamespace()->getName(),
+                        '\\Repositor'
+                    ) ?? $c->getNamespace()->getName();
+                }
+            }
+        }
+    }
+
     protected function configure(): void
     {
         $this->addOption('migrate', null, null, 'Migrate existing repositories to new structure');
@@ -63,30 +85,13 @@ class RepositoryCodeGenerationCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $tables = $this->structure->getTables();
-        $rii = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($this->appDir));
-        $files = [];
-        $classNames = [];
         $repoDirs = [];
         $repoNamespaces = [];
         foreach ($tables as $table) {
             $classNames[$table['name']] = EntityStructure::toClassCase($this->inflector, $table['name']);
         }
-        /** @var SplFileInfo $file */
-        foreach ($rii as $file) {
-            if (!str_ends_with($file->getPathname(), '.php')) {
-                continue;
-            }
-            foreach ($tables as $table) {
-                if ($file->getBaseName('.php') === $classNames[$table['name']] . 'Repository') {
-                    $repoDirs[$table['name']] = Strings::before($file->getPathname(), '/Repositor') ?? dirname($file->getPathname(), 2);
-                    $c = ClassType::fromCode(file_get_contents($file->getPathname()));
-                    $repoNamespaces[$table['name']] = Strings::before(
-                        $c->getNamespace()->getName(),
-                        '\\Repositor'
-                    ) ?? $c->getNamespace()->getName();
-                }
-            }
-        }
+
+        $this->findRepoDirs($tables, $classNames, $repoDirs, $repoNamespaces);
 
         foreach ($tables as $table) {
             $namespace = $repoNamespaces[$table['name']] ?? $this->namespace;

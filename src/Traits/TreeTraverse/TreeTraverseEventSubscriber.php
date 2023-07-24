@@ -88,13 +88,11 @@ class TreeTraverseEventSubscriber extends EventSubscriber implements SoftDeleteS
             }
         }
 
-        $entity = $repository->find($id);
-        if ($entity !== null) {
-            $entity[$behavior->getLeftColumn()] = $lft;
-            $entity[$behavior->getRightColumn()] = $value + 2;
-            $entity[$behavior->getDepthColumn()] = $depth;
-            $repository->update($entity);
-        }
+        $repository->update($id, [
+            $behavior->getLeftColumn() => $lft,
+            $behavior->getRightColumn() => $value + 2,
+            $behavior->getDepthColumn() => $depth,
+        ]);
         return $value + 1;
     }
 }

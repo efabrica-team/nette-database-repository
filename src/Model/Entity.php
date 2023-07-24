@@ -34,6 +34,8 @@ abstract class Entity extends ActiveRow
             self::$data = new ReflectionProperty(ActiveRow::class, 'data');
             self::$data->setAccessible(true);
         }
+
+        // if entity is new, insert it
         if (self::$data->getValue($this) === []) {
             $insert = $query->insert($this->_modified);
             if ($insert instanceof ActiveRow) {
@@ -120,7 +122,7 @@ abstract class Entity extends ActiveRow
     }
 
     /**
-     * @deprecated Do not use, call repositories directly.
+     * @deprecated Do not use, use $this->query($repoClass)->where($key, $this->getPrimary())->fetch()
      */
     public function ref(string $key, ?string $throughColumn = null): ?ActiveRow
     {
@@ -128,7 +130,7 @@ abstract class Entity extends ActiveRow
     }
 
     /**
-     * @deprecated Do not use, call repositories directly.
+     * @deprecated Do not use, use $this->query($repoClass)->where($key, $this->getPrimary())->fetchAll()
      */
     public function related(string $key, ?string $throughColumn = null): GroupedSelection
     {

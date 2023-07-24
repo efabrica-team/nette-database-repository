@@ -192,7 +192,7 @@ abstract class Repository
 
     public function delete(iterable ...$entities): int
     {
-        $query = $this->query()->whereRows(...$entities);
+        $query = $this->query()->whereRows(...$entities)->delete();
         return (new DeleteQueryEvent($query, $entities))->handle();
     }
 
@@ -388,7 +388,7 @@ abstract class Repository
      * @param int           $retryTimes
      * @return T
      * @throws Throwable
-     * @deprecated use retry() instead
+     * @deprecated use ensure() instead
      * @template T
      */
     final public function retry(callable $callback, int $retryTimes = 2)

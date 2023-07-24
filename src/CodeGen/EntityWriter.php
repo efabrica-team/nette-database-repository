@@ -39,7 +39,9 @@ class EntityWriter
             $repo = $container->getByName(ModuleWriter::getRepoServiceName($structure));
             foreach ($repo->behaviors()->all() as $behavior) {
                 if ($behavior instanceof CastBehavior) {
-                    $casts[$behavior->getField()] = $behavior->getCastType();
+                    foreach ($behavior->getFields() as $field) {
+                        $casts[$field] = $behavior->getCastType();
+                    }
                 }
             }
         }

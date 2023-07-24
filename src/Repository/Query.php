@@ -219,9 +219,9 @@ class Query extends Selection
 
     /**
      * @param int $chunkSize
-     * @return Generator<E> foreach($query->fetchAllChunked() as $entity) { ... }
+     * @return Generator<E> foreach($query->fetchAllChunked() as $entity) { $entity->update(...); }
      */
-    public function fetchAllChunked(int $chunkSize = self::CHUNK_SIZE): Generator
+    public function fetchChunked(int $chunkSize = self::CHUNK_SIZE): Generator
     {
         foreach ($this->chunks($chunkSize) as $chunk) {
             yield from $chunk;
@@ -234,20 +234,27 @@ class Query extends Selection
      */
     public function chunks(int $chunkSize = self::CHUNK_SIZE): Generator
     {
-        $page = 1;
         $limit = $this->sqlBuilder->getLimit();
-        $chunk = (clone $this)->page(1, $chunkSize);
+        $offset = $this->sqlBuilder->getOffset();
+        $chunk = (clone $this)->page($offset, $chunkSize);
         while (true) {
             yield $chunk;
             if (count($chunk->fetchAll()) < $chunkSize) {
                 break;
             }
-            $chunk = (clone $this)->page(++$page, $chunkSize);
+            $offset += $chunkSize;
+            if ($limit > 0 && $offset > $limit) {
+                break;
+            }
+            $chunk = (clone $this)->limit($chunkSize, $offset);
         }
     }
 
     public function count(?string $column = null): int
     {
-        return parent::count($column ?? '*');
+        if ($column === null && $this->rows === null) {
+            $column = '*';
+        }
+        return parent::count($column);
     }
 }

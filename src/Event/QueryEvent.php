@@ -29,9 +29,6 @@ abstract class QueryEvent extends RepositoryEvent
         parent::__construct($query->getRepository());
     }
 
-    /**
-     * @return Query<Entity>
-     */
     public function getQuery(): Query
     {
         return $this->query;
@@ -40,9 +37,9 @@ abstract class QueryEvent extends RepositoryEvent
     /**
      * @return Entity[]
      */
-    public function getEntities(): array
+    public function getEntities(): iterable
     {
-        return $this->entities ??= $this->query->fetchAll();
+        return $this->entities ??= $this->query;
     }
 
     /**

@@ -96,3 +96,32 @@ $repository->delete($id);
 
 #### DateBehavior
 DateBehavior ensures that the `created_at` and `updated_at` columns are automatically filled with the current date and time on insert and update.
+
+#### KeepDefaultBehavior
+KeepDefaultBehavior ensures that there is at least one truthy value in the default column. It is useful for columns that are used as flags.
+
+#### SoftDeleteBehavior
+SoftDeleteBehavior ensures that the `deleted_at` column is automatically filled with the current date and time on delete.
+
+#### LastManStandingBehavior
+LastManStandingBehavior ensures that there is at least one row in the table for the specified query.
+
+#### TreeTraverseBehavior
+TreeTraverseBehavior ensures that the `lft` and `rgt` columns are automatically filled with the correct values on insert and update.
+
+#### SortingTrait
+SortingTrait adds moveUp(), moveDown(), insertBefore(), insertAfter() methods to the repository.
+
+## Code Generator
+
+Code generation is fully optional, but it is recommended to use it. 
+
+For every table in the database, it will generate these classes: (Example: `person` table)
+- `Repository\Generated\Repository\PersonRepositoryBase` - Repository base class, holds typehints for `PersonQuery` and `Person` entity. (abstract)
+- `Repository\Generated\Query\PersonQuery` - Query class, holds typehints for `Person` entity. (abstract)
+- `Repository\Generated\Entity\Person` - Entity class, holds types for columns and public constants for column names. (final)
+
+These classes are generated only if they don't exist. If they exist, they will not be overwritten:
+- `Repository\PersonRepository` - extends `PersonRepositoryBase`. Here you write your custom repository methods. (final)
+- `Repository\Query\PersonQuery` - extends `PersonQuery`. Here you write your custom query methods. (final)
+- `Repository\Entity\PersonBody` - trait that is inserted into `Person` entity. Here you write your custom entity methods. (trait)
