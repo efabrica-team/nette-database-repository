@@ -1,6 +1,6 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\Event;
+namespace Efabrica\NetteRepository\Event;
 
 final class InsertEventResponse extends RepositoryEventResponse
 {

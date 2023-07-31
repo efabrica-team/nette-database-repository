@@ -1,6 +1,6 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\Traits;
+namespace Efabrica\NetteRepository\Traits;
 
 abstract class RepositoryBehavior
 {

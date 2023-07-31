@@ -1,10 +1,10 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\Traits\Date;
+namespace Efabrica\NetteRepository\Traits\Date;
 
 use DateTimeImmutable;
 use DateTimeInterface;
-use Efabrica\NetteDatabaseRepository\Traits\RepositoryBehavior;
+use Efabrica\NetteRepository\Traits\RepositoryBehavior;
 
 /**
  * This behavior will automatically set createdAt and updatedAt fields on insert and update.

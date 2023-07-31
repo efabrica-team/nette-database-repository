@@ -1,9 +1,9 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\Traits\KeepDefault;
+namespace Efabrica\NetteRepository\Traits\KeepDefault;
 
-use Efabrica\NetteDatabaseRepository\Repository\Query;
-use Efabrica\NetteDatabaseRepository\Traits\RepositoryBehavior;
+use Efabrica\NetteRepository\Repository\Query;
+use Efabrica\NetteRepository\Traits\RepositoryBehavior;
 
 /**
  * This behavior will ensure at least one row in $query has the $field set to true.

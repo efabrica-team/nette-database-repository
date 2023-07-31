@@ -1,8 +1,8 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\CodeGen;
+namespace Efabrica\NetteRepository\CodeGen;
 
-use Efabrica\NetteDatabaseRepository\Repository\Query;
+use Efabrica\NetteRepository\Repository\Query;
 use Nette\PhpGenerator\ClassType;
 
 class QueryWriter

@@ -1,6 +1,6 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\CodeGen;
+namespace Efabrica\NetteRepository\CodeGen;
 
 use Doctrine\Inflector\Inflector;
 use Doctrine\Inflector\InflectorFactory;
@@ -91,17 +91,20 @@ class RepositoryCodeGenerationCommand extends Command
             $classNames[$table['name']] = EntityStructure::toClassCase($this->inflector, $table['name']);
         }
 
-        $this->findRepoDirs($tables, $classNames, $repoDirs, $repoNamespaces);
+        $this->findRepoDirs($tables, $repoDirs, $repoNamespaces);
 
+        $structures = [];
         foreach ($tables as $table) {
             $namespace = $repoNamespaces[$table['name']] ?? $this->namespace;
             $dbDir = $repoDirs[$table['name']] ?? ($this->appDir . '/' . $this->repoDir);
+            $structures[$table['name']] = $this->structureFactory->create($table['name'], $namespace, $dbDir);
+        }
 
-            $structure = $this->structureFactory->create($table['name'], $namespace, $dbDir);
+        foreach ($structures as $structure) {
             $output->writeln("Generating {$structure->getClassName()} Entity Structure");
             EntityWriter::writeBody($structure);
             $output->writeln("Generating {$structure->getClassName()} Entity");
-            EntityWriter::writeEntity($structure, $this->container);
+            EntityWriter::writeEntity($structure, $structures);
             $output->writeln("Generating {$structure->getClassName()} Query Base");
             QueryWriter::writeQueryBase($structure);
             $output->writeln("Generating {$structure->getClassName()} Query");

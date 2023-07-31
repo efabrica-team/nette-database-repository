@@ -1,9 +1,12 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\Subscriber\Inline;
+namespace Efabrica\NetteRepository\Subscriber\Inline;
 
-use Efabrica\NetteDatabaseRepository\Event\UpdateQueryEvent;
+use Efabrica\NetteRepository\Event\UpdateQueryEvent;
 
+/**
+ * Implement this in your repository to handle update events for a specific case.
+ */
 interface UpdateEventSubscriber
 {
     public function onUpdate(UpdateQueryEvent $event, array &$data): int;

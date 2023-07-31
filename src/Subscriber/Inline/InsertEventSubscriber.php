@@ -1,10 +1,13 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\Subscriber\Inline;
+namespace Efabrica\NetteRepository\Subscriber\Inline;
 
-use Efabrica\NetteDatabaseRepository\Event\InsertEventResponse;
-use Efabrica\NetteDatabaseRepository\Event\InsertRepositoryEvent;
+use Efabrica\NetteRepository\Event\InsertEventResponse;
+use Efabrica\NetteRepository\Event\InsertRepositoryEvent;
 
+/**
+ * Implement this in your repository to handle insert events for a specific case.
+ */
 interface InsertEventSubscriber
 {
     public function onInsert(InsertRepositoryEvent $event): InsertEventResponse;

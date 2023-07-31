@@ -1,13 +1,16 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\CodeGen;
+namespace Efabrica\NetteRepository\CodeGen;
 
 use DateTimeInterface;
 use Doctrine\Inflector\Inflector;
 use Doctrine\Inflector\InflectorFactory;
-use Efabrica\NetteDatabaseRepository\CodeGen\EntityProperty;
+use Efabrica\NetteRepository\CodeGen\EntityProperty;
+use Efabrica\NetteRepository\Repository\Repository;
+use Efabrica\NetteRepository\Traits\Cast\CastBehavior;
 use LogicException;
 use Nette\Database\Structure;
+use Nette\DI\Container;
 use Nette\Utils\Strings;
 
 class EntityStructureFactory
@@ -43,11 +46,13 @@ class EntityStructureFactory
     private Structure $structure;
 
     private Inflector $inflector;
+    private Container $container;
 
-    public function __construct(Structure $structure)
+    public function __construct(Structure $structure, Container $container)
     {
         $this->structure = $structure;
         $this->inflector = InflectorFactory::create()->build();
+        $this->container = $container;
     }
 
     public function create(string $table, string $namespace, string $dbDir): EntityStructure
@@ -90,6 +95,31 @@ class EntityStructureFactory
             }
             $properties[$column['name']] = new EntityProperty($type, $column['name'], implode(" ", $annotations));
         }
-        return new EntityStructure($properties, $table, $namespace, $dbDir, $this->inflector, $primaries);
+
+        $structure = new EntityStructure($properties, $table, $namespace, $dbDir, $this->inflector, $primaries, $this->structure);
+
+        $casts = [];
+        if ($this->container->hasService(ModuleWriter::getRepoServiceName($structure))) {
+            /** @var Repository $repo */
+            $repo = $this->container->getByName(ModuleWriter::getRepoServiceName($structure));
+            foreach ($repo->behaviors()->all() as $behavior) {
+                if ($behavior instanceof CastBehavior) {
+                    foreach ($behavior->getFields() as $field) {
+                        $casts[$field] = $behavior->getCastType();
+                    }
+                }
+            }
+        }
+        foreach ($structure->getProperties() as $prop) {
+            $propName = $casts[$prop->getName()] ?? null;
+            if (isset($propName)) {
+                if (str_contains($prop->getType(), '|null')) {
+                    $propName .= '|null';
+                }
+                $prop->setType($propName);
+            }
+        }
+
+        return $structure;
     }
 }

@@ -1,8 +1,8 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\Traits\AES;
+namespace Efabrica\NetteRepository\Traits\AES;
 
-use Efabrica\NetteDatabaseRepository\Traits\RepositoryBehavior;
+use Efabrica\NetteRepository\Traits\RepositoryBehavior;
 
 class AESBehavior extends RepositoryBehavior
 {

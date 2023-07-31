@@ -1,6 +1,6 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\CodeGen;
+namespace Efabrica\NetteRepository\CodeGen;
 
 class EntityProperty
 {

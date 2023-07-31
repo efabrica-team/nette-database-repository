@@ -1,10 +1,10 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\Repository;
+namespace Efabrica\NetteRepository\Repository;
 
-use Efabrica\NetteDatabaseRepository\Event\DeleteQueryEvent;
-use Efabrica\NetteDatabaseRepository\Model\Entity;
-use Efabrica\NetteDatabaseRepository\Subscriber\RepositoryEvents;
+use Efabrica\NetteRepository\Event\DeleteQueryEvent;
+use Efabrica\NetteRepository\Model\Entity;
+use Efabrica\NetteRepository\Subscriber\RepositoryEvents;
 use LogicException;
 use Nette\Application\BadRequestException;
 use Nette\Database\Explorer;
@@ -65,20 +65,20 @@ abstract class Repository
     /**
      * @param string|int|array|E $id
      */
-    public function find($id, bool $defaultWhere = true): ?Entity
+    public function find($id, bool $events = true): ?Entity
     {
         if ($id instanceof ActiveRow) {
             $id = $id->getPrimary();
         }
-        return $this->query($defaultWhere)->wherePrimary($id)->limit(1)->fetch();
+        return $this->query($events)->wherePrimary($id)->limit(1)->fetch();
     }
 
     /**
      * @return E|null
      */
-    public function findOneBy(array $conditions, bool $defaultWhere = true): ?Entity
+    public function findOneBy(array $conditions, bool $events = true): ?Entity
     {
-        return $this->query($defaultWhere)->where($conditions)->limit(1)->fetch();
+        return $this->query($events)->where($conditions)->limit(1)->fetch();
     }
 
     /**
@@ -99,9 +99,9 @@ abstract class Repository
         return $this->findBy($conditions)->sum($column);
     }
 
-    public function search(array $columns, string $search, bool $defaultWhere = true): Query
+    public function search(array $columns, string $search, bool $events = true): Query
     {
-        return $this->query($defaultWhere)->search($columns, $search);
+        return $this->query($events)->search($columns, $search);
     }
 
     /**

@@ -1,10 +1,10 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\Traits\Choozer;
+namespace Efabrica\NetteRepository\Traits\Choozer;
 
-use Efabrica\NetteDatabaseRepository\Model\Entity;
-use Efabrica\NetteDatabaseRepository\Repository\Query;
-use Efabrica\NetteDatabaseRepository\Repository\Repository;
+use Efabrica\NetteRepository\Model\Entity;
+use Efabrica\NetteRepository\Repository\Query;
+use Efabrica\NetteRepository\Repository\Repository;
 
 /**
  * @mixin Repository

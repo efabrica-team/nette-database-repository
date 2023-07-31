@@ -1,9 +1,9 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\Traits\SoftDelete;
+namespace Efabrica\NetteRepository\Traits\SoftDelete;
 
-use Efabrica\NetteDatabaseRepository\Model\Entity;
-use Efabrica\NetteDatabaseRepository\Repository\Repository;
+use Efabrica\NetteRepository\Model\Entity;
+use Efabrica\NetteRepository\Repository\Repository;
 
 /**
  * @mixin Repository

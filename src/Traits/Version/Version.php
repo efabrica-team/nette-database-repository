@@ -1,9 +1,9 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\Traits\Version;
+namespace Efabrica\NetteRepository\Traits\Version;
 
 use DateTimeInterface;
-use Efabrica\NetteDatabaseRepository\Model\Entity;
+use Efabrica\NetteRepository\Model\Entity;
 
 /**
  * @property int $id

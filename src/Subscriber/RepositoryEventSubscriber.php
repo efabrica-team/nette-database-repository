@@ -1,27 +1,30 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\Subscriber;
+namespace Efabrica\NetteRepository\Subscriber;
 
-use Efabrica\NetteDatabaseRepository\Event\DeleteQueryEvent;
-use Efabrica\NetteDatabaseRepository\Event\InsertEventResponse;
-use Efabrica\NetteDatabaseRepository\Event\InsertRepositoryEvent;
-use Efabrica\NetteDatabaseRepository\Event\SelectQueryEvent;
-use Efabrica\NetteDatabaseRepository\Event\SelectQueryResponse;
-use Efabrica\NetteDatabaseRepository\Event\UpdateQueryEvent;
-use Efabrica\NetteDatabaseRepository\Repository\Repository;
-use Efabrica\NetteDatabaseRepository\Subscriber\Inline\DeleteEventSubscriber;
-use Efabrica\NetteDatabaseRepository\Subscriber\Inline\InsertEventSubscriber;
-use Efabrica\NetteDatabaseRepository\Subscriber\Inline\SelectEventSubscriber;
-use Efabrica\NetteDatabaseRepository\Subscriber\Inline\UpdateEventSubscriber;
+use Efabrica\NetteRepository\Event\DeleteQueryEvent;
+use Efabrica\NetteRepository\Event\InsertEventResponse;
+use Efabrica\NetteRepository\Event\InsertRepositoryEvent;
+use Efabrica\NetteRepository\Event\SelectQueryEvent;
+use Efabrica\NetteRepository\Event\SelectQueryResponse;
+use Efabrica\NetteRepository\Event\UpdateQueryEvent;
+use Efabrica\NetteRepository\Repository\Repository;
+use Efabrica\NetteRepository\Subscriber\Inline\DeleteEventSubscriber;
+use Efabrica\NetteRepository\Subscriber\Inline\InsertEventSubscriber;
+use Efabrica\NetteRepository\Subscriber\Inline\SelectEventSubscriber;
+use Efabrica\NetteRepository\Subscriber\Inline\UpdateEventSubscriber;
+use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteQueryEvent;
+use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteSubscriber;
 
-class RepositoryEventSubscriber extends EventSubscriber
+class RepositoryEventSubscriber extends EventSubscriber implements SoftDeleteSubscriber
 {
     public function supportsRepository(Repository $repository): bool
     {
         return $repository instanceof InsertEventSubscriber
             || $repository instanceof UpdateEventSubscriber
             || $repository instanceof DeleteEventSubscriber
-            || $repository instanceof SelectEventSubscriber;
+            || $repository instanceof SelectEventSubscriber
+            || $repository instanceof SoftDeleteSubscriber;
     }
 
     public function onInsert(InsertRepositoryEvent $event): InsertEventResponse
@@ -58,5 +61,14 @@ class RepositoryEventSubscriber extends EventSubscriber
             return $repository->onSelect($event);
         }
         return $event->handle();
+    }
+
+    public function onSoftDelete(SoftDeleteQueryEvent $event, array &$data): int
+    {
+        $repository = $event->getRepository();
+        if ($repository instanceof SoftDeleteSubscriber) {
+            return $repository->onSoftDelete($event, $data);
+        }
+        return $event->handle($data);
     }
 }

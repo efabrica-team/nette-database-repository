@@ -1,12 +1,12 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\Traits\SoftDelete;
+namespace Efabrica\NetteRepository\Traits\SoftDelete;
 
-use Efabrica\NetteDatabaseRepository\Event\DeleteQueryEvent;
-use Efabrica\NetteDatabaseRepository\Event\SelectQueryEvent;
-use Efabrica\NetteDatabaseRepository\Event\SelectQueryResponse;
-use Efabrica\NetteDatabaseRepository\Repository\Repository;
-use Efabrica\NetteDatabaseRepository\Subscriber\EventSubscriber;
+use Efabrica\NetteRepository\Event\DeleteQueryEvent;
+use Efabrica\NetteRepository\Event\SelectQueryEvent;
+use Efabrica\NetteRepository\Event\SelectQueryResponse;
+use Efabrica\NetteRepository\Repository\Repository;
+use Efabrica\NetteRepository\Subscriber\EventSubscriber;
 
 class SoftDeleteEventSubscriber extends EventSubscriber
 {

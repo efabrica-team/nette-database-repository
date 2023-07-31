@@ -1,8 +1,8 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\Subscriber;
+namespace Efabrica\NetteRepository\Subscriber;
 
-use Efabrica\NetteDatabaseRepository\Repository\Repository;
+use Efabrica\NetteRepository\Repository\Repository;
 use Generator;
 use IteratorAggregate;
 

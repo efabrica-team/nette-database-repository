@@ -1,10 +1,10 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\Traits\Cast;
+namespace Efabrica\NetteRepository\Traits\Cast;
 
 use Nette\Utils\Json;
 
-class JsonCastBehavior extends CastBehavior
+final class JsonCastBehavior extends CastBehavior
 {
     public function getCastType(): string
     {

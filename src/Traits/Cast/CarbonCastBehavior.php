@@ -1,11 +1,11 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\Traits\Cast;
+namespace Efabrica\NetteRepository\Traits\Cast;
 
 use Carbon\CarbonImmutable;
 use Throwable;
 
-class CarbonCastBehavior extends CastBehavior
+final class CarbonCastBehavior extends CastBehavior
 {
     public function getCastType(): string
     {

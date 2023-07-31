@@ -1,8 +1,8 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\Traits\TreeTraverse;
+namespace Efabrica\NetteRepository\Traits\TreeTraverse;
 
-use Efabrica\NetteDatabaseRepository\Traits\RepositoryBehavior;
+use Efabrica\NetteRepository\Traits\RepositoryBehavior;
 
 class TreeTraverseBehavior extends RepositoryBehavior
 {

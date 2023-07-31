@@ -1,16 +1,17 @@
 services:
-    repoCodeGen: Efabrica\NetteDatabaseRepository\CodeGen\RepositoryCodeGenerationCommand(%appDir%)
-    - Efabrica\NetteDatabaseRepository\CodeGen\EntityStructureFactory
-    repoDeps: Efabrica\NetteDatabaseRepository\Repository\RepositoryDependencies
-    repoManager: Efabrica\NetteDatabaseRepository\Repository\RepositoryManager
+    repoCodeGen: Efabrica\NetteRepository\CodeGen\RepositoryCodeGenerationCommand(%appDir%)
+    - Efabrica\NetteRepository\CodeGen\EntityStructureFactory
+    repoDeps: Efabrica\NetteRepository\Repository\RepositoryDependencies
+    repoManager: Efabrica\NetteRepository\Repository\RepositoryManager
 
-    accountEventSubscriber: Efabrica\NetteDatabaseRepository\Traits\Account\AccountEventSubscriber
-    aesEventSubscriber: Efabrica\NetteDatabaseRepository\Traits\AES\AESEventSubscriber
-    castEventSubscriber: Efabrica\NetteDatabaseRepository\Traits\Cast\CastEventSubscriber
-    dateEventSubscriber: Efabrica\NetteDatabaseRepository\Traits\Date\DateEventSubscriber
-    keepDefaultEventSubscriber: Efabrica\NetteDatabaseRepository\Traits\KeepDefault\KeepDefaultEventSubscriber
-    lastManStandingEventSubscriber: Efabrica\NetteDatabaseRepository\Traits\LastManStanding\LastManStandingEventSubscriber
-    ownerEventSubscriber: Efabrica\NetteDatabaseRepository\Traits\Owner\OwnerEventSubscriber
-    softDeleteEventSubscriber: Efabrica\NetteDatabaseRepository\Traits\SoftDelete\SoftDeleteEventSubscriber
-    treeTraverseEventSubscriber: Efabrica\NetteDatabaseRepository\Traits\TreeTraverse\TreeTraverseEventSubscriber
-    versionEventSubscriber: Efabrica\NetteDatabaseRepository\Traits\Version\VersionEventSubscriber
+    accountEventSubscriber: Efabrica\NetteRepository\Traits\Account\AccountEventSubscriber
+    aesEventSubscriber: Efabrica\NetteRepository\Traits\AES\AESEventSubscriber
+    castEventSubscriber: Efabrica\NetteRepository\Traits\Cast\CastEventSubscriber
+    dateEventSubscriber: Efabrica\NetteRepository\Traits\Date\DateEventSubscriber
+    keepDefaultEventSubscriber: Efabrica\NetteRepository\Traits\KeepDefault\KeepDefaultEventSubscriber
+    lastManStandingEventSubscriber: Efabrica\NetteRepository\Traits\LastManStanding\LastManStandingEventSubscriber
+    ownerEventSubscriber: Efabrica\NetteRepository\Traits\Owner\OwnerEventSubscriber
+    softDeleteEventSubscriber: Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteEventSubscriber
+    treeTraverseEventSubscriber: Efabrica\NetteRepository\Traits\TreeTraverse\TreeTraverseEventSubscriber
+    versionEventSubscriber: Efabrica\NetteRepository\Traits\Version\VersionEventSubscriber
+    repoEventSubscriber: Efabrica\NetteRepository\Subscriber\RepositoryEventSubscriber

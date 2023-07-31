@@ -1,10 +1,10 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\CodeGen;
+namespace Efabrica\NetteRepository\CodeGen;
 
-use Efabrica\NetteDatabaseRepository\Repository\Repository;
-use Efabrica\NetteDatabaseRepository\Repository\RepositoryBehaviors;
-use Efabrica\NetteDatabaseRepository\Repository\RepositoryDependencies;
+use Efabrica\NetteRepository\Repository\Repository;
+use Efabrica\NetteRepository\Repository\RepositoryBehaviors;
+use Efabrica\NetteRepository\Repository\RepositoryDependencies;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\Parameter;
 use Nette\Utils\Strings;
@@ -40,9 +40,9 @@ class RepositoryWriter
         $class->addComment('@generated');
         $class->addComment("@method {$structure->getClassName()}Query query(bool \$events = true)");
         $class->addComment("@method {$structure->getClassName()}[] fetchAll(bool \$events = true)");
-        $class->addComment("@method {$structure->getClassName()}|null find($primaryType|{$structure->getClassName()} \$$primaryName, bool \$defaultWhere = true)");
+        $class->addComment("@method {$structure->getClassName()}|null find($primaryType|{$structure->getClassName()} \$$primaryName, bool \$events = true)");
         $class->addComment("@method {$structure->getClassName()}      lookup($primaryType|{$structure->getClassName()} \$$primaryName)");
-        $class->addComment("@method {$structure->getClassName()}|null findOneBy(array \$conditions, bool \$defaultWhere = true)");
+        $class->addComment("@method {$structure->getClassName()}|null findOneBy(array \$conditions, bool \$events = true)");
         $class->addComment("@method {$structure->getClassName()}Query findBy(array \$conditions)");
         $class->addComment("@method {$structure->getClassName()}|int insert({$structure->getClassName()}|iterable ...\$entities)");
         $class->addComment("@method int update({$structure->getClassName()}|$primaryType \$entity, iterable \$data, bool \$events = true)");

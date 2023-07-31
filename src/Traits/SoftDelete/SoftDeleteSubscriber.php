@@ -1,6 +1,6 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\Traits\SoftDelete;
+namespace Efabrica\NetteRepository\Traits\SoftDelete;
 
 interface SoftDeleteSubscriber
 {

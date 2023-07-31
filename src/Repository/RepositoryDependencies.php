@@ -1,9 +1,9 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\Repository;
+namespace Efabrica\NetteRepository\Repository;
 
-use Efabrica\NetteDatabaseRepository\Subscriber\RepositoryEvents;
-use Efabrica\NetteDatabaseRepository\Subscriber\EventSubscriber;
+use Efabrica\NetteRepository\Subscriber\RepositoryEvents;
+use Efabrica\NetteRepository\Subscriber\EventSubscriber;
 use Nette\Database\Explorer;
 use Nette\DI\Container;
 

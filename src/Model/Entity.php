@@ -1,9 +1,9 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\Model;
+namespace Efabrica\NetteRepository\Model;
 
-use Efabrica\NetteDatabaseRepository\Repository\Query;
-use Efabrica\NetteDatabaseRepository\Repository\Repository;
+use Efabrica\NetteRepository\Repository\Query;
+use Efabrica\NetteRepository\Repository\Repository;
 use Nette\Database\Table\ActiveRow;
 use Nette\Database\Table\GroupedSelection;
 use ReflectionProperty;
@@ -122,7 +122,7 @@ abstract class Entity extends ActiveRow
     }
 
     /**
-     * @deprecated Do not use, use $this->query($repoClass)->where($key, $this->getPrimary())->fetch()
+     * @deprecated Do not use, use $this->query($repoClass)->where($throughColumn, $row[$key])->fetch()
      */
     public function ref(string $key, ?string $throughColumn = null): ?ActiveRow
     {
@@ -130,7 +130,7 @@ abstract class Entity extends ActiveRow
     }
 
     /**
-     * @deprecated Do not use, use $this->query($repoClass)->where($key, $this->getPrimary())->fetchAll()
+     * @deprecated Do not use, use $this->query($repoClass)->where($throughColumn, $row[$key])
      */
     public function related(string $key, ?string $throughColumn = null): GroupedSelection
     {

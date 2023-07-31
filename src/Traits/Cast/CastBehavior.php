@@ -1,8 +1,8 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\Traits\Cast;
+namespace Efabrica\NetteRepository\Traits\Cast;
 
-use Efabrica\NetteDatabaseRepository\Traits\RepositoryBehavior;
+use Efabrica\NetteRepository\Traits\RepositoryBehavior;
 
 /**
  * This behavior will automatically cast field from database to entity and back.

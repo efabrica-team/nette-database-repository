@@ -1,6 +1,6 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\Repository;
+namespace Efabrica\NetteRepository\Repository;
 
 use Nette\DI\Container;
 

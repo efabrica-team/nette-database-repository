@@ -1,10 +1,10 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\Traits\SoftDelete;
+namespace Efabrica\NetteRepository\Traits\SoftDelete;
 
 use DateTimeImmutable;
 use DateTimeInterface;
-use Efabrica\NetteDatabaseRepository\Traits\RepositoryBehavior;
+use Efabrica\NetteRepository\Traits\RepositoryBehavior;
 
 /**
  * This behavior will change deletedAt field when entity is deleted and cancel the delete.
@@ -17,6 +17,8 @@ class SoftDeleteBehavior extends RepositoryBehavior
      * @var bool|DateTimeInterface
      */
     private $newValue;
+
+    private bool $scopeEnabled = true;
 
     /**
      * @param bool|DateTimeInterface $newValue use true if column is bool, null for DateTimeImmutable

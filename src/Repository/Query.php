@@ -1,14 +1,14 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\Repository;
+namespace Efabrica\NetteRepository\Repository;
 
-use Efabrica\NetteDatabaseRepository\Event\DeleteQueryEvent;
-use Efabrica\NetteDatabaseRepository\Event\InsertRepositoryEvent;
-use Efabrica\NetteDatabaseRepository\Event\SelectQueryEvent;
-use Efabrica\NetteDatabaseRepository\Event\UpdateQueryEvent;
-use Efabrica\NetteDatabaseRepository\Model\Entity;
-use Efabrica\NetteDatabaseRepository\Subscriber\RepositoryEvents;
-use Efabrica\NetteDatabaseRepository\Subscriber\EventSubscriber;
+use Efabrica\NetteRepository\Event\DeleteQueryEvent;
+use Efabrica\NetteRepository\Event\InsertRepositoryEvent;
+use Efabrica\NetteRepository\Event\SelectQueryEvent;
+use Efabrica\NetteRepository\Event\UpdateQueryEvent;
+use Efabrica\NetteRepository\Model\Entity;
+use Efabrica\NetteRepository\Subscriber\RepositoryEvents;
+use Efabrica\NetteRepository\Subscriber\EventSubscriber;
 use Efabrica\Translatte\Helper\Arr;
 use Generator;
 use LogicException;

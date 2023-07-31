@@ -1,8 +1,8 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\Traits\Owner;
+namespace Efabrica\NetteRepository\Traits\Owner;
 
-use Efabrica\NetteDatabaseRepository\Traits\RepositoryBehavior;
+use Efabrica\NetteRepository\Traits\RepositoryBehavior;
 
 class OwnerBehavior extends RepositoryBehavior
 {

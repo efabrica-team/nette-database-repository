@@ -1,10 +1,10 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\Event;
+namespace Efabrica\NetteRepository\Event;
 
-use Efabrica\NetteDatabaseRepository\Model\Entity;
-use Efabrica\NetteDatabaseRepository\Repository\Repository;
-use Efabrica\NetteDatabaseRepository\Subscriber\EventSubscriber;
+use Efabrica\NetteRepository\Model\Entity;
+use Efabrica\NetteRepository\Repository\Repository;
+use Efabrica\NetteRepository\Subscriber\EventSubscriber;
 use Traversable;
 
 /**

@@ -1,8 +1,8 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\Traits\Version;
+namespace Efabrica\NetteRepository\Traits\Version;
 
-use Efabrica\NetteDatabaseRepository\Traits\RepositoryBehavior;
+use Efabrica\NetteRepository\Traits\RepositoryBehavior;
 
 class VersionBehavior extends RepositoryBehavior
 {

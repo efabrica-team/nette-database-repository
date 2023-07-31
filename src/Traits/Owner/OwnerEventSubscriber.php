@@ -1,13 +1,13 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\Traits\Owner;
+namespace Efabrica\NetteRepository\Traits\Owner;
 
 use Efabrica\IrisClient\IrisUser;
-use Efabrica\NetteDatabaseRepository\Event\InsertEventResponse;
-use Efabrica\NetteDatabaseRepository\Event\InsertRepositoryEvent;
-use Efabrica\NetteDatabaseRepository\Event\UpdateQueryEvent;
-use Efabrica\NetteDatabaseRepository\Repository\Repository;
-use Efabrica\NetteDatabaseRepository\Subscriber\EventSubscriber;
+use Efabrica\NetteRepository\Event\InsertEventResponse;
+use Efabrica\NetteRepository\Event\InsertRepositoryEvent;
+use Efabrica\NetteRepository\Event\UpdateQueryEvent;
+use Efabrica\NetteRepository\Repository\Repository;
+use Efabrica\NetteRepository\Subscriber\EventSubscriber;
 
 class OwnerEventSubscriber extends EventSubscriber
 {

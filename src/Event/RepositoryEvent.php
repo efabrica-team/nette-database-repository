@@ -1,12 +1,12 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\Event;
+namespace Efabrica\NetteRepository\Event;
 
-use Efabrica\NetteDatabaseRepository\Model\Entity;
-use Efabrica\NetteDatabaseRepository\Repository\Query;
-use Efabrica\NetteDatabaseRepository\Repository\Repository;
-use Efabrica\NetteDatabaseRepository\Repository\RepositoryBehaviors;
-use Efabrica\NetteDatabaseRepository\Subscriber\EventSubscriber;
+use Efabrica\NetteRepository\Model\Entity;
+use Efabrica\NetteRepository\Repository\Query;
+use Efabrica\NetteRepository\Repository\Repository;
+use Efabrica\NetteRepository\Repository\RepositoryBehaviors;
+use Efabrica\NetteRepository\Subscriber\EventSubscriber;
 
 /**
  * @template E of Entity

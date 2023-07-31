@@ -1,13 +1,13 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\Traits\LastManStanding;
+namespace Efabrica\NetteRepository\Traits\LastManStanding;
 
-use Efabrica\NetteDatabaseRepository\Event\DeleteQueryEvent;
-use Efabrica\NetteDatabaseRepository\Event\RepositoryEvent;
-use Efabrica\NetteDatabaseRepository\Repository\Repository;
-use Efabrica\NetteDatabaseRepository\Subscriber\EventSubscriber;
-use Efabrica\NetteDatabaseRepository\Traits\SoftDelete\SoftDeleteQueryEvent;
-use Efabrica\NetteDatabaseRepository\Traits\SoftDelete\SoftDeleteSubscriber;
+use Efabrica\NetteRepository\Event\DeleteQueryEvent;
+use Efabrica\NetteRepository\Event\RepositoryEvent;
+use Efabrica\NetteRepository\Repository\Repository;
+use Efabrica\NetteRepository\Subscriber\EventSubscriber;
+use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteQueryEvent;
+use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteSubscriber;
 use LogicException;
 
 class LastManStandingEventSubscriber extends EventSubscriber implements SoftDeleteSubscriber

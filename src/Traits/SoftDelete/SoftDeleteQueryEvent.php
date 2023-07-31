@@ -1,10 +1,10 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\Traits\SoftDelete;
+namespace Efabrica\NetteRepository\Traits\SoftDelete;
 
-use Efabrica\NetteDatabaseRepository\Event\UpdateQueryEvent;
-use Efabrica\NetteDatabaseRepository\Repository\Query;
-use Efabrica\NetteDatabaseRepository\Subscriber\EventSubscriber;
+use Efabrica\NetteRepository\Event\UpdateQueryEvent;
+use Efabrica\NetteRepository\Repository\Query;
+use Efabrica\NetteRepository\Subscriber\EventSubscriber;
 
 class SoftDeleteQueryEvent extends UpdateQueryEvent
 {

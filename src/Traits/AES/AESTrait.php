@@ -1,9 +1,9 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\Traits\AES;
+namespace Efabrica\NetteRepository\Traits\AES;
 
-use Efabrica\NetteDatabaseRepository\Repository\Query;
-use Efabrica\NetteDatabaseRepository\Repository\Repository;
+use Efabrica\NetteRepository\Repository\Query;
+use Efabrica\NetteRepository\Repository\Repository;
 
 /**
  * @mixin Repository

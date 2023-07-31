@@ -1,14 +1,14 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\Traits\AES;
+namespace Efabrica\NetteRepository\Traits\AES;
 
-use Efabrica\NetteDatabaseRepository\Event\InsertEventResponse;
-use Efabrica\NetteDatabaseRepository\Event\InsertRepositoryEvent;
-use Efabrica\NetteDatabaseRepository\Event\SelectQueryEvent;
-use Efabrica\NetteDatabaseRepository\Event\SelectQueryResponse;
-use Efabrica\NetteDatabaseRepository\Event\UpdateQueryEvent;
-use Efabrica\NetteDatabaseRepository\Repository\Repository;
-use Efabrica\NetteDatabaseRepository\Subscriber\EventSubscriber;
+use Efabrica\NetteRepository\Event\InsertEventResponse;
+use Efabrica\NetteRepository\Event\InsertRepositoryEvent;
+use Efabrica\NetteRepository\Event\SelectQueryEvent;
+use Efabrica\NetteRepository\Event\SelectQueryResponse;
+use Efabrica\NetteRepository\Event\UpdateQueryEvent;
+use Efabrica\NetteRepository\Repository\Repository;
+use Efabrica\NetteRepository\Subscriber\EventSubscriber;
 use Nette\Database\Table\ActiveRow;
 
 class AESEventSubscriber extends EventSubscriber

@@ -1,10 +1,10 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\Traits\Version;
+namespace Efabrica\NetteRepository\Traits\Version;
 
-use Efabrica\NetteDatabaseRepository\Repository\Query;
-use Efabrica\NetteDatabaseRepository\Repository\Repository;
-use Efabrica\NetteDatabaseRepository\Repository\RepositoryDependencies;
+use Efabrica\NetteRepository\Repository\Query;
+use Efabrica\NetteRepository\Repository\Repository;
+use Efabrica\NetteRepository\Repository\RepositoryDependencies;
 
 /**
  * @extends Repository<Version,Query<Version>>

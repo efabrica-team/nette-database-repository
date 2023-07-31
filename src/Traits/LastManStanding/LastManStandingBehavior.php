@@ -1,9 +1,9 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\Traits\LastManStanding;
+namespace Efabrica\NetteRepository\Traits\LastManStanding;
 
-use Efabrica\NetteDatabaseRepository\Repository\Query;
-use Efabrica\NetteDatabaseRepository\Traits\RepositoryBehavior;
+use Efabrica\NetteRepository\Repository\Query;
+use Efabrica\NetteRepository\Traits\RepositoryBehavior;
 
 class LastManStandingBehavior extends RepositoryBehavior
 {

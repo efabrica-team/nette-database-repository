@@ -1,15 +1,21 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\CodeGen;
+namespace Efabrica\NetteRepository\CodeGen;
 
 use DateTimeInterface;
 use Doctrine\Inflector\Inflector;
-use Efabrica\NetteDatabaseRepository\CodeGen\EntityProperty;
+use Efabrica\NetteRepository\CodeGen\EntityProperty;
+use Efabrica\NetteRepository\Repository\Repository;
+use Efabrica\NetteRepository\Traits\Cast\CastBehavior;
+use Nette\Database\Structure;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\PhpNamespace;
 use Nette\Utils\Strings;
 use RuntimeException;
 
+/**
+ * @internal
+ */
 class EntityStructure
 {
     /** @var EntityProperty[] */
@@ -47,12 +53,21 @@ class EntityStructure
 
     private Inflector $inflector;
     private array $primaries;
+    public array $toMany;
+    public array $toOne;
 
     /**
      * @param EntityProperty[] $properties
      */
-    public function __construct(array $properties, string $table, string $namespace, string $dbDir, Inflector $inflector, array $primaries)
-    {
+    public function __construct(
+        array $properties,
+        string $table,
+        string $namespace,
+        string $dbDir,
+        Inflector $inflector,
+        array $primaries,
+        Structure $structure
+    ) {
         $this->tableName = $table;
         $this->inflector = $inflector;
         $this->className = $this->toClassName($table);
@@ -79,6 +94,9 @@ class EntityStructure
             }
         }
         $this->primaries = $primaries;
+
+        $this->toMany = $structure->getHasManyReference($table) ?? [];
+        $this->toOne = $structure->getBelongsToReference($table) ?? [];
     }
 
     public function toClassName(string $string): string
@@ -86,17 +104,12 @@ class EntityStructure
         return self::toClassCase($this->inflector, $string);
     }
 
-    public static function toClassCase(Inflector $inflector, string $string)
+    public static function toClassCase(Inflector $inflector, string $string): string
     {
         if (!Strings::endsWith($string, 'data')) {
             $string = $inflector->singularize($string);
         }
         return Strings::firstUpper($inflector->camelize($string));
-    }
-
-    public function toPropertyName(string $string): string
-    {
-        return Strings::firstUpper($this->inflector->camelize($string));
     }
 
     public function getTableName(): string

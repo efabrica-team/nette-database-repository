@@ -1,8 +1,8 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\Event;
+namespace Efabrica\NetteRepository\Event;
 
-use Efabrica\NetteDatabaseRepository\Subscriber\EventSubscriber;
+use Efabrica\NetteRepository\Subscriber\EventSubscriber;
 
 class DeleteQueryEvent extends QueryEvent
 {

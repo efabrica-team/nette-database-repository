@@ -1,15 +1,15 @@
 <?php
 
-namespace Efabrica\NetteDatabaseRepository\Traits\Date;
+namespace Efabrica\NetteRepository\Traits\Date;
 
 use DateTimeImmutable;
-use Efabrica\NetteDatabaseRepository\Event\InsertEventResponse;
-use Efabrica\NetteDatabaseRepository\Event\InsertRepositoryEvent;
-use Efabrica\NetteDatabaseRepository\Event\UpdateQueryEvent;
-use Efabrica\NetteDatabaseRepository\Repository\Repository;
-use Efabrica\NetteDatabaseRepository\Subscriber\EventSubscriber;
-use Efabrica\NetteDatabaseRepository\Traits\SoftDelete\SoftDeleteQueryEvent;
-use Efabrica\NetteDatabaseRepository\Traits\SoftDelete\SoftDeleteSubscriber;
+use Efabrica\NetteRepository\Event\InsertEventResponse;
+use Efabrica\NetteRepository\Event\InsertRepositoryEvent;
+use Efabrica\NetteRepository\Event\UpdateQueryEvent;
+use Efabrica\NetteRepository\Repository\Repository;
+use Efabrica\NetteRepository\Subscriber\EventSubscriber;
+use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteQueryEvent;
+use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteSubscriber;
 
 class DateEventSubscriber extends EventSubscriber implements SoftDeleteSubscriber
 {
