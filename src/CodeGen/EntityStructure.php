@@ -5,8 +5,6 @@ namespace Efabrica\NetteRepository\CodeGen;
 use DateTimeInterface;
 use Doctrine\Inflector\Inflector;
 use Efabrica\NetteRepository\CodeGen\EntityProperty;
-use Efabrica\NetteRepository\Repository\Repository;
-use Efabrica\NetteRepository\Traits\Cast\CastBehavior;
 use Nette\Database\Structure;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\PhpNamespace;
@@ -52,8 +50,11 @@ class EntityStructure
     public string $entityGenDir;
 
     private Inflector $inflector;
+
     private array $primaries;
+
     public array $toMany;
+
     public array $toOne;
 
     /**
@@ -112,6 +113,13 @@ class EntityStructure
         return Strings::firstUpper($inflector->camelize($string));
     }
 
+    public function toPluralName(string $column): string
+    {
+        $column = Strings::before($column, '_id') ?? $column;
+        $column = $this->inflector->pluralize($column);
+        return Strings::firstUpper($this->inflector->camelize($column));
+    }
+
     public function getTableName(): string
     {
         return $this->tableName;
@@ -135,7 +143,7 @@ class EntityStructure
         return $this->primaries;
     }
 
-    public function writeClass(ClassType $classType, string $dir): void
+    public static function writeClass(ClassType $classType, string $dir): void
     {
         if (!@mkdir($dir, 0777, true) && !is_dir($dir)) {
             throw new RuntimeException(sprintf('Directory "%s" was not created', $dir));

@@ -46,6 +46,7 @@ class EntityStructureFactory
     private Structure $structure;
 
     private Inflector $inflector;
+
     private Container $container;
 
     public function __construct(Structure $structure, Container $container)
@@ -93,7 +94,7 @@ class EntityStructureFactory
             if ($column['autoincrement']) {
                 $annotations[] = '@AutoIncrement';
             }
-            $properties[$column['name']] = new EntityProperty($type, $column['name'], implode(" ", $annotations));
+            $properties[$column['name']] = new EntityProperty($type, $column['name'], implode(' ', $annotations));
         }
 
         $structure = new EntityStructure($properties, $table, $namespace, $dbDir, $this->inflector, $primaries, $this->structure);

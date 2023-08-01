@@ -4,10 +4,8 @@ namespace Efabrica\NetteRepository\CodeGen;
 
 use DateTimeInterface;
 use Efabrica\NetteRepository\Model\Entity;
-use Efabrica\NetteRepository\Repository\Repository;
-use Efabrica\NetteRepository\Traits\Cast\CastBehavior;
-use Nette\DI\Container;
 use Nette\PhpGenerator\ClassType;
+use function str_contains;
 
 class EntityWriter
 {
@@ -42,7 +40,7 @@ class EntityWriter
                 $prop->setType($propName);
             }
             $class->addComment($prop->toString());
-            if (\str_contains($prop->getType(), DateTimeInterface::class)) {
+            if (str_contains($prop->getType(), DateTimeInterface::class)) {
                 $structure->entityGenNamespace->addUse(DateTimeInterface::class);
             }
             $class->addConstant($prop->getName(), $prop->getName())->setPublic();
@@ -60,8 +58,7 @@ class EntityWriter
             $class->addMethod('get' . $structure->toClassName($column))
                 ->setBody("return \$this->query({$className}Repository::class, \$events)\n" .
                     "->where('$relatedColumn', \$this[$column])\n" .
-                    "->limit(1)->fetch();"
-                )
+                    '->limit(1)->fetch();')
                 ->setReturnType($relatedEntity)
                 ->setReturnNullable()
                 ->addParameter('events')->setType('bool')->setDefaultValue(true)
@@ -78,10 +75,9 @@ class EntityWriter
             $structure->entityGenNamespace->addUse($relatedEntity);
             $structure->entityGenNamespace->addUse($relatedQuery);
             $structure->entityGenNamespace->addUse($relatedRepository);
-            $class->addMethod('get' . $structure->toClassName($column))
+            $class->addMethod('get' . $structure->toPluralName($column))
                 ->setBody("return \$this->query({$className}Repository::class, \$events)\n" .
-                    "->where('$relatedColumn', \$this[$column]);"
-                )
+                    "->where('$relatedColumn', \$this[$column]);")
                 ->setReturnType($relatedQuery)
                 ->addComment("@return iterable<{$className}>&{$className}Query")
                 ->addParameter('events')->setType('bool')->setDefaultValue(true)

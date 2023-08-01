@@ -7,17 +7,33 @@ use Nette\PhpGenerator\ClassType;
 
 class QueryWriter
 {
+    public static function writeAppQueryBase(EntityStructure $structure): void
+    {
+        $class = new ClassType('QueryBase', $structure->queryNamespace);
+        if (class_exists($structure->queryNamespace->getName() . '\\' . $class->getName())) {
+            return;
+        }
+
+        $class->setAbstract();
+        $class->setExtends(Query::class);
+
+        EntityStructure::writeClass($class, $structure->queryDir);
+    }
+
     public static function createQueryBase(EntityStructure $structure): ClassType
     {
         $repositoryClass = $structure->repositoryNamespace->getName() . '\\' . $structure->getClassName() . 'Repository';
         $entityClass = $structure->entityGenNamespace->getName() . '\\' . $structure->getClassName();
+        $queryBaseClass = $structure->queryNamespace->getName() . '\\' . $structure->getClassName() . 'QueryBase';
         $structure->queryGenNamespace
             ->addUse($entityClass)
             ->addUse($repositoryClass)
-            ->addUse(Query::class)
+            ->addUse($queryBaseClass)
         ;
         $baseClass = new ClassType("{$structure->getClassName()}QueryBase", $structure->queryGenNamespace);
         $baseClass->setAbstract();
+        $baseClass->setExtends($queryBaseClass);
+
         $baseClass->addComment('@internal Typehint extended classes only');
         $baseClass->addComment('@generated');
         $baseClass->addComment("@method insert({$structure->getClassName()}|array \$data)");
@@ -26,7 +42,6 @@ class QueryWriter
         $baseClass->addComment("@method {$structure->getClassName()} createRow(array \$data = [])");
         $baseClass->addComment("@method {$structure->getClassName()} current()");
         $baseClass->addComment("@method {$structure->getClassName()}Repository getRepository()");
-        $baseClass->setExtends(Query::class);
 
         return $baseClass;
     }

@@ -5,7 +5,6 @@ namespace Efabrica\NetteRepository\CodeGen;
 use Doctrine\Inflector\Inflector;
 use Doctrine\Inflector\InflectorFactory;
 use Nette\Database\Structure;
-use Nette\DI\Container;
 use Nette\PhpGenerator\ClassType;
 use Nette\Utils\Strings;
 use RecursiveDirectoryIterator;
@@ -29,9 +28,7 @@ class RepositoryCodeGenerationCommand extends Command
 
     private Structure $structure;
 
-    private Container $container;
-
-    public function __construct(string $appDir, EntityStructureFactory $structureFactory, Structure $structure, Container $container)
+    public function __construct(string $appDir, EntityStructureFactory $structureFactory, Structure $structure)
     {
         parent::__construct('repository:code-gen');
         $this->inflector = InflectorFactory::create()->build();
@@ -40,7 +37,6 @@ class RepositoryCodeGenerationCommand extends Command
         $this->namespace = 'App\\Core';
         $this->structureFactory = $structureFactory;
         $this->structure = $structure;
-        $this->container = $container;
     }
 
     public function findRepoDirs(array $tables, array &$repoDirs, array &$repoNamespaces): void
@@ -101,6 +97,11 @@ class RepositoryCodeGenerationCommand extends Command
         }
 
         foreach ($structures as $structure) {
+            $output->writeln("Generating {$structure->getClassName()} Repository App Base");
+            RepositoryWriter::writeAppRepositoryBase($structure);
+            $output->writeln("Generating {$structure->getClassName()} Query App Base");
+            QueryWriter::writeAppQueryBase($structure);
+
             $output->writeln("Generating {$structure->getClassName()} Entity Structure");
             EntityWriter::writeBody($structure);
             $output->writeln("Generating {$structure->getClassName()} Entity");

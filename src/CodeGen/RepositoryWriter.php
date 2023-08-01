@@ -12,20 +12,34 @@ use ReflectionClass;
 
 class RepositoryWriter
 {
-    private static function createRepositoryBase(EntityStructure $structure): ClassType
+    public static function writeAppRepositoryBase(EntityStructure $structure): void
+    {
+        $class = new ClassType('RepositoryBase', $structure->repositoryNamespace);
+        if (class_exists($structure->repositoryNamespace->getName() . '\\' . $class->getName())) {
+            return;
+        }
+
+        $class->setAbstract();
+        $class->setExtends(Repository::class);
+
+        EntityStructure::writeClass($class, $structure->repositoryDir);
+    }
+
+    public static function writeRepositoryBase(EntityStructure $structure): void
     {
         $class = new ClassType($structure->getClassName() . 'RepositoryBase', $structure->repositoryGenNamespace);
         $queryClass = $structure->queryNamespace->getName() . '\\' . $structure->getClassName() . 'Query';
         $entityClass = $structure->entityGenNamespace->getName() . '\\' . $structure->getClassName();
+        $baseClass = $structure->repositoryNamespace->getName() . '\\RepositoryBase';
         $structure->repositoryGenNamespace
             ->addUse($entityClass)
             ->addUse($queryClass)
-            ->addUse(Repository::class)
+            ->addUse($baseClass)
             ->addUse(RepositoryDependencies::class)
         ;
 
         if (count($structure->getPrimaries()) > 1) {
-            $primaryType = "array"; // generics dont work in @method
+            $primaryType = 'array'; // generics dont work in @method
         } else {
             $primaries = $structure->getPrimaries();
             $primaryType = reset($primaries);
@@ -36,7 +50,7 @@ class RepositoryWriter
         }
 
         $class->setAbstract();
-        $class->setExtends(Repository::class);
+        $class->setExtends($baseClass);
         $class->addComment('@generated');
         $class->addComment("@method {$structure->getClassName()}Query query(bool \$events = true)");
         $class->addComment("@method {$structure->getClassName()}[] fetchAll(bool \$events = true)");
@@ -58,12 +72,7 @@ class RepositoryWriter
             ->setBody("parent::__construct('{$structure->getTableName()}', {$structure->getClassName()}::class, {$structure->getClassName()}Query::class, \$deps);")
         ;
 
-        return $class;
-    }
-
-    public static function writeRepositoryBase(EntityStructure $structure): void
-    {
-        $structure->writeClass(self::createRepositoryBase($structure), $structure->repositoryGenDir);
+        $structure->writeClass($class, $structure->repositoryGenDir);
     }
 
     private static function createRepository(EntityStructure $structure): ClassType

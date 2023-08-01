@@ -2,8 +2,6 @@
 
 namespace Efabrica\NetteRepository\Traits\Date;
 
-use DateTimeImmutable;
-use DateTimeInterface;
 use Efabrica\NetteRepository\Traits\RepositoryBehavior;
 
 /**
@@ -16,10 +14,6 @@ class DateBehavior extends RepositoryBehavior
 
     private ?string $updatedAtField;
 
-    /**
-     * @param string|null $createdAtField
-     * @param string|null $updatedAtField
-     */
     public function __construct(?string $createdAtField, ?string $updatedAtField)
     {
         $this->createdAtField = $createdAtField;

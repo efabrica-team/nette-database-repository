@@ -4,6 +4,7 @@ namespace Efabrica\NetteRepository\Repository;
 
 use Efabrica\NetteRepository\Event\DeleteQueryEvent;
 use Efabrica\NetteRepository\Model\Entity;
+use Efabrica\NetteRepository\Repository\Scope\Scope;
 use Efabrica\NetteRepository\Subscriber\RepositoryEvents;
 use LogicException;
 use Nette\Application\BadRequestException;
@@ -35,6 +36,8 @@ abstract class Repository
 
     private RepositoryManager $manager;
 
+    protected Scope $scope;
+
     /**
      * @param class-string<E> $entityClass
      * @param class-string<Q> $queryClass
@@ -48,15 +51,16 @@ abstract class Repository
         assert(is_a($queryClass, Query::class, true));
         $this->queryClass = $queryClass;
         $this->behaviors = new RepositoryBehaviors();
-        $this->setupBehaviors($this->behaviors);
+        $this->setup($this->behaviors);
         $this->events = $deps->getEvents()->forRepository($this);
         $this->manager = $deps->getManager();
+        $this->scope = $deps->getDefaultScope();
     }
 
     /**
      * Do $behaviors->add() here.
      */
-    abstract protected function setupBehaviors(RepositoryBehaviors $behaviors): void;
+    abstract protected function setup(RepositoryBehaviors $behaviors): void;
 
     /********************************
      * Fetching entities
@@ -273,6 +277,11 @@ abstract class Repository
     public function getEntityClass(): string
     {
         return $this->entityClass;
+    }
+
+    public function getScope(): Scope
+    {
+        return $this->scope;
     }
 
     /**

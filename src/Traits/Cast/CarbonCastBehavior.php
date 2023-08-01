@@ -31,5 +31,4 @@ final class CarbonCastBehavior extends CastBehavior
     {
         return $decoded;
     }
-
 }
