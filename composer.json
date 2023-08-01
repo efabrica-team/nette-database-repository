@@ -1,5 +1,5 @@
 {
-    "name": "efabrica/nette-database-repository",
+    "name": "efabrica/nette-repository",
     "type": "library",
     "description": "Repositories for Nette database",
     "keywords": [
