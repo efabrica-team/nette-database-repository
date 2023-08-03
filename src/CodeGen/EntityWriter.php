@@ -5,6 +5,7 @@ namespace Efabrica\NetteRepository\CodeGen;
 use DateTimeInterface;
 use Efabrica\NetteRepository\Model\Entity;
 use Nette\PhpGenerator\ClassType;
+use Nette\Utils\Strings;
 use function str_contains;
 
 class EntityWriter
@@ -46,38 +47,46 @@ class EntityWriter
             $class->addConstant($prop->getName(), $prop->getName())->setPublic();
         }
 
-        foreach ($structure->toOne as $column => $relation) {
-            [$relatedTable, $relatedColumn] = $relation;
+        foreach ($structure->toOne as $relatedColumn => $relatedTable) {
             /** @var EntityStructure $relatedStructure */
             $relatedStructure = $structures[$relatedTable];
             $className = $relatedStructure->getClassName();
-            $relatedEntity = $relatedStructure->entityNamespace->getName() . '\\' . $className;
+            $relatedEntity = $relatedStructure->entityGenNamespace->getName() . '\\' . $className;
             $relatedRepository = $relatedStructure->repositoryNamespace->getName() . '\\' . $className . 'Repository';
             $structure->entityGenNamespace->addUse($relatedEntity);
             $structure->entityGenNamespace->addUse($relatedRepository);
-            $class->addMethod('get' . $structure->toClassName($column))
+            $columnName = Strings::before($relatedColumn, '_id') ?? $relatedColumn;
+            $class->addMethod('get' . $structure->toClassName($columnName))
                 ->setBody("return \$this->query({$className}Repository::class, \$events)\n" .
-                    "->where('$relatedColumn', \$this[$column])\n" .
-                    '->limit(1)->fetch();')
+                    "    ->wherePrimary(\$this->$relatedColumn)\n" .
+                    '    ->limit(1)->fetch();')
                 ->setReturnType($relatedEntity)
                 ->setReturnNullable()
                 ->addParameter('events')->setType('bool')->setDefaultValue(true)
             ;
         }
-        foreach ($structure->toMany as $column => $relation) {
-            [$relatedTable, $relatedColumn] = $relation;
+        foreach ($structure->toMany as $relatedTable => $relatedColumns) {
+            if (count($relatedColumns) > 1) {
+                continue;
+            }
+            [$relatedColumn] = $relatedColumns;
             /** @var EntityStructure $relatedStructure */
             $relatedStructure = $structures[$relatedTable];
             $className = $relatedStructure->getClassName();
-            $relatedEntity = $relatedStructure->entityNamespace->getName() . '\\' . $className;
+            $relatedEntity = $relatedStructure->entityGenNamespace->getName() . '\\' . $className;
             $relatedQuery = $relatedStructure->queryNamespace->getName() . '\\' . $className . 'Query';
             $relatedRepository = $relatedStructure->repositoryNamespace->getName() . '\\' . $className . 'Repository';
             $structure->entityGenNamespace->addUse($relatedEntity);
             $structure->entityGenNamespace->addUse($relatedQuery);
             $structure->entityGenNamespace->addUse($relatedRepository);
-            $class->addMethod('get' . $structure->toPluralName($column))
-                ->setBody("return \$this->query({$className}Repository::class, \$events)\n" .
-                    "->where('$relatedColumn', \$this[$column]);")
+            // TODO namiesto $events posuvat Scope
+            $body = "\$query = \$this->query({$className}Repository::class, \$events)\n" .
+                "    ->where(['{$relatedColumn}' => \$this->getPrimary()]);\n" .
+                "assert(\$query instanceof {$className}Query);\n" .
+                'return $query;';
+
+            $class->addMethod('get' . $structure->toPluralName($className))
+                ->setBody($body)
                 ->setReturnType($relatedQuery)
                 ->addComment("@return iterable<{$className}>&{$className}Query")
                 ->addParameter('events')->setType('bool')->setDefaultValue(true)
@@ -87,19 +96,19 @@ class EntityWriter
         return $class;
     }
 
-    public static function writeBody(EntityStructure $structure): void
+    public static function writeBody(EntityStructure $structure, FileWriter $writer): void
     {
         if (!class_exists($structure->entityNamespace->getName() . '\\' . $structure->getClassName() . 'Body')) {
-            $structure->writeClass(self::createBody($structure), $structure->entityGenDir);
+            $writer->writeClass(self::createBody($structure), $structure->entityDir);
         }
     }
 
-    public static function writeEntity(EntityStructure $structure, array $structures): void
+    public static function writeEntity(EntityStructure $structure, array $structures, FileWriter $writer): void
     {
         $entityClassName = "{$structure->entityNamespace->getName()}\\{$structure->getClassName()}";
         if (!class_exists($entityClassName)) {
             $entity = self::createClass($structure, $structures);
-            $structure->writeClass($entity, $structure->entityGenDir);
+            $writer->writeClass($entity, $structure->entityGenDir);
         }
     }
 }

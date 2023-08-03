@@ -4,6 +4,7 @@ namespace Efabrica\NetteRepository\Model;
 
 use Efabrica\NetteRepository\Repository\Query;
 use Efabrica\NetteRepository\Repository\Repository;
+use Efabrica\NetteRepository\Repository\Scope\Scope;
 use Nette\Database\Table\ActiveRow;
 use Nette\Database\Table\GroupedSelection;
 use ReflectionProperty;
@@ -144,12 +145,18 @@ abstract class Entity extends ActiveRow
     protected function query(string $repository, bool $events = true): Query
     {
         return $this->_query->getRepository()->getManager()
-            ->getRepository($repository)->query($events)
+            ->byClass($repository)->query($events)
         ;
     }
 
     public function getTableName(): string
     {
         return $this->_query->getName();
+    }
+
+    public function setScope(Scope $scope): self
+    {
+        $this->_query = $this->_query->createSelectionInstance()->setScope($scope);
+        return $this;
     }
 }

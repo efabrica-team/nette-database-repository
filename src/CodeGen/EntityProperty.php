@@ -13,11 +13,14 @@ class EntityProperty
      */
     protected string $annotations;
 
-    public function __construct(string $type, string $name, string $annotations)
+    private string $nativeType;
+
+    public function __construct(string $type, string $name, string $annotations, string $nativeType)
     {
         $this->type = $type;
         $this->name = $name;
         $this->annotations = trim($annotations);
+        $this->nativeType = $nativeType;
     }
 
     public function getType(): string
@@ -37,6 +40,6 @@ class EntityProperty
 
     public function toString(): string
     {
-        return "@property {$this->type} \${$this->name} ({$this->dbType}) {$this->annotations}";
+        return "@property {$this->type} \${$this->name} ({$this->nativeType}) {$this->annotations}";
     }
 }

@@ -3,6 +3,8 @@ services:
     - Efabrica\NetteRepository\CodeGen\EntityStructureFactory
     repoDeps: Efabrica\NetteRepository\Repository\RepositoryDependencies
     repoManager: Efabrica\NetteRepository\Repository\RepositoryManager
+    scopeContainer: Efabrica\NetteRepository\Repository\Scope\ScopeContainer
+    defaultScope: Efabrica\NetteRepository\Repository\Scope\FullScope
 
     accountEventSubscriber: Efabrica\NetteRepository\Traits\Account\AccountEventSubscriber
     aesEventSubscriber: Efabrica\NetteRepository\Traits\AES\AESEventSubscriber

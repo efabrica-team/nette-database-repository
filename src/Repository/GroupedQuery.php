@@ -29,7 +29,6 @@ class GroupedQuery extends GroupedSelection
         $g->events = clone $query->getEvents();
         $g->behaviors = clone $query->getBehaviors();
         $g->doesEvents = $query->doesEvents();
-        $g->scope = $query->getScope();
         return $g;
     }
 
@@ -41,7 +40,6 @@ class GroupedQuery extends GroupedSelection
         $g->events = clone $query->getEvents();
         $g->behaviors = clone $query->getBehaviors();
         $g->doesEvents = $query->doesEvents();
-        $g->scope = $query->getScope();
         return $g;
     }
 

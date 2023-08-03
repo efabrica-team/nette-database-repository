@@ -94,7 +94,7 @@ class EntityStructureFactory
             if ($column['autoincrement']) {
                 $annotations[] = '@AutoIncrement';
             }
-            $properties[$column['name']] = new EntityProperty($type, $column['name'], implode(' ', $annotations));
+            $properties[$column['name']] = new EntityProperty($type, $column['name'], implode(' ', $annotations), $nativeType);
         }
 
         $structure = new EntityStructure($properties, $table, $namespace, $dbDir, $this->inflector, $primaries, $this->structure);
@@ -103,21 +103,24 @@ class EntityStructureFactory
         if ($this->container->hasService(ModuleWriter::getRepoServiceName($structure))) {
             /** @var Repository $repo */
             $repo = $this->container->getByName(ModuleWriter::getRepoServiceName($structure));
-            foreach ($repo->behaviors()->all() as $behavior) {
-                if ($behavior instanceof CastBehavior) {
-                    foreach ($behavior->getFields() as $field) {
-                        $casts[$field] = $behavior->getCastType();
+            if ($repo instanceof Repository) {
+                foreach ($repo->behaviors()->all() as $behavior) {
+                    if ($behavior instanceof CastBehavior) {
+                        foreach ($behavior->getFields() as $field) {
+                            $casts[$field] = $behavior->getCastType();
+                        }
                     }
                 }
-            }
-        }
-        foreach ($structure->getProperties() as $prop) {
-            $propName = $casts[$prop->getName()] ?? null;
-            if (isset($propName)) {
-                if (str_contains($prop->getType(), '|null')) {
-                    $propName .= '|null';
+
+                foreach ($structure->getProperties() as $prop) {
+                    $propName = $casts[$prop->getName()] ?? null;
+                    if (isset($propName)) {
+                        if (str_contains($prop->getType(), '|null')) {
+                            $propName .= '|null';
+                        }
+                        $prop->setType($propName);
+                    }
                 }
-                $prop->setType($propName);
             }
         }
 

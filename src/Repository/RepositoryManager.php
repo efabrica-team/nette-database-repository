@@ -2,6 +2,9 @@
 
 namespace Efabrica\NetteRepository\Repository;
 
+use Doctrine\Inflector\Inflector;
+use Doctrine\Inflector\InflectorFactory;
+use Efabrica\NetteRepository\CodeGen\ModuleWriter;
 use Nette\DI\Container;
 
 class RepositoryManager
@@ -9,10 +12,12 @@ class RepositoryManager
     private array $repositories = [];
 
     private Container $container;
+    private Inflector $inflector;
 
     public function __construct(Container $container)
     {
         $this->container = $container;
+        $this->inflector = InflectorFactory::create()->build();
     }
 
     /**
@@ -20,9 +25,16 @@ class RepositoryManager
      * @param class-string<R> $class
      * @return R
      */
-    public function getRepository(string $class): Repository
+    public function byClass(string $class): Repository
     {
         return $this->repositories[$class] ??= $this->container->getByType($class);
+    }
+
+    public function byTableName(string $table): Repository
+    {
+        $repo = $this->container->getByName(ModuleWriter::toRepoServiceName($table, $this->inflector));
+        assert($repo instanceof Repository);
+        return $this->repositories[$table] ??= $repo;
     }
 
     /**

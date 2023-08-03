@@ -36,8 +36,6 @@ abstract class Repository
 
     private RepositoryManager $manager;
 
-    protected Scope $scope;
-
     /**
      * @param class-string<E> $entityClass
      * @param class-string<Q> $queryClass
@@ -50,17 +48,32 @@ abstract class Repository
         $this->entityClass = $entityClass;
         assert(is_a($queryClass, Query::class, true));
         $this->queryClass = $queryClass;
-        $this->behaviors = new RepositoryBehaviors();
+        $this->behaviors = new RepositoryBehaviors($this, $deps->getScopeContainer());
         $this->setup($this->behaviors);
         $this->events = $deps->getEvents()->forRepository($this);
         $this->manager = $deps->getManager();
-        $this->scope = $deps->getDefaultScope();
     }
 
     /**
      * Do $behaviors->add() here.
      */
     abstract protected function setup(RepositoryBehaviors $behaviors): void;
+
+    public function setScope(Scope $scope): self
+    {
+        $this->behaviors->setScope($scope);
+        return $this;
+    }
+
+    public function scopeRaw(): self
+    {
+        return $this->setScope($this->behaviors->getScope()->raw());
+    }
+
+    public function scopeFull(): self
+    {
+        return $this->setScope($this->behaviors->getScope()->full());
+    }
 
     /********************************
      * Fetching entities
@@ -69,20 +82,20 @@ abstract class Repository
     /**
      * @param string|int|array|E $id
      */
-    public function find($id, bool $events = true): ?Entity
+    public function find($id): ?Entity
     {
         if ($id instanceof ActiveRow) {
             $id = $id->getPrimary();
         }
-        return $this->query($events)->wherePrimary($id)->limit(1)->fetch();
+        return $this->query()->wherePrimary($id)->limit(1)->fetch();
     }
 
     /**
      * @return E|null
      */
-    public function findOneBy(array $conditions, bool $events = true): ?Entity
+    public function findOneBy(array $conditions): ?Entity
     {
-        return $this->query($events)->where($conditions)->limit(1)->fetch();
+        return $this->findBy($conditions)->limit(1)->fetch();
     }
 
     /**
@@ -95,7 +108,7 @@ abstract class Repository
 
     public function countBy(array $conditions): int
     {
-        return $this->findBy($conditions)->count();
+        return $this->findBy($conditions)->count('*');
     }
 
     public function sumBy(string $column, array $conditions = []): int
@@ -103,9 +116,9 @@ abstract class Repository
         return $this->findBy($conditions)->sum($column);
     }
 
-    public function search(array $columns, string $search, bool $events = true): Query
+    public function search(array $columns, string $search): Query
     {
-        return $this->query($events)->search($columns, $search);
+        return $this->query()->search($columns, $search);
     }
 
     /**
@@ -141,12 +154,11 @@ abstract class Repository
     /**
      * @param E|array|string|int $row Entity, primary value (ID), or array where conditions
      * @param iterable           $data Data to update
-     * @param bool               $events Whether to fire events
      * @return int Number of affected rows
      */
-    public function update($row, iterable $data, bool $events = true): int
+    public function update($row, iterable $data): int
     {
-        $query = $this->query($events);
+        $query = $this->query();
         if (is_scalar($row)) {
             $query->wherePrimary($row);
         } elseif ($row instanceof ActiveRow) {
@@ -201,7 +213,7 @@ abstract class Repository
 
     public function delete(iterable ...$entities): int
     {
-        $query = $this->query()->whereRows(...$entities)->delete();
+        $query = $this->query()->whereRows(...$entities);
         return (new DeleteQueryEvent($query, $entities))->handle();
     }
 
@@ -212,17 +224,17 @@ abstract class Repository
     /**
      * @return Q
      */
-    public function query(bool $events = true): Query
+    public function query(): Query
     {
-        return new ($this->queryClass)($this, $events);
+        return new ($this->queryClass)($this);
     }
 
     /**
      * @return iterable<E>
      */
-    public function fetchAll(bool $events = true): iterable
+    public function fetchAll(): iterable
     {
-        return $this->query($events)->fetchAll();
+        return $this->query()->fetchAll();
     }
 
     public function fetchPairs(?string $key = null, ?string $value = null, ?string $order = null, array $where = []): array
@@ -289,7 +301,7 @@ abstract class Repository
      */
     public function createRow(array $row = [], ?Query $query = null): Entity
     {
-        $entity = new ($this->entityClass)($row, $this->query());
+        $entity = new ($this->entityClass)($row, $query ?? $this->query());
         $events = $query !== null ? $query->getEvents() : $this->getEvents();
         foreach ($events as $event) {
             $event->onLoad($entity, $this);

@@ -7,24 +7,25 @@ use Nette\PhpGenerator\ClassType;
 
 class QueryWriter
 {
-    public static function writeAppQueryBase(EntityStructure $structure): void
+    public static function writeAppQueryBase(EntityStructure $structure, FileWriter $writer): void
     {
         $class = new ClassType('QueryBase', $structure->queryNamespace);
         if (class_exists($structure->queryNamespace->getName() . '\\' . $class->getName())) {
             return;
         }
 
+        $structure->queryNamespace->addUse(Query::class);
         $class->setAbstract();
         $class->setExtends(Query::class);
 
-        EntityStructure::writeClass($class, $structure->queryDir);
+        $writer->writeClass($class, $structure->queryDir);
     }
 
-    public static function createQueryBase(EntityStructure $structure): ClassType
+    public static function writeQueryBase(EntityStructure $structure, FileWriter $writer): void
     {
         $repositoryClass = $structure->repositoryNamespace->getName() . '\\' . $structure->getClassName() . 'Repository';
         $entityClass = $structure->entityGenNamespace->getName() . '\\' . $structure->getClassName();
-        $queryBaseClass = $structure->queryNamespace->getName() . '\\' . $structure->getClassName() . 'QueryBase';
+        $queryBaseClass = $structure->queryNamespace->getName() . '\\QueryBase';
         $structure->queryGenNamespace
             ->addUse($entityClass)
             ->addUse($repositoryClass)
@@ -43,12 +44,7 @@ class QueryWriter
         $baseClass->addComment("@method {$structure->getClassName()} current()");
         $baseClass->addComment("@method {$structure->getClassName()}Repository getRepository()");
 
-        return $baseClass;
-    }
-
-    public static function writeQueryBase(EntityStructure $structure): void
-    {
-        $structure->writeClass(self::createQueryBase($structure), $structure->queryGenDir);
+        $writer->writeClass($baseClass, $structure->queryGenDir);
     }
 
     private static function createQuery(EntityStructure $structure): ClassType
@@ -64,12 +60,12 @@ class QueryWriter
         return $class;
     }
 
-    public static function writeQuery(EntityStructure $structure): void
+    public static function writeQuery(EntityStructure $structure, FileWriter $writer): void
     {
         $queryClass = $structure->queryNamespace->getName() . '\\' . $structure->getClassName() . 'Query';
         if (class_exists($queryClass)) {
             return;
         }
-        $structure->writeClass(self::createQuery($structure), $structure->queryDir);
+        $writer->writeClass(self::createQuery($structure), $structure->queryDir);
     }
 }

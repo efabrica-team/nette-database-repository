@@ -29,8 +29,6 @@ trait QueryTrait
 
     protected RepositoryBehaviors $behaviors;
 
-    protected Scope $scope;
-
     /**
      * @param E[]|E|array $data Supports multi-insert
      * @return E|int
@@ -45,9 +43,9 @@ trait QueryTrait
         }
         if (is_array($data)) {
             if (Arrays::isList($data)) {
-                $data = array_map(fn($row) => $row instanceof Entity ? $row : $this->repository->createRow($row), $data);
+                $data = array_map(fn($row) => $row instanceof Entity ? $row : $this->repository->createRow($row, $this), $data);
             } else {
-                $data = [$this->repository->createRow($data)];
+                $data = [$this->repository->createRow($data, $this)];
             }
         } elseif ($data instanceof Entity) {
             $data = [$data];
@@ -213,6 +211,7 @@ trait QueryTrait
      */
     public function withoutEvent(string ...$eventClasses): self
     {
+        $this->emptyResultSet();
         $clone = clone $this;
         foreach ($eventClasses as $eventClass) {
             $clone->events->removeEvent($eventClass);
@@ -222,6 +221,7 @@ trait QueryTrait
 
     public function withoutEvents(): self
     {
+        $this->emptyResultSet();
         $clone = clone $this;
         $clone->doesEvents = false;
         return $clone;
@@ -256,6 +256,24 @@ trait QueryTrait
 
     public function getScope(): Scope
     {
-        return $this->scope;
+        return $this->behaviors->getScope();
+    }
+
+    public function setScope(Scope $scope): self
+    {
+        $this->behaviors->setScope($scope);
+        return $this;
+    }
+
+    public function scopeRaw(): self
+    {
+        $this->behaviors->setScope($this->behaviors->getScope()->raw());
+        return $this;
+    }
+
+    public function scopeFull(): self
+    {
+        $this->behaviors->setScope($this->behaviors->getScope()->full());
+        return $this;
     }
 }

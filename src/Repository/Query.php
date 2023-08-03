@@ -16,19 +16,20 @@ class Query extends Selection
 
     protected const CHUNK_SIZE = 127;
 
-    public function __construct(Repository $repository, bool $events = true, ?Scope $scope = null)
+    public function __construct(Repository $repository)
     {
         $this->repository = $repository;
-        $this->doesEvents = $events;
         $this->events = clone $repository->getEvents();
         $this->behaviors = clone $repository->behaviors();
         parent::__construct($repository->getExplorer(), $repository->getExplorer()->getConventions(), $repository->getTableName());
-        $this->scope = $scope ?? $repository->getScope();
     }
 
     public function createSelectionInstance(?string $table = null): self
     {
-        return new (static::class)($this->repository, $this->doesEvents);
+        if ($table === null) {
+            return new (static::class)($this->repository);
+        }
+        return $this->repository->getManager()->byTableName($table)->query()->setScope($this->scope);
     }
 
     public function createGroupedSelectionInstance(string $table, string $column): GroupedSelection

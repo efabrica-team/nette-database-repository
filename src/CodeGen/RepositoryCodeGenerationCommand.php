@@ -96,25 +96,27 @@ class RepositoryCodeGenerationCommand extends Command
             $structures[$table['name']] = $this->structureFactory->create($table['name'], $namespace, $dbDir);
         }
 
+        $writer = new FileWriter();
+
         foreach ($structures as $structure) {
             $output->writeln("Generating {$structure->getClassName()} Repository App Base");
-            RepositoryWriter::writeAppRepositoryBase($structure);
+            RepositoryWriter::writeAppRepositoryBase($structure, $writer);
             $output->writeln("Generating {$structure->getClassName()} Query App Base");
-            QueryWriter::writeAppQueryBase($structure);
+            QueryWriter::writeAppQueryBase($structure, $writer);
 
             $output->writeln("Generating {$structure->getClassName()} Entity Structure");
-            EntityWriter::writeBody($structure);
+            EntityWriter::writeBody($structure, $writer);
             $output->writeln("Generating {$structure->getClassName()} Entity");
-            EntityWriter::writeEntity($structure, $structures);
+            EntityWriter::writeEntity($structure, $structures, $writer);
             $output->writeln("Generating {$structure->getClassName()} Query Base");
-            QueryWriter::writeQueryBase($structure);
+            QueryWriter::writeQueryBase($structure, $writer);
             $output->writeln("Generating {$structure->getClassName()} Query");
-            QueryWriter::writeQuery($structure);
+            QueryWriter::writeQuery($structure, $writer);
             $output->writeln("Generating {$structure->getClassName()} Repository Base");
-            RepositoryWriter::writeRepositoryBase($structure);
+            RepositoryWriter::writeRepositoryBase($structure, $writer);
             $output->writeln("Generating {$structure->getClassName()} Repository");
-            RepositoryWriter::writeRepository($structure, $input->getOption('migrate'));
-            ModuleWriter::writeConfigNeon($structure, $dbDir);
+            RepositoryWriter::writeRepository($structure, $input->getOption('migrate'), $writer);
+            ModuleWriter::writeConfigNeon($structure, $dbDir, $writer);
         }
         return 0;
     }

@@ -2,9 +2,11 @@
 
 namespace Efabrica\NetteRepository\CodeGen;
 
+use Doctrine\Inflector\Inflector;
+
 class ModuleWriter
 {
-    public static function writeConfigNeon(EntityStructure $structure, string $dbDir): void
+    public static function writeConfigNeon(EntityStructure $structure, string $dbDir, FileWriter $writer): void
     {
         $config = [];
         if (file_exists($dbDir . '/config.neon')) {
@@ -17,7 +19,7 @@ class ModuleWriter
         $defLine = null;
         $servicesLine = null;
         foreach ($config as $i => $line) {
-            if (preg_match("/^\\s*$serviceName:/", $line) || str_contains($line, $repoClass)) {
+            if (preg_match("/^\\s*$serviceName:/", $line)) {
                 $defLine = $i;
                 break;
             }
@@ -34,11 +36,16 @@ class ModuleWriter
             array_splice($config, $servicesLine + 1, 0, ['    ' . $serviceName . ': ' . $repoClass]);
         }
 
-        file_put_contents($structure->dbDir . '/config.neon', implode("\n", $config));
+        $writer->writeFile($structure->dbDir . '/config.neon', implode("\n", $config));
     }
 
     public static function getRepoServiceName(EntityStructure $structure): string
     {
         return lcfirst($structure->getClassName()) . 'Repository';
+    }
+
+    public static function toRepoServiceName(string $table, Inflector $inflector): string
+    {
+        return lcfirst(EntityStructure::toClassCase($inflector, $table)) . 'Repository';
     }
 }

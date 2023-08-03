@@ -2,8 +2,7 @@
 
 namespace Efabrica\NetteRepository\Repository;
 
-use Efabrica\NetteRepository\Repository\Scope\DefaultScope;
-use Efabrica\NetteRepository\Repository\Scope\Scope;
+use Efabrica\NetteRepository\Repository\Scope\ScopeContainer;
 use Efabrica\NetteRepository\Subscriber\EventSubscriber;
 use Efabrica\NetteRepository\Subscriber\RepositoryEvents;
 use Nette\Database\Explorer;
@@ -17,9 +16,9 @@ final class RepositoryDependencies
 
     private RepositoryManager $repositoryManager;
 
-    private Scope $defaultScope;
+    private ScopeContainer $scopeContainer;
 
-    public function __construct(Explorer $explorer, Container $container, RepositoryManager $repositoryManager, DefaultScope $defaultScope)
+    public function __construct(Explorer $explorer, Container $container, RepositoryManager $repositoryManager, ScopeContainer $scopeContainer)
     {
         $this->explorer = $explorer;
 
@@ -32,7 +31,7 @@ final class RepositoryDependencies
         }
         $this->events = new RepositoryEvents(...$subscribers);
         $this->repositoryManager = $repositoryManager;
-        $this->defaultScope = $defaultScope;
+        $this->scopeContainer = $scopeContainer;
     }
 
     public function getExplorer(): Explorer
@@ -50,8 +49,8 @@ final class RepositoryDependencies
         return $this->repositoryManager;
     }
 
-    public function getDefaultScope(): Scope
+    public function getScopeContainer(): ScopeContainer
     {
-        return $this->defaultScope;
+        return $this->scopeContainer;
     }
 }

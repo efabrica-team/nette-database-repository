@@ -12,7 +12,7 @@ use ReflectionClass;
 
 class RepositoryWriter
 {
-    public static function writeAppRepositoryBase(EntityStructure $structure): void
+    public static function writeAppRepositoryBase(EntityStructure $structure, FileWriter $writer): void
     {
         $class = new ClassType('RepositoryBase', $structure->repositoryNamespace);
         if (class_exists($structure->repositoryNamespace->getName() . '\\' . $class->getName())) {
@@ -22,10 +22,10 @@ class RepositoryWriter
         $class->setAbstract();
         $class->setExtends(Repository::class);
 
-        EntityStructure::writeClass($class, $structure->repositoryDir);
+        $writer->writeClass($class, $structure->repositoryDir);
     }
 
-    public static function writeRepositoryBase(EntityStructure $structure): void
+    public static function writeRepositoryBase(EntityStructure $structure, FileWriter $writer): void
     {
         $class = new ClassType($structure->getClassName() . 'RepositoryBase', $structure->repositoryGenNamespace);
         $queryClass = $structure->queryNamespace->getName() . '\\' . $structure->getClassName() . 'Query';
@@ -72,7 +72,7 @@ class RepositoryWriter
             ->setBody("parent::__construct('{$structure->getTableName()}', {$structure->getClassName()}::class, {$structure->getClassName()}Query::class, \$deps);")
         ;
 
-        $structure->writeClass($class, $structure->repositoryGenDir);
+        $writer->writeClass($class, $structure->repositoryGenDir);
     }
 
     private static function createRepository(EntityStructure $structure): ClassType
@@ -90,16 +90,16 @@ class RepositoryWriter
         $class->setFinal();
         $class->setExtends($repositoryClass);
 
-        $class->addMethod('configure')
+        $class->addMethod('setup')
             ->setReturnType('void')
             ->setProtected()
-            ->addParameter('behavior')->setType(RepositoryBehaviors::class)
+            ->addParameter('behaviors')->setType(RepositoryBehaviors::class)
         ;
 
         return $class;
     }
 
-    private static function migrateRepository(EntityStructure $structure): void
+    private static function migrateRepository(EntityStructure $structure, FileWriter $writer): void
     {
         $class = new ReflectionClass($structure->repositoryNamespace->getName() . '\\' . $structure->getClassName() . 'Repository');
 
@@ -107,7 +107,7 @@ class RepositoryWriter
         self::modifyExtends($structure, $class, $lines);
         self::migrateMagicMethods($lines, $structure);
 
-        file_put_contents($class->getFileName(), implode("\n", $lines));
+        $writer->writeFile($class->getFileName(), implode("\n", $lines));
     }
 
     public static function modifyExtends(EntityStructure $structure, ReflectionClass $class, array &$lines): void
@@ -200,16 +200,16 @@ class RepositoryWriter
         }
     }
 
-    public static function writeRepository(EntityStructure $structure, bool $migrate): void
+    public static function writeRepository(EntityStructure $structure, bool $migrate, FileWriter $writer): void
     {
         $repoClass = $structure->repositoryNamespace->getName() . '\\' . $structure->getClassName() . 'Repository';
         if (class_exists($repoClass)) {
             if ($migrate) {
-                self::migrateRepository($structure);
+                self::migrateRepository($structure, $writer);
             }
         } else {
             $class = self::createRepository($structure);
-            $structure->writeClass($class, $structure->repositoryDir);
+            $writer->writeClass($class, $structure->repositoryDir);
         }
     }
 }
