@@ -13,7 +13,7 @@ class DeleteQueryEvent extends QueryEvent
         if ($subscriber instanceof EventSubscriber) {
             return $subscriber->onDelete($this);
         }
-        return $this->query->withoutEvents()->delete();
+        return (clone $this->query)->scopeRaw()->delete();
     }
 
     public function stopPropagation(): int

@@ -135,6 +135,7 @@ class RepositoryBehaviors
             $this->behaviors[$key] = clone $behavior;
         }
         $this->scoped = null;
+
     }
 
     public function setScope(Scope $scope): self

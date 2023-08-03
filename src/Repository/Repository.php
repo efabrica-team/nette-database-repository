@@ -229,6 +229,11 @@ abstract class Repository
         return new ($this->queryClass)($this);
     }
 
+    public function rawQuery(): Query
+    {
+        return $this->query()->scopeRaw();
+    }
+
     /**
      * @return iterable<E>
      */
@@ -291,11 +296,6 @@ abstract class Repository
         return $this->entityClass;
     }
 
-    public function getScope(): Scope
-    {
-        return $this->scope;
-    }
-
     /**
      * @return E
      */
@@ -346,9 +346,9 @@ abstract class Repository
 
     /**
      * @template T
-     * @param callable(): T $callback
-     * @param int           $retryTimes
-     * @param bool          $reconnect
+     * @param callable(Repository): T $callback
+     * @param int                     $retryTimes
+     * @param bool                    $reconnect
      * @return T
      * @throws Throwable
      */
@@ -392,12 +392,12 @@ abstract class Repository
     }
 
     /**
-     * @deprecated use query(false) instead
+     * @deprecated use rawQuery() instead
      * @deprecated instead of overriding, implement SelectEventSubscriber in the repository
      */
     final public function getTable(): Query
     {
-        return $this->query(false);
+        return $this->rawQuery();
     }
 
     /**

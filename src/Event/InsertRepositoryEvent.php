@@ -39,7 +39,7 @@ class InsertRepositoryEvent extends RepositoryEvent
             $entities[] = $entity->toArray();
         }
         return $this->stopPropagation(
-            $this->getRepository()->query(false)->insert($entities)
+            $this->getRepository()->rawQuery()->insert($entities)
         );
     }
 

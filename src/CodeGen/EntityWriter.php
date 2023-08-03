@@ -33,13 +33,6 @@ class EntityWriter
         $class->addTrait($structure->entityNamespace->getName() . '\\' . $structure->getClassName() . 'Body');
 
         foreach ($structure->getProperties() as $prop) {
-            $propName = $casts[$prop->getName()] ?? null;
-            if (isset($propName)) {
-                if (str_contains($prop->getType(), '|null')) {
-                    $propName .= '|null';
-                }
-                $prop->setType($propName);
-            }
             $class->addComment($prop->toString());
             if (str_contains($prop->getType(), DateTimeInterface::class)) {
                 $structure->entityGenNamespace->addUse(DateTimeInterface::class);

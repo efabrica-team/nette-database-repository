@@ -6,6 +6,8 @@ use Efabrica\NetteRepository\Model\Entity;
 use Efabrica\NetteRepository\Repository\Scope\Scope;
 use Nette\Database\Table\GroupedSelection;
 use Nette\Database\Table\Selection;
+use Traversable;
+use Iterator;
 
 /**
  * @template E of Entity

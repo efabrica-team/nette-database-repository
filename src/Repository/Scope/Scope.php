@@ -8,7 +8,6 @@ use Efabrica\NetteRepository\Repository\RepositoryBehaviors;
 /**
  * @immutable
  */
-#[\Jetbrains\PhpStorm\Immutable]
 interface Scope
 {
     public function apply(RepositoryBehaviors $behaviors, Repository $repository): void;

@@ -49,9 +49,9 @@ class RepositoryCodeGenerationCommand extends Command
             }
             foreach ($tables as $table) {
                 $className = EntityStructure::toClassCase($this->inflector, $table['name']);
-                if ($file->getBaseName('.php') === $className . 'Repository') {
+                if ($file->getBasename('.php') === $className . 'Repository') {
                     $c = ClassType::fromCode(file_get_contents($file->getPathname()));
-                    $repoDirs[$table['name']] = Strings::before($file->getPathname(), '/Repositor') ?? dirname($file->getPathname(), 2);
+                    $repoDirs[$table['name']] = Strings::before($file->getPathname(), '/Repository') ?? dirname($file->getPathname(), 2);
                     $repoNamespaces[$table['name']] = Strings::before(
                         $c->getNamespace()->getName(),
                         '\\Repositor'
@@ -116,6 +116,7 @@ class RepositoryCodeGenerationCommand extends Command
             RepositoryWriter::writeRepositoryBase($structure, $writer);
             $output->writeln("Generating {$structure->getClassName()} Repository");
             RepositoryWriter::writeRepository($structure, $input->getOption('migrate'), $writer);
+
             ModuleWriter::writeConfigNeon($structure, $dbDir, $writer);
         }
         return 0;

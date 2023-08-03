@@ -8,7 +8,6 @@ use Efabrica\NetteRepository\Repository\RepositoryBehaviors;
 /**
  * @immutable
  */
-#[\Jetbrains\PhpStorm\Immutable]
 class ScopeContainer implements Scope
 {
     private FullScope $full;
@@ -17,6 +16,11 @@ class ScopeContainer implements Scope
 
     private Scope $current;
 
+    /**
+     * @param FullScope  $fullScope
+     * @param Scope|null $current
+     * @phpstan-consistent-constructor
+     */
     public function __construct(FullScope $fullScope, ?Scope $current = null)
     {
         $this->full = $fullScope;
@@ -35,7 +39,9 @@ class ScopeContainer implements Scope
             return $this;
         }
 
-        return new static($this->full, $scope);
+        $clone = clone $this;
+        $clone->current = $scope;
+        return $clone;
     }
 
     public function full(): self
@@ -46,5 +52,10 @@ class ScopeContainer implements Scope
     public function raw(): self
     {
         return $this->withScope($this->raw);
+    }
+
+    public function current(): Scope
+    {
+        return $this->current;
     }
 }

@@ -7,7 +7,9 @@ use Efabrica\NetteRepository\Event\InsertRepositoryEvent;
 use Efabrica\NetteRepository\Event\SelectQueryEvent;
 use Efabrica\NetteRepository\Event\UpdateQueryEvent;
 use Efabrica\NetteRepository\Model\Entity;
+use Efabrica\NetteRepository\Repository\Scope\RawScope;
 use Efabrica\NetteRepository\Repository\Scope\Scope;
+use Efabrica\NetteRepository\Repository\Scope\ScopeContainer;
 use Efabrica\NetteRepository\Subscriber\EventSubscriber;
 use Efabrica\NetteRepository\Subscriber\RepositoryEvents;
 use Generator;
@@ -21,8 +23,6 @@ use Traversable;
  */
 trait QueryTrait
 {
-    protected bool $doesEvents;
-
     protected Repository $repository;
 
     protected RepositoryEvents $events;
@@ -30,7 +30,7 @@ trait QueryTrait
     protected RepositoryBehaviors $behaviors;
 
     /**
-     * @param E[]|E|array $data Supports multi-insert
+     * @param array|E $data Supports multi-insert
      * @return E|int
      */
     public function insert(iterable $data)
@@ -203,30 +203,6 @@ trait QueryTrait
         return parent::count($column);
     }
 
-    /********************************** Events ***************************/
-
-    /**
-     * @param class-string<EventSubscriber> ...$eventClasses
-     * @return Query cloned instance
-     */
-    public function withoutEvent(string ...$eventClasses): self
-    {
-        $this->emptyResultSet();
-        $clone = clone $this;
-        foreach ($eventClasses as $eventClass) {
-            $clone->events->removeEvent($eventClass);
-        }
-        return $clone;
-    }
-
-    public function withoutEvents(): self
-    {
-        $this->emptyResultSet();
-        $clone = clone $this;
-        $clone->doesEvents = false;
-        return $clone;
-    }
-
     /*********************** Getters *************************/
 
     public function getRepository(): Repository
@@ -244,9 +220,13 @@ trait QueryTrait
         return $this->behaviors;
     }
 
-    public function doesEvents(): bool
+    protected function doesEvents(): bool
     {
-        return $this->doesEvents;
+        $scope = $this->behaviors->getScope();
+        while ($scope instanceof ScopeContainer) {
+            $scope = $scope->current();
+        }
+        return $scope instanceof RawScope;
     }
 
     protected function createRow(array $row = []): Entity

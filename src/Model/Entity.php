@@ -8,6 +8,7 @@ use Efabrica\NetteRepository\Repository\Scope\Scope;
 use Nette\Database\Table\ActiveRow;
 use Nette\Database\Table\GroupedSelection;
 use ReflectionProperty;
+use Traversable;
 
 abstract class Entity extends ActiveRow
 {
@@ -25,12 +26,11 @@ abstract class Entity extends ActiveRow
 
     /**
      * Sync state of entity into database
-     * @param bool $events
      * @return bool
      */
-    public function save(bool $events = true): bool
+    public function save(): bool
     {
-        $query = $this->_query->getRepository()->query($events);
+        $query = $this->_query->getRepository()->query();
         if (!isset(self::$data)) {
             self::$data = new ReflectionProperty(ActiveRow::class, 'data');
             self::$data->setAccessible(true);
@@ -49,20 +49,23 @@ abstract class Entity extends ActiveRow
     }
 
     /**
-     * @param iterable<self::*,mixed> $data
+     * @param array<static::*,mixed> $data
      * @return bool
      */
     public function update(iterable $data = []): bool
     {
+        if ($data instanceof Traversable) {
+            $data = iterator_to_array($data);
+        }
         $result = parent::update($data + $this->_modified);
         $this->_modified = [];
         return $result;
     }
 
-    public function delete(bool $events = true): int
+    public function delete(): int
     {
         return $this->_query->getRepository()
-            ->query($events)
+            ->query()
             ->wherePrimary($this->getPrimary())
             ->delete()
         ;
@@ -140,12 +143,11 @@ abstract class Entity extends ActiveRow
 
     /**
      * @param class-string<Repository> $repository
-     * @return Query<Repository>
      */
-    protected function query(string $repository, bool $events = true): Query
+    protected function query(string $repository): Query
     {
         return $this->_query->getRepository()->getManager()
-            ->byClass($repository)->query($events)
+            ->byClass($repository)->query()
         ;
     }
 
@@ -156,7 +158,17 @@ abstract class Entity extends ActiveRow
 
     public function setScope(Scope $scope): self
     {
-        $this->_query = $this->_query->createSelectionInstance()->setScope($scope);
+        $this->_query = (clone $this->_query)->setScope($scope);
         return $this;
+    }
+
+    public function scopeRaw(): self
+    {
+        return $this->setScope($this->_query->getBehaviors()->getScope()->raw());
+    }
+
+    public function scopeFull(): self
+    {
+        return $this->setScope($this->_query->getBehaviors()->getScope()->full());
     }
 }

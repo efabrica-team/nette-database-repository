@@ -35,11 +35,13 @@ abstract class QueryEvent extends RepositoryEvent
     }
 
     /**
-     * @return Entity[]
+     * @return iterable<Entity> Entities that are affected by this event
      */
     public function getEntities(): iterable
     {
-        return $this->entities ??= $this->query;
+        /** @var iterable<Entity> $query */
+        $query = $this->query;
+        return $this->entities ??= $query;
     }
 
     /**

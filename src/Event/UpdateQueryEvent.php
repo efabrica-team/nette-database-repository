@@ -13,7 +13,7 @@ class UpdateQueryEvent extends QueryEvent
         if ($subscriber instanceof EventSubscriber) {
             return $subscriber->onUpdate($this, $data);
         }
-        return $this->query->withoutEvents()->update($data);
+        return (clone $this->query)->scopeRaw()->update($data);
     }
 
     public function stopPropagation(): int

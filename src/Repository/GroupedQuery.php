@@ -28,7 +28,6 @@ class GroupedQuery extends GroupedSelection
         $g->repository = $query->getRepository();
         $g->events = clone $query->getEvents();
         $g->behaviors = clone $query->getBehaviors();
-        $g->doesEvents = $query->doesEvents();
         return $g;
     }
 
@@ -39,7 +38,6 @@ class GroupedQuery extends GroupedSelection
         $g->repository = $query->getRepository();
         $g->events = clone $query->getEvents();
         $g->behaviors = clone $query->getBehaviors();
-        $g->doesEvents = $query->doesEvents();
         return $g;
     }
 

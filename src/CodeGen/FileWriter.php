@@ -18,13 +18,7 @@ class FileWriter
         $this->writeFile($dir . '/' . $classType->getName() . '.php', $contents);
     }
 
-    /**
-     * @param string    $dir
-     * @param ClassType $classType
-     * @param           $contents
-     * @return void
-     */
-    public function writeFile(string $path, $contents): void
+    public function writeFile(string $path, string $contents): void
     {
         if (file_exists($path) && file_get_contents($path) === $contents) {
             $this->freshFiles[$path] = true;
