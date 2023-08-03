@@ -7,6 +7,7 @@ use Efabrica\NetteRepository\Repository\RepositoryBehaviors;
 
 /**
  * @immutable
+ * @readonly
  */
 interface Scope
 {

@@ -18,14 +18,13 @@ class ScopeContainer implements Scope
 
     /**
      * @param FullScope  $fullScope
-     * @param Scope|null $current
      * @phpstan-consistent-constructor
      */
-    public function __construct(FullScope $fullScope, ?Scope $current = null)
+    public function __construct(FullScope $fullScope)
     {
         $this->full = $fullScope;
-        $this->current = $current ?? $this->full;
         $this->raw = new RawScope();
+        $this->current = $this->full;
     }
 
     public function apply(RepositoryBehaviors $behaviors, Repository $repository): void

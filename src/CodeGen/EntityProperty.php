@@ -28,9 +28,9 @@ class EntityProperty
         return $this->type;
     }
 
-    public function setType($getName): void
+    public function setType(string $type): void
     {
-        $this->type = $getName;
+        $this->type = $type;
     }
 
     public function getName(): string

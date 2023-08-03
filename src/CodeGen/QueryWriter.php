@@ -19,6 +19,7 @@ class QueryWriter
         $class->setExtends(Query::class);
 
         $writer->writeClass($class, $structure->queryDir);
+        $structure->repositoryNamespace->removeUse(Query::class);
     }
 
     public static function writeQueryBase(EntityStructure $structure, FileWriter $writer): void

@@ -19,7 +19,7 @@ class SoftDeleteEventSubscriber extends EventSubscriber
     {
         /** @var SoftDeleteBehavior $behavior */
         $behavior = $event->getRepository()->behaviors()->get(SoftDeleteBehavior::class);
-        if ($behavior->isFilterDeleted()) {
+        if ($behavior->shouldFilterDeleted()) {
             $event->getQuery()->where(
                 $event->getRepository()->getTableName() . '.' . $behavior->getColumn() . ' = NULL',
                 false

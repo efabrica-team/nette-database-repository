@@ -18,29 +18,19 @@ class SoftDeleteBehavior extends RepositoryBehavior
      */
     private $newValue;
 
-    private bool $filterDeleted = true;
+    private bool $filterDeleted;
 
     /**
      * @param bool|DateTimeInterface $newValue use true if column is bool, null for DateTimeImmutable
      */
-    public function __construct(string $column, $newValue = null)
+    public function __construct(string $column, $newValue = null, bool $filterDeleted = true)
     {
         $this->column = $column;
         $this->newValue = $newValue ?? new DateTimeImmutable();
+        $this->filterDeleted = $filterDeleted;
     }
 
-    /**
-     * Wheter is_deleted filter should be applied on select
-     * @param bool $enabled
-     * @return $this
-     */
-    public function setFilterDeleted(bool $enabled): self
-    {
-        $this->filterDeleted = $enabled;
-        return $this;
-    }
-
-    public function isFilterDeleted(): bool
+    public function shouldFilterDeleted(): bool
     {
         return $this->filterDeleted;
     }
@@ -50,6 +40,9 @@ class SoftDeleteBehavior extends RepositoryBehavior
         return $this->column;
     }
 
+    /**
+     * @return bool|DateTimeInterface
+     */
     public function getNewValue()
     {
         return $this->newValue;

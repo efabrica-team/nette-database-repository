@@ -152,7 +152,7 @@ abstract class Repository
     }
 
     /**
-     * @param E|array|string|int $row Entity, primary value (ID), or array where conditions
+     * @param E|ActiveRow|array|string|int $row Entity, primary value (ID), or array where conditions
      * @param iterable           $data Data to update
      * @return int Number of affected rows
      */
@@ -226,7 +226,8 @@ abstract class Repository
      */
     public function query(): Query
     {
-        return new ($this->queryClass)($this);
+        $class = $this->queryClass;
+        return new $class($this);
     }
 
     public function rawQuery(): Query
@@ -301,7 +302,8 @@ abstract class Repository
      */
     public function createRow(array $row = [], ?Query $query = null): Entity
     {
-        $entity = new ($this->entityClass)($row, $query ?? $this->query());
+        $class = $this->entityClass;
+        $entity = new $class($row, $query ?? $this->query());
         $events = $query !== null ? $query->getEvents() : $this->getEvents();
         foreach ($events as $event) {
             $event->onLoad($entity, $this);

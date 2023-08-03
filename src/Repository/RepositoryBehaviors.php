@@ -75,9 +75,9 @@ class RepositoryBehaviors
      * @param class-string<T> $behaviorClass
      * @return T
      */
-    public function get(string $behaviorClass): ?RepositoryBehavior
+    public function get(string $behaviorClass, bool $raw = false): ?RepositoryBehavior
     {
-        $behaviors = $this->all();
+        $behaviors = $raw ? $this->allRaw() : $this->all();
         if (isset($behaviors[$behaviorClass]) && $behaviors[$behaviorClass] instanceof $behaviorClass) {
             return $behaviors[$behaviorClass];
         }
@@ -89,6 +89,10 @@ class RepositoryBehaviors
         return null;
     }
 
+    /**
+     * @param class-string<RepositoryBehavior> $behaviorClass
+     * @return bool
+     */
     public function has(string $behaviorClass): bool
     {
         return $this->get($behaviorClass) !== null;
@@ -127,15 +131,6 @@ class RepositoryBehaviors
         $this->behaviors = [];
         $this->scoped = null;
         return $this;
-    }
-
-    public function __clone()
-    {
-        foreach ($this->behaviors as $key => $behavior) {
-            $this->behaviors[$key] = clone $behavior;
-        }
-        $this->scoped = null;
-
     }
 
     public function setScope(Scope $scope): self
