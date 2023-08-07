@@ -12,30 +12,38 @@ use Iterator;
 /**
  * @template E of Entity
  */
-class Query extends Selection
+class Query extends Selection implements QueryInterface
 {
     use QueryTrait;
 
-    protected const CHUNK_SIZE = 127;
+    public const CHUNK_SIZE = 127;
 
+    /**
+     * @param Repository<E, Query<E>> $repository
+     */
     public function __construct(Repository $repository)
     {
         $this->repository = $repository;
-        $this->events = clone $repository->getEvents();
         $this->behaviors = clone $repository->behaviors();
         parent::__construct($repository->getExplorer(), $repository->getExplorer()->getConventions(), $repository->getTableName());
     }
 
-    public function createSelectionInstance(?string $table = null): self
+    public function createSelectionInstance(?string $table = null): Query
     {
         if ($table === null) {
-            return new (static::class)($this->repository);
+            return $this->repository->query();
         }
-        return $this->repository->getManager()->byTableName($table)->query()->setScope($this->scope);
+        return $this->repository->getManager()->byTableName($table)->query()->setScope($this->behaviors->getScope());
     }
 
-    public function createGroupedSelectionInstance(string $table, string $column): GroupedSelection
+    public function createGroupedSelectionInstance(string $table, string $column): GroupedQuery
     {
         return GroupedQuery::fromQuery($this, $table, $column);
+    }
+
+    public function __clone()
+    {
+        parent::__clone();
+        $this->behaviors = clone $this->behaviors;
     }
 }

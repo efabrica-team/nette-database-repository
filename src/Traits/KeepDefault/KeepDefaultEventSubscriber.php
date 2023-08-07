@@ -12,7 +12,7 @@ use Efabrica\NetteRepository\Subscriber\EventSubscriber;
 use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteQueryEvent;
 use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteSubscriber;
 
-class KeepDefaultEventSubscriber extends EventSubscriber implements SoftDeleteSubscriber
+final class KeepDefaultEventSubscriber extends EventSubscriber implements SoftDeleteSubscriber
 {
     public function supportsRepository(Repository $repository): bool
     {

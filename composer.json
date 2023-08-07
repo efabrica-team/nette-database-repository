@@ -54,7 +54,8 @@
         "nette/http": "^3.2",
         "phpunit/phpunit": "^9.6",
         "nette/application": "^3.1",
-        "nesbot/carbon": "^2.68"
+        "nesbot/carbon": "^2.68",
+        "ramsey/uuid": "^4.2"
     },
     "autoload": {
         "psr-4": {

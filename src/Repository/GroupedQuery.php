@@ -6,48 +6,51 @@ use Nette\Database\Explorer;
 use Nette\Database\Table\GroupedSelection;
 use Nette\Database\Table\Selection;
 
-class GroupedQuery extends GroupedSelection
+final class GroupedQuery extends GroupedSelection implements QueryInterface
 {
     use QueryTrait;
 
     private Query $query;
 
     private function __construct(
-        Explorer $explorer,
         string $tableName,
         string $column,
-        Selection $refTable
+        Selection $refTable,
+        Query $query
     ) {
+        $explorer = $query->getRepository()->getExplorer();
         parent::__construct($explorer, $explorer->getConventions(), $tableName, $column, $refTable);
+        $this->query = $query;
+        $this->repository = $query->getRepository();
+        $this->behaviors = clone $query->getBehaviors();
     }
 
     public static function fromQuery(Query $query, string $tableName, string $column): self
     {
-        $g = new self($query->getRepository()->getExplorer(), $tableName, $column, $query);
-        $g->query = $query;
-        $g->repository = $query->getRepository();
-        $g->events = clone $query->getEvents();
-        $g->behaviors = clone $query->getBehaviors();
-        return $g;
+        return new self($tableName, $column, $query, $query);
     }
 
     public static function fromGroupedQuery(GroupedQuery $query, string $tableName, string $column): self
     {
-        $g = new self($query->getExplorer(), $tableName, $column, $query);
-        $g->query = $query->query;
-        $g->repository = $query->getRepository();
-        $g->events = clone $query->getEvents();
-        $g->behaviors = clone $query->getBehaviors();
-        return $g;
+        return new self($tableName, $column, $query, $query->query);
     }
 
     public function createSelectionInstance(?string $table = null): Query
     {
-        return new (get_class($this->query))($this->repository, $this->doesEvents);
+        if ($table === null) {
+            return $this->repository->query();
+        }
+        return $this->repository->getManager()->byTableName($table)->query()->setScope($this->behaviors->getScope());
     }
 
     public function createGroupedSelectionInstance(string $table, string $column): self
     {
-        return static::fromGroupedQuery($this, $table, $column);
+        return self::fromGroupedQuery($this, $table, $column);
+    }
+
+    public function __clone()
+    {
+        parent::__clone();
+        $this->behaviors = clone $this->behaviors;
     }
 }

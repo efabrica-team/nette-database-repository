@@ -14,7 +14,7 @@ class ScopeContainer implements Scope
 
     private RawScope $raw;
 
-    private Scope $current;
+    protected Scope $current;
 
     /**
      * @param FullScope  $fullScope

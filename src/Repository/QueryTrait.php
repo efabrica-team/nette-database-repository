@@ -9,8 +9,6 @@ use Efabrica\NetteRepository\Event\UpdateQueryEvent;
 use Efabrica\NetteRepository\Model\Entity;
 use Efabrica\NetteRepository\Repository\Scope\RawScope;
 use Efabrica\NetteRepository\Repository\Scope\Scope;
-use Efabrica\NetteRepository\Repository\Scope\ScopeContainer;
-use Efabrica\NetteRepository\Subscriber\EventSubscriber;
 use Efabrica\NetteRepository\Subscriber\RepositoryEvents;
 use Generator;
 use LogicException;
@@ -25,14 +23,8 @@ trait QueryTrait
 {
     protected Repository $repository;
 
-    protected RepositoryEvents $events;
-
     protected RepositoryBehaviors $behaviors;
 
-    /**
-     * @param array|E $data Supports multi-insert
-     * @return E|int
-     */
     public function insert(iterable $data)
     {
         if (!$this->doesEvents()) {
@@ -43,7 +35,8 @@ trait QueryTrait
         }
         if (is_array($data)) {
             if (Arrays::isList($data)) {
-                $data = array_map(fn($row) => $row instanceof Entity ? $row : $this->repository->createRow($row, $this), $data);
+                $data = array_map(fn($row) => $row instanceof Entity ? $row :
+                    $this->repository->createRow($row, $this), $data);
             } else {
                 $data = [$this->repository->createRow($data, $this)];
             }
@@ -80,23 +73,19 @@ trait QueryTrait
 
     /**
      * @param array|string|ActiveRow $condition
-     * @param mixed                  ...$params
-     * @return $this
+     * @param mixed ...$params
      */
     public function where($condition, ...$params): self
     {
         if ($condition instanceof ActiveRow) {
-            return $this->wherePrimary($condition->getPrimary());
+            $this->wherePrimary($condition->getPrimary());
+            return $this;
         }
         parent::where($condition, ...$params);
         return $this;
     }
 
-    /**
-     * @param ActiveRow|array|scalar ...$entities primary value, ActiveRow or associative array of primary values
-     * @return $this
-     */
-    public function whereRows(iterable ...$entities): self
+    public function whereRows(...$entities): self
     {
         $where = [];
         $values = [];
@@ -166,13 +155,14 @@ trait QueryTrait
     public function fetchChunked(int $chunkSize = Query::CHUNK_SIZE): Generator
     {
         foreach ($this->chunks($chunkSize) as $chunk) {
+            /** @var Traversable<E> $chunk */
             yield from $chunk;
         }
     }
 
     /**
      * @param int $chunkSize
-     * @return Generator<self> foreach($query->chunks() as $chunk) { $chunk->fetchAll()->doSomething(); }
+     * @return Generator<static> foreach($query->chunks() as $chunk) { $chunk->fetchAll()->doSomething(); }
      */
     public function chunks(int $chunkSize = Query::CHUNK_SIZE): Generator
     {
@@ -188,7 +178,7 @@ trait QueryTrait
                 break;
             }
             $offset += $chunkSize;
-            if ($limit > 0 && $offset > $limit) {
+            if ($offset > $limit) {
                 break;
             }
             $chunk = (clone $this)->limit(min($chunkSize, $limit - $offset), $offset);
@@ -212,7 +202,7 @@ trait QueryTrait
 
     public function getEvents(): RepositoryEvents
     {
-        return $this->events;
+        return $this->repository->getEvents();
     }
 
     public function getBehaviors(): RepositoryBehaviors
@@ -222,11 +212,7 @@ trait QueryTrait
 
     protected function doesEvents(): bool
     {
-        $scope = $this->behaviors->getScope();
-        while ($scope instanceof ScopeContainer) {
-            $scope = $scope->current();
-        }
-        return $scope instanceof RawScope;
+        return $this->behaviors->isScope(RawScope::class);
     }
 
     protected function createRow(array $row = []): Entity
@@ -241,19 +227,18 @@ trait QueryTrait
 
     public function setScope(Scope $scope): self
     {
-        $this->behaviors->setScope($scope);
-        return $this;
+        $clone = clone $this;
+        $clone->behaviors->setScope($scope);
+        return $clone;
     }
 
     public function scopeRaw(): self
     {
-        $this->behaviors->setScope($this->behaviors->getScope()->raw());
-        return $this;
+        return $this->setScope($this->behaviors->getScope()->raw());
     }
 
     public function scopeFull(): self
     {
-        $this->behaviors->setScope($this->behaviors->getScope()->full());
-        return $this;
+        return $this->setScope($this->behaviors->getScope()->full());
     }
 }

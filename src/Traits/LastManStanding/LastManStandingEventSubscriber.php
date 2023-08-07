@@ -10,7 +10,7 @@ use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteQueryEvent;
 use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteSubscriber;
 use LogicException;
 
-class LastManStandingEventSubscriber extends EventSubscriber implements SoftDeleteSubscriber
+final class LastManStandingEventSubscriber extends EventSubscriber implements SoftDeleteSubscriber
 {
     public function supportsRepository(Repository $repository): bool
     {

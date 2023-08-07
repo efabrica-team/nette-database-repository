@@ -36,6 +36,8 @@ abstract class Repository
 
     private RepositoryManager $manager;
 
+    protected string $lookupMessage = 'Entity not found';
+
     /**
      * @param class-string<E> $entityClass
      * @param class-string<Q> $queryClass
@@ -59,17 +61,28 @@ abstract class Repository
      */
     abstract protected function setup(RepositoryBehaviors $behaviors): void;
 
+    /**
+     * @param Scope $scope
+     * @return static cloned
+     */
     public function setScope(Scope $scope): self
     {
-        $this->behaviors->setScope($scope);
-        return $this;
+        $clone = clone $this;
+        $clone->behaviors->setScope($scope);
+        return $clone;
     }
 
+    /**
+     * @return static cloned
+     */
     public function scopeRaw(): self
     {
         return $this->setScope($this->behaviors->getScope()->raw());
     }
 
+    /**
+     * @return static cloned
+     */
     public function scopeFull(): self
     {
         return $this->setScope($this->behaviors->getScope()->full());
@@ -123,10 +136,10 @@ abstract class Repository
 
     /**
      * Makes sure the returned entity is not null and exists.
-     * Made to be used in presenter actions. Throws BadRequestException if not found.
+     * Made to be used in Presenter actions. Throws BadRequestException if not found.
      * @param Entity|string|int|array $id
      */
-    public function lookup($id): Entity
+    public function load($id): Entity
     {
         if ($id instanceof Entity) {
             return $id;
@@ -135,7 +148,7 @@ abstract class Repository
         if ($entity) {
             return $entity;
         }
-        throw new BadRequestException('Entity not found');
+        throw new BadRequestException($this->lookupMessage);
     }
 
     /********************************
@@ -300,7 +313,7 @@ abstract class Repository
     /**
      * @return E
      */
-    public function createRow(array $row = [], ?Query $query = null): Entity
+    public function createRow(array $row = [], ?QueryInterface $query = null): Entity
     {
         $class = $this->entityClass;
         $entity = new $class($row, $query ?? $this->query());
@@ -432,5 +445,10 @@ abstract class Repository
         foreach ($query->chunks($limit) as $chunk) {
             $callback($chunk);
         }
+    }
+
+    public function __clone()
+    {
+        $this->behaviors = clone $this->behaviors;
     }
 }

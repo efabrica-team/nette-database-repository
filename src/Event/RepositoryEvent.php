@@ -30,9 +30,7 @@ abstract class RepositoryEvent
     public function __construct(Repository $repository)
     {
         $this->repository = $repository;
-        if ($this->subscribers === []) {
-            $this->subscribers = $repository->getEvents()->toArray();
-        }
+        $this->subscribers = $repository->getEvents()->toArray();
     }
 
     public function hasEnded(): bool

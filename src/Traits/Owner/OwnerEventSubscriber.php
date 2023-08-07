@@ -9,7 +9,7 @@ use Efabrica\NetteRepository\Event\UpdateQueryEvent;
 use Efabrica\NetteRepository\Repository\Repository;
 use Efabrica\NetteRepository\Subscriber\EventSubscriber;
 
-class OwnerEventSubscriber extends EventSubscriber
+final class OwnerEventSubscriber extends EventSubscriber
 {
     private IrisUser $irisUser;
 

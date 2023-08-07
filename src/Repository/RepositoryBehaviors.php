@@ -54,12 +54,11 @@ class RepositoryBehaviors
     public function all(): array
     {
         if ($this->scope === null) {
-            return $this->behaviors;
+            return $this->allRaw();
         }
         if ($this->scoped === null) {
             $this->scoped = clone $this;
-            $this->scoped->scope = null;
-            $this->scoped->scoped = null;
+            $this->scoped->scope = $this->scoped->scoped = null;
             $this->scope->apply($this->scoped, $this->repository);
         }
         return $this->scoped->all();
@@ -135,6 +134,9 @@ class RepositoryBehaviors
 
     public function setScope(Scope $scope): self
     {
+        while ($scope instanceof ScopeContainer) {
+            $scope = $scope->current();
+        }
         $this->scope = $this->scope->withScope($scope);
         $this->scoped = null;
         return $this;
@@ -143,5 +145,21 @@ class RepositoryBehaviors
     public function getScope(): ScopeContainer
     {
         return $this->scope;
+    }
+
+    /**
+     * @param class-string<Scope> $class
+     * @return bool
+     */
+    public function isScope(string $class): bool
+    {
+        $scope = $this;
+        while ($scope instanceof ScopeContainer) {
+            if ($scope instanceof $class) {
+                return true;
+            }
+            $scope = $scope->current();
+        }
+        return $scope instanceof $class;
     }
 }

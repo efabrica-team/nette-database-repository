@@ -11,7 +11,7 @@ use Efabrica\NetteRepository\Subscriber\EventSubscriber;
 use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteQueryEvent;
 use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteSubscriber;
 
-class DateEventSubscriber extends EventSubscriber implements SoftDeleteSubscriber
+final class DateEventSubscriber extends EventSubscriber implements SoftDeleteSubscriber
 {
     public function supportsRepository(Repository $repository): bool
     {
@@ -26,10 +26,10 @@ class DateEventSubscriber extends EventSubscriber implements SoftDeleteSubscribe
         $updatedAt = $behavior->getUpdatedAtField();
         foreach ($event->getEntities() as $entity) {
             if (!isset($entity[$createdAt])) {
-                $entity[$createdAt] = new DateTimeImmutable();
+                $entity[$createdAt] = $behavior->getNewValue();
             }
             if (!isset($entity[$updatedAt])) {
-                $entity[$updatedAt] = new DateTimeImmutable();
+                $entity[$updatedAt] = $behavior->getNewValue();
             }
         }
         return $event->handle();
@@ -41,7 +41,7 @@ class DateEventSubscriber extends EventSubscriber implements SoftDeleteSubscribe
         $behavior = $event->getBehaviors()->get(DateBehavior::class);
         $updatedAt = $behavior->getUpdatedAtField();
         if (!isset($data[$updatedAt])) {
-            $data[$updatedAt] = new DateTimeImmutable();
+            $data[$updatedAt] = $behavior->getNewValue();
         }
         return $event->handle($data);
     }

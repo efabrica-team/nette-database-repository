@@ -91,6 +91,75 @@ Or:
 ```php
 $repository->delete($id);
 ```
+### Scopes
+Scope is a way to define which behaviors are enabled for repository, query and entity recursively.
+
+Recursively means, that if you define a scope for repository, it will be applied to query and entity as well.
+
+#### Example
+```php
+class AdminScope implements \Efabrica\NetteRepository\Repository\Scope\Scope
+{
+    public function apply(RepositoryBehaviors $behaviors, Repository $repository): void
+    {
+        $behaviors
+            ->remove(SoftDeleteBehavior::class)
+            ->remove(PublishBehavior::class);
+        // You should only remove behaviors, as the scope can be applied on different repositories at once.
+        
+        // If you had a user repository and injected the user into the scope, you could do this:
+        if ($repository instanceof UserRepository && $this->user->isAdmin()) {
+            $behaviors->add(AdminBehavior::class); // This behavior does not exist, it's just an example.
+        }
+    }
+}
+```
+
+You should then create your own ScopeContainer:
+```php
+class AppScopeContainer extends \Efabrica\NetteRepository\Repository\Scope\ScopeContainer
+{
+    public function __construct(
+        FullScope $scope,
+        AdminScope $adminScope
+    ) {
+        parent::__construct($scope);
+        $this->adminScope = $adminScope;
+    }
+    
+    public function admin(): self
+    {
+        return $this->withScope($this->adminScope);
+    }
+}
+```
+
+And implement shorthand methods for your queries:
+```php
+class QueryBase extends \Efabrica\NetteRepository\Repository\Query
+{
+    public function scopeAdmin(): self
+    {
+        $scope = $this->getScope();
+        assert($scope instanceof AppScopeContainer);
+        return $this->setScope($this->scopeContainer->admin());
+    }
+}
+```
+
+## Code Generator
+
+Code generation is fully optional, but it is recommended to use it. 
+
+For every table in the database, it will generate these classes: (Example: `person` table)
+- `Repository\Generated\Repository\PersonRepositoryBase` - Repository base class, holds typehints for `PersonQuery` and `Person` entity. (abstract)
+- `Repository\Generated\Query\PersonQuery` - Query class, holds typehints for `Person` entity. (abstract)
+- `Repository\Generated\Entity\Person` - Entity class, holds types for columns and public constants for column names. (final)
+
+These classes are generated only if they don't exist. If they exist, they will not be overwritten:
+- `Repository\PersonRepository` - extends `PersonRepositoryBase`. Here you write your custom repository methods. (final)
+- `Repository\Query\PersonQuery` - extends `PersonQuery`. Here you write your custom query methods. (final)
+- `Repository\Entity\PersonBody` - trait that is inserted into `Person` entity. Here you write your custom entity methods. (trait)
 
 ### Traits (Behaviors and Event Subscribers)
 
@@ -111,17 +180,3 @@ TreeTraverseBehavior ensures that the `lft` and `rgt` columns are automatically 
 
 #### SortingTrait
 SortingTrait adds moveUp(), moveDown(), insertBefore(), insertAfter() methods to the repository.
-
-## Code Generator
-
-Code generation is fully optional, but it is recommended to use it. 
-
-For every table in the database, it will generate these classes: (Example: `person` table)
-- `Repository\Generated\Repository\PersonRepositoryBase` - Repository base class, holds typehints for `PersonQuery` and `Person` entity. (abstract)
-- `Repository\Generated\Query\PersonQuery` - Query class, holds typehints for `Person` entity. (abstract)
-- `Repository\Generated\Entity\Person` - Entity class, holds types for columns and public constants for column names. (final)
-
-These classes are generated only if they don't exist. If they exist, they will not be overwritten:
-- `Repository\PersonRepository` - extends `PersonRepositoryBase`. Here you write your custom repository methods. (final)
-- `Repository\Query\PersonQuery` - extends `PersonQuery`. Here you write your custom query methods. (final)
-- `Repository\Entity\PersonBody` - trait that is inserted into `Person` entity. Here you write your custom entity methods. (trait)

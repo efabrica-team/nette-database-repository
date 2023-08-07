@@ -8,6 +8,7 @@ use IteratorAggregate;
 
 /**
  * @implements IteratorAggregate<EventSubscriber>
+ * @immutable
  */
 final class RepositoryEvents implements IteratorAggregate
 {
@@ -26,26 +27,13 @@ final class RepositoryEvents implements IteratorAggregate
     public function forRepository(Repository $repository): self
     {
         $events = clone $this;
+        $repository = $repository->scopeFull();
         foreach ($events->subscribers as $key => $subscriber) {
             if (!$subscriber->supportsRepository($repository)) {
                 unset($events->subscribers[$key]);
             }
         }
         return $events;
-    }
-
-    /**
-     * @param class-string<EventSubscriber> $eventClass
-     * @return $this
-     */
-    public function removeEvent(string $eventClass): self
-    {
-        foreach ($this->subscribers as $key => $subscriber) {
-            if ($subscriber instanceof $eventClass) {
-                unset($this->subscribers[$key]);
-            }
-        }
-        return $this;
     }
 
     /**

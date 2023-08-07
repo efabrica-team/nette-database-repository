@@ -53,11 +53,12 @@ class RepositoryWriter
 
         $class->setAbstract();
         $class->setExtends($baseClass);
+        $class->addConstant('TableName', $structure->getTableName());
         $class->addComment('@generated');
         $class->addComment("@method {$structure->getClassName()}Query query()");
         $class->addComment("@method {$structure->getClassName()}[] fetchAll()");
         $class->addComment("@method {$structure->getClassName()}|null find($primaryType|{$structure->getClassName()} \$$primaryName)");
-        $class->addComment("@method {$structure->getClassName()}      lookup($primaryType|{$structure->getClassName()} \$$primaryName)");
+        $class->addComment("@method {$structure->getClassName()}      load($primaryType|{$structure->getClassName()} \$$primaryName)");
         $class->addComment("@method {$structure->getClassName()}|null findOneBy(array \$conditions)");
         $class->addComment("@method {$structure->getClassName()}Query findBy(array \$conditions)");
         $class->addComment("@method {$structure->getClassName()}|int insert({$structure->getClassName()}|iterable ...\$entities)");

@@ -11,7 +11,7 @@ use Efabrica\NetteRepository\Event\UpdateQueryEvent;
 use Efabrica\NetteRepository\Repository\Repository;
 use Efabrica\NetteRepository\Subscriber\EventSubscriber;
 
-class AccountEventSubscriber extends EventSubscriber
+final class AccountEventSubscriber extends EventSubscriber
 {
     private IrisUser $irisUser;
 

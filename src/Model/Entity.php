@@ -3,10 +3,12 @@
 namespace Efabrica\NetteRepository\Model;
 
 use Efabrica\NetteRepository\Repository\Query;
+use Efabrica\NetteRepository\Repository\QueryInterface;
 use Efabrica\NetteRepository\Repository\Repository;
 use Efabrica\NetteRepository\Repository\Scope\Scope;
 use Nette\Database\Table\ActiveRow;
 use Nette\Database\Table\GroupedSelection;
+use Nette\Database\Table\Selection;
 use ReflectionProperty;
 use Traversable;
 
@@ -14,12 +16,13 @@ abstract class Entity extends ActiveRow
 {
     protected array $_modified = [];
 
-    private Query $_query;
+    private QueryInterface $_query;
 
     private static ReflectionProperty $data;
 
-    public function __construct(array $data, Query $query)
+    public function __construct(array $data, QueryInterface $query)
     {
+        /** @var QueryInterface&Selection $query */
         parent::__construct($data, $query);
         $this->_query = $query;
     }
@@ -158,8 +161,9 @@ abstract class Entity extends ActiveRow
 
     public function setScope(Scope $scope): self
     {
-        $this->_query = (clone $this->_query)->setScope($scope);
-        return $this;
+        $clone = clone $this;
+        $clone->_query = (clone $clone->_query)->setScope($scope);
+        return $clone;
     }
 
     public function scopeRaw(): self

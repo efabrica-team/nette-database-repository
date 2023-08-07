@@ -11,7 +11,7 @@ use Efabrica\NetteRepository\Repository\Repository;
 use Efabrica\NetteRepository\Subscriber\EventSubscriber;
 use Nette\Database\Table\ActiveRow;
 
-class AESEventSubscriber extends EventSubscriber
+final class AESEventSubscriber extends EventSubscriber
 {
     public function supportsRepository(Repository $repository): bool
     {
