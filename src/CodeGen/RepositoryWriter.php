@@ -72,7 +72,7 @@ class RepositoryWriter
             ->setParameters([
                 (new Parameter('deps'))->setType(RepositoryDependencies::class),
             ])
-            ->setBody("parent::__construct('{$structure->getTableName()}', {$structure->getClassName()}::class, {$structure->getClassName()}Query::class, \$deps);")
+            ->setBody("parent::__construct(static::TableName, {$structure->getClassName()}::class, {$structure->getClassName()}Query::class, \$deps);")
         ;
 
         $writer->writeClass($class, $structure->repositoryGenDir);

@@ -129,7 +129,7 @@ abstract class Entity extends ActiveRow
     }
 
     /**
-     * @deprecated Do not use, use $this->query($repoClass)->where($throughColumn, $row[$key])->fetch()
+     * @internal Use typehinted Entity getters instead
      */
     public function ref(string $key, ?string $throughColumn = null): ?ActiveRow
     {
@@ -137,7 +137,7 @@ abstract class Entity extends ActiveRow
     }
 
     /**
-     * @deprecated Do not use, use $this->query($repoClass)->where($throughColumn, $row[$key])
+     * @internal Use typehinted $otherRepo->findBy($throughColumn, $row[$key]) instead
      */
     public function related(string $key, ?string $throughColumn = null): GroupedSelection
     {

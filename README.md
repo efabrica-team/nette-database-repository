@@ -1,22 +1,24 @@
-# Nette Database Repository
+# Nette Repository
 
-Nette Database is a library that enhances the functionality of the popular Nette/Database package by adding support for typed
-entities, queries (Selections) and repositories. It provides a convenient way to define and work with strongly-typed entities in your
-database-driven applications. This extension aims to improve code readability, maintainability, and reduce the risk of errors related to
-data types.
+Bring better static analysis to your Nette Database! Typehinted entities (ActiveRows), queries (Selections) and repositories (services). 
 
 ## Installation
 
 The best way to install this extension is using [Composer](http://getcomposer.org/):
 
 ```sh
-$ composer require nette-database-repository/core
+$ composer require efabrica/nette-repository
 ```
 
 Register our configuration:
 ```neon
 includes:
-    - %appDir%/../vendor/nette-database-repository/core/config.neon
+    - %appDir%/../vendor/efabrica/nette-repository/core/config.neon
+    
+symfonyConsoleApp:
+    type: Symfony\Component\Console\Application
+    setup:
+        - add(@repoCodeGen)
 ```
 
 Execute our repository code generation command:

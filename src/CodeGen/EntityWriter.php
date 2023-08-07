@@ -4,6 +4,7 @@ namespace Efabrica\NetteRepository\CodeGen;
 
 use DateTimeInterface;
 use Efabrica\NetteRepository\Model\Entity;
+use Nette\Database\Table\GroupedSelection;
 use Nette\PhpGenerator\ClassType;
 use Nette\Utils\Strings;
 use function str_contains;
@@ -50,12 +51,11 @@ class EntityWriter
             $structure->entityGenNamespace->addUse($relatedRepository);
             $columnName = Strings::before($relatedColumn, '_id') ?? $relatedColumn;
             $class->addMethod('get' . $structure->toClassName($columnName))
-                ->setBody("return \$this->query({$className}Repository::class, \$events)\n" .
-                    "    ->wherePrimary(\$this->$relatedColumn)\n" .
-                    '    ->limit(1)->fetch();')
+                ->setBody("\$row = \$this->ref({$className}Repository::TableName, self::$relatedColumn);\n" .
+                    "assert(\$row === null || \$row instanceof {$className});\n" .
+                    'return $row;')
                 ->setReturnType($relatedEntity)
                 ->setReturnNullable()
-                ->addParameter('events')->setType('bool')->setDefaultValue(true)
             ;
         }
         foreach ($structure->toMany as $relatedTable => $relatedColumns) {
@@ -70,19 +70,16 @@ class EntityWriter
             $relatedQuery = $relatedStructure->queryNamespace->getName() . '\\' . $className . 'Query';
             $relatedRepository = $relatedStructure->repositoryNamespace->getName() . '\\' . $className . 'Repository';
             $structure->entityGenNamespace->addUse($relatedEntity);
-            $structure->entityGenNamespace->addUse($relatedQuery);
+            $structure->entityGenNamespace->addUse(GroupedSelection::class);
             $structure->entityGenNamespace->addUse($relatedRepository);
-            // TODO namiesto $events posuvat Scope
-            $body = "\$query = \$this->query({$className}Repository::class, \$events)\n" .
-                "    ->where(['{$relatedColumn}' => \$this->getPrimary()]);\n" .
-                "assert(\$query instanceof {$className}Query);\n" .
+            $body = "/** @var iterable<{$className}>&GroupedSelection \$query */\n".
+                "\$query = \$this->related({$className}Repository::TableName, $className::$relatedColumn);\n" .
                 'return $query;';
 
             $class->addMethod('get' . $structure->toPluralName($className))
                 ->setBody($body)
-                ->setReturnType($relatedQuery)
-                ->addComment("@return iterable<{$className}>&{$className}Query")
-                ->addParameter('events')->setType('bool')->setDefaultValue(true)
+                ->setReturnType(GroupedSelection::class)
+                ->addComment("@return iterable<{$className}>&GroupedSelection")
             ;
         }
 
