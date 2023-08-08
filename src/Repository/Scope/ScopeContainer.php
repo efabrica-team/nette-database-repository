@@ -16,13 +16,9 @@ class ScopeContainer implements Scope
 
     protected Scope $current;
 
-    /**
-     * @param FullScope  $fullScope
-     * @phpstan-consistent-constructor
-     */
-    public function __construct(FullScope $fullScope)
+    public function __construct()
     {
-        $this->full = $fullScope;
+        $this->full = new FullScope();
         $this->raw = new RawScope();
         $this->current = $this->full;
     }

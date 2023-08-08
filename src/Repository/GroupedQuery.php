@@ -40,17 +40,11 @@ final class GroupedQuery extends GroupedSelection implements QueryInterface
         if ($table === null) {
             return $this->repository->query();
         }
-        return $this->repository->getManager()->byTableName($table)->query()->setScope($this->behaviors->getScope());
+        return $this->repository->getManager()->byTableName($table)->query()->withScope($this->behaviors->getScope());
     }
 
     public function createGroupedSelectionInstance(string $table, string $column): self
     {
         return self::fromGroupedQuery($this, $table, $column);
-    }
-
-    public function __clone()
-    {
-        parent::__clone();
-        $this->behaviors = clone $this->behaviors;
     }
 }

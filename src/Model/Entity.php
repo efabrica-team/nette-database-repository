@@ -5,7 +5,10 @@ namespace Efabrica\NetteRepository\Model;
 use Efabrica\NetteRepository\Repository\Query;
 use Efabrica\NetteRepository\Repository\QueryInterface;
 use Efabrica\NetteRepository\Repository\Repository;
+use Efabrica\NetteRepository\Repository\Scope\FullScope;
+use Efabrica\NetteRepository\Repository\Scope\RawScope;
 use Efabrica\NetteRepository\Repository\Scope\Scope;
+use Efabrica\NetteRepository\Repository\Scope\ScopeContainer;
 use Nette\Database\Table\ActiveRow;
 use Nette\Database\Table\GroupedSelection;
 use Nette\Database\Table\Selection;
@@ -162,17 +165,17 @@ abstract class Entity extends ActiveRow
     public function setScope(Scope $scope): self
     {
         $clone = clone $this;
-        $clone->_query = (clone $clone->_query)->setScope($scope);
+        $clone->_query = (clone $clone->_query)->withScope($scope);
         return $clone;
     }
 
     public function scopeRaw(): self
     {
-        return $this->setScope($this->_query->getBehaviors()->getScope()->raw());
+        return $this->setScope(new RawScope());
     }
 
     public function scopeFull(): self
     {
-        return $this->setScope($this->_query->getBehaviors()->getScope()->full());
+        return $this->setScope(new FullScope());
     }
 }

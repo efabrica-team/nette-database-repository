@@ -33,17 +33,11 @@ class Query extends Selection implements QueryInterface
         if ($table === null) {
             return $this->repository->query();
         }
-        return $this->repository->getManager()->byTableName($table)->query()->setScope($this->behaviors->getScope());
+        return $this->repository->getManager()->byTableName($table)->query()->withScope($this->behaviors->getScope());
     }
 
     public function createGroupedSelectionInstance(string $table, string $column): GroupedQuery
     {
         return GroupedQuery::fromQuery($this, $table, $column);
-    }
-
-    public function __clone()
-    {
-        parent::__clone();
-        $this->behaviors = clone $this->behaviors;
     }
 }

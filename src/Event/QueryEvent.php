@@ -13,11 +13,14 @@ abstract class QueryEvent extends RepositoryEvent
     protected QueryInterface $query;
 
     /**
-     * @var Entity[]|null
+     * @var iterable<Entity>|null
      */
-    private ?array $entities;
+    private $entities;
 
-    public function __construct(QueryInterface $query, ?array $entities = null)
+    /**
+     * @param iterable<Entity>|null  $entities
+     */
+    public function __construct(QueryInterface $query, ?iterable $entities = null)
     {
         $this->query = $query;
         $this->entities = $entities;

@@ -13,7 +13,7 @@ class FilterBehavior extends RepositoryBehavior
 {
     private array $where;
 
-    public function __construct(?array $where = [])
+    public function __construct(array $where = [])
     {
         $this->where = $where;
     }

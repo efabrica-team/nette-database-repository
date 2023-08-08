@@ -50,7 +50,11 @@ class RepositoryCodeGenerationCommand extends Command
             foreach ($tables as $table) {
                 $className = EntityStructure::toClassCase($this->inflector, $table['name']);
                 if ($file->getBasename('.php') === $className . 'Repository') {
-                    $c = ClassType::fromCode(file_get_contents($file->getPathname()));
+                    $code = file_get_contents($file->getPathname());
+                    if ($code === false) {
+                        throw new \RuntimeException("Cannot read file {$file->getPathname()}");
+                    }
+                    $c = ClassType::fromCode($code);
                     $repoDirs[$table['name']] = Strings::before($file->getPathname(), '/Repository') ?? dirname($file->getPathname(), 2);
                     $repoNamespaces[$table['name']] = Strings::before(
                         $c->getNamespace()->getName(),

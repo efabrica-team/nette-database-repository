@@ -98,9 +98,13 @@ Scope is a way to define which behaviors are enabled for repository, query and e
 
 Recursively means, that if you define a scope for repository, it will be applied to query and entity as well.
 
+`->scopeRaw()` returns a clone of the object with raw scope. Raw scope removes all behaviors.
+
+`->scopeFull()` returns a clone of the object with full scope. Full scope keeps all behaviors.
+
 #### Example
 ```php
-class AdminScope implements \Efabrica\NetteRepository\Repository\Scope\Scope
+final class ApiScope implements \Efabrica\NetteRepository\Repository\Scope\Scope
 {
     public function apply(RepositoryBehaviors $behaviors, Repository $repository): void
     {
@@ -118,35 +122,43 @@ class AdminScope implements \Efabrica\NetteRepository\Repository\Scope\Scope
 ```
 
 You should then create your own ScopeContainer:
+
 ```php
-class AppScopeContainer extends \Efabrica\NetteRepository\Repository\Scope\ScopeContainer
+abstract class RepositoryBase extends \Efabrica\NetteRepository\Repository\Repository
 {
-    public function __construct(
-        FullScope $scope,
-        AdminScope $adminScope
-    ) {
-        parent::__construct($scope);
-        $this->adminScope = $adminScope;
-    }
+    /** @inject */
+    public ApiScope $apiScope;
     
-    public function admin(): self
+    public function scopeApi(): self
     {
-        return $this->withScope($this->adminScope);
+        return $this->withScope($this->apiScope);
     }
 }
 ```
 
 And implement shorthand methods for your queries:
+
 ```php
-class QueryBase extends \Efabrica\NetteRepository\Repository\Query
+abstract class QueryBase extends \Efabrica\NetteRepository\Repository\Query
 {
-    public function scopeAdmin(): self
+    public function scopeApi(): self
     {
-        $scope = $this->getScope();
-        assert($scope instanceof AppScopeContainer);
-        return $this->setScope($this->scopeContainer->admin());
+        // returns cloned query with Api scope set
+        return $this->withScope($this->repository->apiScope);
+        // or if api scope has no dependencies, you can use this:
+        return $this->withScope(new ApiScope());
     }
 }
+```
+
+Usage:
+```php
+// all of these are equivalent:
+$repository->findBy(['age > ?' => 18])->scopeApi()->fetchAll();
+$repository->scopeApi()->findBy(['age > ?' => 18])->fetchAll();
+$repository->query()->where('age > ?', 18)->scopeApi()->fetchAll();
+$repository->scopeApi()->query()->where('age > ?', 18)->fetchAll();
+$repository->query()->scopeApi()->where('age > ?', 18)->fetchAll();
 ```
 
 ## Code Generator
@@ -167,6 +179,9 @@ These classes are generated only if they don't exist. If they exist, they will n
 
 #### DateBehavior
 DateBehavior ensures that the `created_at` and `updated_at` columns are automatically filled with the current date and time on insert and update.
+
+#### FilterBehavior
+FilterBehavior adds a new default where() conditions on every select query.
 
 #### KeepDefaultBehavior
 KeepDefaultBehavior ensures that there is at least one truthy value in the default column. It is useful for columns that are used as flags.

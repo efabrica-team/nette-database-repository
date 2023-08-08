@@ -4,6 +4,8 @@ namespace Efabrica\NetteRepository\Repository;
 
 use Efabrica\NetteRepository\Event\DeleteQueryEvent;
 use Efabrica\NetteRepository\Model\Entity;
+use Efabrica\NetteRepository\Repository\Scope\FullScope;
+use Efabrica\NetteRepository\Repository\Scope\RawScope;
 use Efabrica\NetteRepository\Repository\Scope\Scope;
 use Efabrica\NetteRepository\Subscriber\RepositoryEvents;
 use LogicException;
@@ -77,7 +79,7 @@ abstract class Repository
      */
     public function scopeRaw(): self
     {
-        return $this->setScope($this->behaviors->getScope()->raw());
+        return $this->setScope(new RawScope());
     }
 
     /**
@@ -85,7 +87,7 @@ abstract class Repository
      */
     public function scopeFull(): self
     {
-        return $this->setScope($this->behaviors->getScope()->full());
+        return $this->setScope(new FullScope());
     }
 
     /********************************
@@ -108,15 +110,19 @@ abstract class Repository
      */
     public function findOneBy(array $conditions): ?Entity
     {
-        return $this->findBy($conditions)->limit(1)->fetch();
+        /** @var E|null $e */
+        $e = $this->findBy($conditions)->fetch();
+        return $e;
     }
 
     /**
-     * @return Q&Query<E>
+     * @return Q
      */
     public function findBy(array $conditions): Query
     {
-        return $this->query()->where($conditions);
+        $q = $this->query();
+        $q->where($conditions);
+        return $q;
     }
 
     public function countBy(array $conditions): int
@@ -157,7 +163,7 @@ abstract class Repository
 
     /**
      * @param E ...$entities
-     * @return E|int
+     * @return bool|int|ActiveRow
      */
     public function insert(iterable ...$entities)
     {
@@ -224,10 +230,19 @@ abstract class Repository
         return $count;
     }
 
-    public function delete(iterable ...$entities): int
+    /**
+     * @param ActiveRow|array|scalar ...$entities
+     * @return int
+     */
+    public function delete(...$entities): int
     {
-        $query = $this->query()->whereRows(...$entities);
-        return (new DeleteQueryEvent($query, $entities))->handle();
+        foreach ($entities as $entity) {
+            if (!$entity instanceof Entity) {
+                return $this->query()->whereRows(...$entities)->delete();
+            }
+        }
+        /** @var Entity[] $entities */
+        return $this->query()->delete($entities);
     }
 
     /********************************
@@ -253,7 +268,9 @@ abstract class Repository
      */
     public function fetchAll(): iterable
     {
-        return $this->query()->fetchAll();
+        /** @var iterable<E> $fetchAll */
+        $fetchAll = $this->query()->fetchAll();
+        return $fetchAll;
     }
 
     public function fetchPairs(?string $key = null, ?string $value = null, ?string $order = null, array $where = []): array
@@ -295,7 +312,7 @@ abstract class Repository
      */
     public function getPrimary(): array
     {
-        $primary = $this->explorer->getConventions()->getPrimary($this->tableName);
+        $primary = $this->explorer->getConventions()->getPrimary($this->tableName) ?? [];
         if (!is_array($primary)) {
             return [$primary];
         }
@@ -440,9 +457,9 @@ abstract class Repository
     /**
      * @deprecated use query()->chunks() instead
      */
-    final public function chunk(Query $query, ?int $limit, callable $callback, ?int $count = null): void
+    final public function chunk(Query $query, ?int $chunkSize, callable $callback, ?int $count = null): void
     {
-        foreach ($query->chunks($limit) as $chunk) {
+        foreach ($query->chunks($chunkSize ?? Query::CHUNK_SIZE) as $chunk) {
             $callback($chunk);
         }
     }

@@ -27,12 +27,12 @@ class SoftDeleteBehavior extends RepositoryBehavior
     {
         $this->column = $column;
         $this->newValue = $newValue ?? new DateTimeImmutable();
-        $this->filterDeleted = $filterDeletedRows;
+        $this->filterDeletedRows = $filterDeletedRows;
     }
 
     public function shouldFilterDeleted(): bool
     {
-        return $this->filterDeleted;
+        return $this->filterDeletedRows;
     }
 
     public function getColumn(): string
@@ -51,7 +51,7 @@ class SoftDeleteBehavior extends RepositoryBehavior
     public function withoutFilter(): self
     {
         $clone = clone $this;
-        $clone->filterDeletedRows = $filterDeletedRows;
+        $clone->filterDeletedRows = false;
         return $clone;
     }
 }

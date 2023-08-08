@@ -7,6 +7,7 @@ use Efabrica\NetteRepository\Event\InsertRepositoryEvent;
 use Efabrica\NetteRepository\Event\SelectQueryEvent;
 use Efabrica\NetteRepository\Event\UpdateQueryEvent;
 use Efabrica\NetteRepository\Model\Entity;
+use Efabrica\NetteRepository\Repository\Scope\FullScope;
 use Efabrica\NetteRepository\Repository\Scope\RawScope;
 use Efabrica\NetteRepository\Repository\Scope\Scope;
 use Efabrica\NetteRepository\Subscriber\RepositoryEvents;
@@ -18,6 +19,7 @@ use Traversable;
 
 /**
  * @template E of Entity
+ * @method $this limit(int $limit, ?int $offset = null)
  */
 trait QueryTrait
 {
@@ -28,7 +30,7 @@ trait QueryTrait
     public function insert(iterable $data)
     {
         if (!$this->doesEvents()) {
-            if (Arrays::isList($data) && count($data) === 1) {
+            if (Arrays::isList($data) && is_countable($data) && count($data) === 1) {
                 $data = reset($data);
             }
             return parent::insert($data);
@@ -55,12 +57,18 @@ trait QueryTrait
         return (new UpdateQueryEvent($this))->handle($data);
     }
 
-    public function delete(): int
+    /**
+     * @param iterable<Entity>|null $entities
+     */
+    public function delete(?iterable $entities = null): int
     {
         if (!$this->doesEvents()) {
             return parent::delete();
         }
-        return (new DeleteQueryEvent($this))->handle();
+        if ($entities !== null) {
+            $this->whereRows(...$entities);
+        }
+        return (new DeleteQueryEvent($this, $entities))->handle();
     }
 
     protected function execute(): void
@@ -73,7 +81,8 @@ trait QueryTrait
 
     /**
      * @param array|string|ActiveRow $condition
-     * @param mixed ...$params
+     * @param mixed                  ...$params
+     * @return $this
      */
     public function where($condition, ...$params): self
     {
@@ -87,18 +96,16 @@ trait QueryTrait
 
     public function whereRows(...$entities): self
     {
-        $where = [];
-        $values = [];
-        $primary = $this->repository->getPrimary();
-        if ($primary === []) {
+        $where = $values = [];
+        $primary = $this->getPrimary();
+        if ($primary === null) {
             throw new LogicException('Primary key is not set');
         }
-        if (count($primary) === 1) {
-            $primaryKey = reset($primary);
+        if (is_string($primary)) {
             foreach ($entities as $entity) {
-                $values[] = is_scalar($entity) ? $entity : $entity[$primaryKey];
+                $values[] = is_scalar($entity) ? $entity : $entity[$primary];
             }
-            return $this->where($primaryKey, $values);
+            return $this->where($primary, $values);
         }
         foreach ($entities as $row) {
             $key = [];
@@ -225,20 +232,20 @@ trait QueryTrait
         return $this->behaviors->getScope();
     }
 
-    public function setScope(Scope $scope): self
+    public function withScope(Scope $scope): self
     {
         $clone = clone $this;
-        $clone->behaviors->setScope($scope);
+        $clone->behaviors = $this->behaviors->withScope($scope);
         return $clone;
     }
 
     public function scopeRaw(): self
     {
-        return $this->setScope($this->behaviors->getScope()->raw());
+        return $this->withScope(new RawScope());
     }
 
     public function scopeFull(): self
     {
-        return $this->setScope($this->behaviors->getScope()->full());
+        return $this->withScope(new FullScope());
     }
 }

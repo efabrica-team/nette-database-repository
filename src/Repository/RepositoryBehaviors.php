@@ -2,9 +2,11 @@
 
 namespace Efabrica\NetteRepository\Repository;
 
+use Efabrica\NetteRepository\Repository\Scope\FullScope;
 use Efabrica\NetteRepository\Repository\Scope\Scope;
 use Efabrica\NetteRepository\Repository\Scope\ScopeContainer;
 use Efabrica\NetteRepository\Traits\RepositoryBehavior;
+use LogicException;
 
 class RepositoryBehaviors
 {
@@ -12,11 +14,11 @@ class RepositoryBehaviors
 
     private Repository $repository;
 
-    private ?ScopeContainer $scope;
+    private ScopeContainer $scope;
 
     private ?self $scoped = null;
 
-    public function __construct(Repository $repository, ?ScopeContainer $scope = null)
+    public function __construct(Repository $repository, ScopeContainer $scope)
     {
         $this->repository = $repository;
         $this->scope = $scope;
@@ -53,12 +55,13 @@ class RepositoryBehaviors
      */
     public function all(): array
     {
-        if ($this->scope === null) {
+        if ($this->getScope() instanceof FullScope) {
             return $this->allRaw();
         }
         if ($this->scoped === null) {
             $this->scoped = clone $this;
-            $this->scoped->scope = $this->scoped->scoped = null;
+            $this->scoped->scope = $this->scope->full();
+            $this->scoped->scoped = null;
             $this->scope->apply($this->scoped, $this->repository);
         }
         return $this->scoped->all();
@@ -134,17 +137,30 @@ class RepositoryBehaviors
 
     public function setScope(Scope $scope): self
     {
-        while ($scope instanceof ScopeContainer) {
-            $scope = $scope->current();
-        }
         $this->scope = $this->scope->withScope($scope);
         $this->scoped = null;
         return $this;
     }
 
-    public function getScope(): ScopeContainer
+    public function getScopeContainer(): ScopeContainer
     {
         return $this->scope;
+    }
+
+    public function getScope(): Scope
+    {
+        $scope = $this->scope;
+        while ($scope instanceof ScopeContainer) {
+            $scope = $scope->current();
+        }
+        return $scope;
+    }
+
+    public function withScope(Scope $scope): self
+    {
+        $clone = clone $this;
+        $clone->setScope($scope);
+        return $clone;
     }
 
     /**

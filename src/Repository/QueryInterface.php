@@ -66,7 +66,12 @@ interface QueryInterface extends \Iterator, \Countable, \ArrayAccess
 
     public function getScope(): Scope;
 
-    public function setScope(Scope $scope): self;
+    /**
+     * Returns cloned query with new scope.
+     * @param Scope $scope
+     * @return self
+     */
+    public function withScope(Scope $scope): self;
 
     public function scopeRaw(): self;
 
@@ -122,7 +127,7 @@ interface QueryInterface extends \Iterator, \Countable, \ArrayAccess
     /**
      * Adds condition for primary key.
      * @param mixed $key
-     * @return static
+     * @return $this
      */
     public function wherePrimary($key);
 

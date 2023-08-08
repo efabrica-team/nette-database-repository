@@ -3,14 +3,15 @@
 namespace Efabrica\NetteRepository\CodeGen;
 
 use Doctrine\Inflector\Inflector;
+use RuntimeException;
 
 class ModuleWriter
 {
     public static function writeConfigNeon(EntityStructure $structure, string $dbDir, FileWriter $writer): void
     {
-        $config = [];
-        if (file_exists($dbDir . '/config.neon')) {
-            $config = file($dbDir . '/config.neon', FILE_IGNORE_NEW_LINES);
+        $config = file($dbDir . '/config.neon', FILE_IGNORE_NEW_LINES);
+        if ($config === false) {
+            throw new RuntimeException("Cannot read file {$dbDir}/config.neon");
         }
 
         $repoClass = $structure->repositoryNamespace->getName() . '\\' . $structure->getClassName() . 'Repository';
