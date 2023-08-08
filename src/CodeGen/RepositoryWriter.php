@@ -186,7 +186,10 @@ class RepositoryWriter
             }
             $methodName = $matches[1];
             $findColumn = Strings::after($methodName, 'By');
-            $findColumn = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $findColumn));
+            if ($findColumn === null) {
+                continue;
+            }
+            $findColumn = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $findColumn) ?? $findColumn);
             $one = str_starts_with($methodName, 'OneBy');
             $returnType = $one ? $structure->getClassName() : $structure->getClassName() . 'Query';
             $methodCode = [
