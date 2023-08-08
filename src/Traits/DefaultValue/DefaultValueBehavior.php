@@ -7,6 +7,7 @@ use Efabrica\NetteRepository\Traits\RepositoryBehavior;
 class DefaultValueBehavior extends RepositoryBehavior
 {
     private string $field;
+
     /**
      * @var mixed
      */

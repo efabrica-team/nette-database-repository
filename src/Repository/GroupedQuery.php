@@ -2,7 +2,6 @@
 
 namespace Efabrica\NetteRepository\Repository;
 
-use Nette\Database\Explorer;
 use Nette\Database\Table\GroupedSelection;
 use Nette\Database\Table\Selection;
 

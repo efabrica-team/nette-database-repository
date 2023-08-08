@@ -2,7 +2,6 @@
 
 namespace Efabrica\NetteRepository\Traits\Date;
 
-use DateTimeImmutable;
 use Efabrica\NetteRepository\Event\InsertEventResponse;
 use Efabrica\NetteRepository\Event\InsertRepositoryEvent;
 use Efabrica\NetteRepository\Event\UpdateQueryEvent;

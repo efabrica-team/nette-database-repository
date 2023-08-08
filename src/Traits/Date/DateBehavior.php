@@ -14,6 +14,7 @@ class DateBehavior extends RepositoryBehavior
     private ?string $createdAtField;
 
     private ?string $updatedAtField;
+
     private bool $date;
 
     public function __construct(?string $createdAtField, ?string $updatedAtField, bool $date = true)
@@ -38,6 +39,6 @@ class DateBehavior extends RepositoryBehavior
      */
     public function getNewValue()
     {
-        return $this->date ? new \DateTimeImmutable() : true;
+        return $this->date ? new DateTimeImmutable() : true;
     }
 }

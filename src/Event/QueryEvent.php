@@ -3,10 +3,8 @@
 namespace Efabrica\NetteRepository\Event;
 
 use Efabrica\NetteRepository\Model\Entity;
-use Efabrica\NetteRepository\Repository\Query;
 use Efabrica\NetteRepository\Repository\QueryInterface;
 use Efabrica\NetteRepository\Repository\RepositoryBehaviors;
-use Efabrica\NetteRepository\Subscriber\EventSubscriber;
 
 abstract class QueryEvent extends RepositoryEvent
 {

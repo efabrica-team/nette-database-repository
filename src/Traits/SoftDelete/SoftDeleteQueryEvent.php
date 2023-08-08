@@ -3,7 +3,6 @@
 namespace Efabrica\NetteRepository\Traits\SoftDelete;
 
 use Efabrica\NetteRepository\Event\UpdateQueryEvent;
-use Efabrica\NetteRepository\Repository\Query;
 use Efabrica\NetteRepository\Repository\QueryInterface;
 use Efabrica\NetteRepository\Subscriber\EventSubscriber;
 

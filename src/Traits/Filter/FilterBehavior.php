@@ -2,7 +2,6 @@
 
 namespace Efabrica\NetteRepository\Traits\Filter;
 
-use Efabrica\NetteRepository\Repository\Query;
 use Efabrica\NetteRepository\Repository\QueryInterface;
 use Efabrica\NetteRepository\Traits\RepositoryBehavior;
 

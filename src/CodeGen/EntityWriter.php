@@ -72,7 +72,7 @@ class EntityWriter
             $structure->entityGenNamespace->addUse($relatedEntity);
             $structure->entityGenNamespace->addUse(GroupedSelection::class);
             $structure->entityGenNamespace->addUse($relatedRepository);
-            $body = "/** @var iterable<{$className}>&GroupedSelection \$query */\n".
+            $body = "/** @var iterable<{$className}>&GroupedSelection \$query */\n" .
                 "\$query = \$this->related({$className}Repository::TableName, $className::$relatedColumn);\n" .
                 'return $query;';
 

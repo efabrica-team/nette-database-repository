@@ -10,6 +10,7 @@ use Nette\PhpGenerator\PhpNamespace;
 use Nette\Utils\Strings;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use RuntimeException;
 use SplFileInfo;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -53,7 +54,7 @@ class RepositoryCodeGenerationCommand extends Command
                 if ($file->getBasename('.php') === $className . 'Repository') {
                     $code = file_get_contents($file->getPathname());
                     if ($code === false) {
-                        throw new \RuntimeException("Cannot read file {$file->getPathname()}");
+                        throw new RuntimeException("Cannot read file {$file->getPathname()}");
                     }
                     $c = ClassType::fromCode($code);
                     $repoDirs[$table['name']] = Strings::before($file->getPathname(), '/Repositor') ?? dirname($file->getPathname(), 2);

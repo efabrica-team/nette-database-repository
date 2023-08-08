@@ -3,7 +3,6 @@
 namespace Efabrica\NetteRepository\Traits\Publish;
 
 use Efabrica\NetteRepository\Traits\Filter\FilterBehavior;
-use Efabrica\NetteRepository\Traits\RepositoryBehavior;
 
 /**
  * This behavior adds default where condition to every query.
@@ -22,5 +21,4 @@ class PublishBehavior extends FilterBehavior
     {
         return $this->publishedField;
     }
-
 }

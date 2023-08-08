@@ -6,7 +6,6 @@ use Efabrica\NetteRepository\Repository\Scope\FullScope;
 use Efabrica\NetteRepository\Repository\Scope\Scope;
 use Efabrica\NetteRepository\Repository\Scope\ScopeContainer;
 use Efabrica\NetteRepository\Traits\RepositoryBehavior;
-use LogicException;
 
 class RepositoryBehaviors
 {

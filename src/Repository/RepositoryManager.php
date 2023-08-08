@@ -12,6 +12,7 @@ class RepositoryManager
     private array $repositories = [];
 
     private Container $container;
+
     private Inflector $inflector;
 
     public function __construct(Container $container)

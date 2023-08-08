@@ -2,18 +2,21 @@
 
 namespace Efabrica\NetteRepository\Repository;
 
+use ArrayAccess;
+use Countable;
 use Efabrica\NetteRepository\Model\Entity;
 use Efabrica\NetteRepository\Repository\Scope\Scope;
 use Efabrica\NetteRepository\Subscriber\RepositoryEvents;
 use Generator;
+use Iterator;
 use Nette\Database\Table\ActiveRow;
 use Nette\Database\Table\GroupedSelection;
-use Nette\Database\Table\SqlBuilder;
+use ReturnTypeWillChange;
 
 /**
  * @template E of Entity
  */
-interface QueryInterface extends \Iterator, \Countable, \ArrayAccess
+interface QueryInterface extends Iterator, Countable, ArrayAccess
 {
     public function createSelectionInstance(?string $table = null): Query;
 
@@ -223,10 +226,10 @@ interface QueryInterface extends \Iterator, \Countable, \ArrayAccess
      */
     public function getReferencingTable(string $table, ?string $column = null, $active = null): ?GroupedSelection;
 
-    #[\ReturnTypeWillChange]
+    #[ReturnTypeWillChange]
     public function current();
 
-    #[\ReturnTypeWillChange]
+    #[ReturnTypeWillChange]
     public function key();
 
     public function next(): void;
