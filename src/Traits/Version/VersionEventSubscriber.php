@@ -10,37 +10,40 @@ use Efabrica\NetteRepository\Event\UpdateQueryEvent;
 use Efabrica\NetteRepository\Model\Entity;
 use Efabrica\NetteRepository\Repository\Query;
 use Efabrica\NetteRepository\Repository\Repository;
+use Efabrica\NetteRepository\Repository\RepositoryManager;
 use Efabrica\NetteRepository\Subscriber\EventSubscriber;
 use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteQueryEvent;
 use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteSubscriber;
-use Nette\DI\Container;
 use Nette\Utils\Json;
 
 class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscriber
 {
+    public const TableName = 'versions';
     protected IrisUser $irisUser;
 
     protected string $transactionId;
 
-    /**
-     * @var VersionRepository|null
-     */
     private ?Repository $versionRepository = null;
+    private RepositoryManager $repositoryManager;
 
-    public function __construct(Container $container, IrisUser $irisUser)
+    public function __construct(RepositoryManager $repositoryManager, IrisUser $irisUser)
     {
-        if ($container->hasService('versionRepository')) {
-            /** @var VersionRepository $versionRepository */
-            $versionRepository = $container->getByName('versionRepository');
-            $this->versionRepository = $versionRepository;
-        }
         $this->irisUser = $irisUser;
         $this->transactionId = uniqid('', true);
+        $this->repositoryManager = $repositoryManager;
+    }
+
+    /**
+     * @return Repository<Version,Query<Version>>
+     */
+    private function getVersionRepository(): Repository
+    {
+        return $this->versionRepository ??= $this->repositoryManager->byTableName(self::TableName);
     }
 
     public function supportsRepository(Repository $repository): bool
     {
-        return $this->versionRepository !== null && $repository->behaviors()->has(VersionBehavior::class);
+        return $repository->behaviors()->has(VersionBehavior::class);
     }
 
     /**
@@ -49,8 +52,7 @@ class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscr
      */
     public function getVersionsForRecord(Repository $repository, string $id, int $limit = 10, int $offset = 0): Query
     {
-        assert($this->versionRepository !== null);
-        return $this->versionRepository->findBy([
+        return $this->getVersionRepository()->findBy([
             'foreign_id' => $id,
             'foreign_table' => $repository->getTableName(),
         ])->order('created_at DESC')->limit($limit, $offset);
@@ -62,19 +64,17 @@ class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscr
 
     public function onInsert(InsertRepositoryEvent $event): InsertEventResponse
     {
-        assert($this->versionRepository !== null);
         $result = $event->handle();
         $versions = [];
         foreach ($event->getEntities() as $entity) {
             $versions[] = $this->insertVersion($entity, [], 'create');
         }
-        $this->versionRepository->insert(...$versions);
+        $this->getVersionRepository()->insert(...$versions);
         return $result;
     }
 
     public function onUpdate(UpdateQueryEvent $event, array &$data): int
     {
-        assert($this->versionRepository !== null);
         $entities = $event->getQuery()->fetchAll();
         $result = $event->handle($data);
         foreach ($entities as $entity) {
@@ -85,28 +85,25 @@ class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscr
 
     public function onDelete(DeleteQueryEvent $event): int
     {
-        assert($this->versionRepository !== null);
         $entities = $event->getQuery()->fetchAll();
         $result = $event->handle();
         $versions = [];
         foreach ($entities as $entity) {
             $versions[] = $this->insertVersion($entity, [], 'delete');
         }
-        $this->versionRepository->insert(...$versions);
+        $this->getVersionRepository()->insert(...$versions);
         return $result;
     }
 
     public function onSoftDelete(SoftDeleteQueryEvent $event, array &$data): int
     {
-        assert($this->versionRepository !== null);
         $entities = $event->getQuery()->fetchAll();
         $result = $event->handle($data);
         $versions = [];
         foreach ($entities as $entity) {
             $versions[] = $this->insertVersion($entity, $data, 'soft-delete');
         }
-        $this->versionRepository->query()->where(['col']);
-        $this->versionRepository->insert(...$versions);
+        $this->getVersionRepository()->insert(...$versions);
         return $result;
     }
 
@@ -116,7 +113,6 @@ class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscr
 
     protected function insertVersion(Entity $entity, array $newData, string $flag): Version
     {
-        assert($this->versionRepository !== null);
         $oldData = [];
         if ($flag === 'update') {
             foreach ($newData as $key => $value) {
@@ -129,7 +125,7 @@ class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscr
 
         $recordToLink = $this->processLinkedEntries($entity);
 
-        $version = $this->versionRepository->createRow();
+        $version = $this->getVersionRepository()->createRow();
         $version->foreign_id = $entity->getPrimary();
         $version->foreign_table = $entity->getTableName();
         $version->old_data = Json::encode($oldData);
@@ -159,7 +155,7 @@ class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscr
     /**
      * Create linked version entries for related tables
      */
-    private function processLinkedEntries(Entity $entity): ?Version
+    private function processLinkedEntries(Entity $entity): ?Entity
     {
         $recordToLink = null;
 
@@ -177,10 +173,9 @@ class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscr
      * @param ?Version $recordToLink
      * @return Version
      */
-    private function processLinkedEntry($foreignId, string $table, Version $recordToLink = null): Version
+    private function processLinkedEntry($foreignId, string $table, Version $recordToLink = null): Entity
     {
-        assert($this->versionRepository !== null);
-        $existing = $this->versionRepository->findOneBy([
+        $existing = $this->getVersionRepository()->findOneBy([
             'transaction_id' => $this->transactionId,
             'foreign_id' => $foreignId,
             'foreign_table' => $table,
@@ -190,13 +185,13 @@ class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscr
             return $existing;
         }
 
-        $entity = $this->versionRepository->createRow();
+        $entity = $this->getVersionRepository()->createRow();
         $entity->foreign_id = $foreignId;
         $entity->foreign_table = $table;
         $entity->flag = 'update';
         $entity->transaction_id = $this->transactionId;
         $entity->linked_id = $recordToLink->id ?? null;
-        $this->versionRepository->insert($entity);
+        $this->getVersionRepository()->insert($entity);
         return $entity;
     }
 }
