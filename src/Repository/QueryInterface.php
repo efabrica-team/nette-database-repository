@@ -40,15 +40,19 @@ interface QueryInterface extends Iterator, Countable, ArrayAccess
     /**
      * @param array|string|ActiveRow $condition
      * @param mixed                  ...$params
+     * @return self&$this
      */
     public function where($condition, ...$params): self;
 
     /**
      * @param ActiveRow|array|scalar ...$entities primary value, ActiveRow or associative array of primary values
-     * @return $this
+     * @return self&$this
      */
     public function whereRows(...$entities): self;
 
+    /**
+     * @return self&$this
+     */
     public function search(array $columns, string $search): self;
 
     public function fetch(): ?Entity;
@@ -72,12 +76,18 @@ interface QueryInterface extends Iterator, Countable, ArrayAccess
     /**
      * Returns cloned query with new scope.
      * @param Scope $scope
-     * @return self
+     * @return self&static
      */
     public function withScope(Scope $scope): self;
 
+    /**
+     * @return self&static
+     */
     public function scopeRaw(): self;
 
+    /**
+     * @return self&static
+     */
     public function scopeFull(): self;
 
     public function __destruct();
@@ -94,7 +104,7 @@ interface QueryInterface extends Iterator, Countable, ArrayAccess
 
     /**
      * @param string $sequence
-     * @return $this
+     * @return self&$this
      */
     public function setPrimarySequence(string $sequence);
 
@@ -123,14 +133,14 @@ interface QueryInterface extends Iterator, Countable, ArrayAccess
      * Adds select clause, more calls appends to the end.
      * @param string|string[] $columns for example "column, MD5(column) AS column_md5"
      * @param mixed           ...$params
-     * @return static
+     * @return self&$this
      */
     public function select($columns, ...$params);
 
     /**
      * Adds condition for primary key.
      * @param mixed $key
-     * @return $this
+     * @return self&$this
      */
     public function wherePrimary($key);
 
@@ -139,13 +149,13 @@ interface QueryInterface extends Iterator, Countable, ArrayAccess
      * @param string $tableChain table chain or table alias for which you need additional left join condition
      * @param string $condition possibly containing ?
      * @param mixed  ...$params
-     * @return static
+     * @return self&$this
      */
     public function joinWhere(string $tableChain, string $condition, ...$params);
 
     /**
      * @param array $parameters
-     * @return $this
+     * @return self&$this
      */
     public function whereOr(array $parameters);
 
@@ -153,20 +163,20 @@ interface QueryInterface extends Iterator, Countable, ArrayAccess
      * Adds order clause, more calls appends to the end.
      * @param string $columns for example 'column1, column2 DESC'
      * @param mixed  ...$params
-     * @return static
+     * @return self&$this
      */
     public function order(string $columns, ...$params);
 
     /**
      * Sets limit clause, more calls rewrite old values.
-     * @return static
+     * @return self&$this
      */
     public function limit(?int $limit, ?int $offset = null);
 
     /**
      * Sets offset using page number, more calls rewrite old values.
      * @param int|null $numOfPages number of pages
-     * @return static
+     * @return self&$this
      */
     public function page(int $page, int $itemsPerPage, &$numOfPages = null);
 
@@ -174,19 +184,19 @@ interface QueryInterface extends Iterator, Countable, ArrayAccess
      * Sets group clause, more calls rewrite old value.
      * @param string $columns for example "column1, column2"
      * @param mixed  ...$params
-     * @return static
+     * @return self&$this
      */
     public function group(string $columns, ...$params);
 
     /**
      * @param string $having
      * @param mixed  ...$params
-     * @return $this
+     * @return self&$this
      */
     public function having(string $having, ...$params);
 
     /**
-     * @return $this
+     * @return self&$this
      */
     public function alias(string $tableChain, string $alias);
 

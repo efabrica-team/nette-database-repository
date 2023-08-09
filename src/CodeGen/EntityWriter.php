@@ -45,19 +45,24 @@ class EntityWriter
             /** @var EntityStructure $relatedStructure */
             $relatedStructure = $structures[$relatedTable];
             $className = $relatedStructure->getClassName();
-            $relatedEntity = $relatedStructure->entityGenNamespace->getName() . '\\' . $className;
-            $relatedRepository = $relatedStructure->repositoryNamespace->getName() . '\\' . $className . 'Repository';
-            $structure->entityGenNamespace->addUse($relatedEntity);
-            $structure->entityGenNamespace->addUse($relatedRepository);
             $columnName = Strings::before($relatedColumn, '_id') ?? $relatedColumn;
-            $RELATED_COLUMN = mb_strtoupper($relatedColumn);
-            $class->addMethod('get' . $structure->toClassName($columnName))
-                ->setBody("\$row = \$this->ref({$className}Repository::TABLE_NAME, self::$RELATED_COLUMN);\n" .
-                    "assert(\$row === null || \$row instanceof {$className});\n" .
-                    'return $row;')
-                ->setReturnType($relatedEntity)
-                ->setReturnNullable()
-            ;
+            // if $relatedColumn does not end with _id, add getter instead of property
+            if ($columnName === $relatedColumn) {
+                $relatedEntity = $relatedStructure->entityGenNamespace->getName() . '\\' . $className;
+                $relatedRepository = $relatedStructure->repositoryNamespace->getName() . '\\' . $className . 'Repository';
+                $structure->entityGenNamespace->addUse($relatedEntity);
+                $structure->entityGenNamespace->addUse($relatedRepository);
+                $RELATED_COLUMN = mb_strtoupper($relatedColumn);
+                $class->addMethod('get' . $structure->toClassName($columnName))
+                    ->setBody("\$row = \$this->ref({$className}Repository::TABLE_NAME, self::$RELATED_COLUMN);\n" .
+                        "assert(\$row === null || \$row instanceof {$className});\n" .
+                        'return $row;')
+                    ->setReturnType($relatedEntity)
+                    ->setReturnNullable()
+                ;
+            } else {
+                $class->addComment("@property {$className}|null \${$columnName} @ForeignKey('$relatedTable')");
+            }
         }
         foreach ($structure->toMany as $relatedTable => $relatedColumns) {
             if (count($relatedColumns) > 1) {

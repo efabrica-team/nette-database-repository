@@ -19,7 +19,7 @@ use Traversable;
 
 /**
  * @template E of Entity
- * @method $this limit(int $limit, ?int $offset = null)
+ * @method $this limit(?int $limit, ?int $offset = null)
  */
 trait QueryTrait
 {
@@ -82,7 +82,7 @@ trait QueryTrait
     /**
      * @param array|string|ActiveRow $condition
      * @param mixed                  ...$params
-     * @return $this
+     * @return self&$this
      */
     public function where($condition, ...$params): self
     {
