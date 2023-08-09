@@ -1,5 +1,12 @@
+parameters:
+    netteRepository:
+        ignoreTables:
+            - migrations
+            - migration_log
+            - phoenix_log
+
 services:
-    repoCodeGen: Efabrica\NetteRepository\CodeGen\RepositoryCodeGenerationCommand(%appDir%)
+    repoCodeGen: Efabrica\NetteRepository\CodeGen\RepositoryCodeGenerationCommand(%appDir%, %netteRepository%)
     - Efabrica\NetteRepository\CodeGen\EntityStructureFactory
     repoDeps: Efabrica\NetteRepository\Repository\RepositoryDependencies
     repoManager: Efabrica\NetteRepository\Repository\RepositoryManager
@@ -17,5 +24,7 @@ services:
     ownerEventSubscriber: Efabrica\NetteRepository\Traits\Owner\OwnerEventSubscriber
     softDeleteEventSubscriber: Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteEventSubscriber
     treeTraverseEventSubscriber: Efabrica\NetteRepository\Traits\TreeTraverse\TreeTraverseEventSubscriber
-    versionEventSubscriber: Efabrica\NetteRepository\Traits\Version\VersionEventSubscriber
     repoEventSubscriber: Efabrica\NetteRepository\Subscriber\RepositoryEventSubscriber
+
+    versionEventSubscriber: Efabrica\NetteRepository\Traits\Version\VersionEventSubscriber
+    versionRepository: Efabrica\NetteRepository\Traits\Version\VersionRepository

@@ -29,8 +29,9 @@ class RepositoryCodeGenerationCommand extends Command
     private EntityStructureFactory $structureFactory;
 
     private Structure $structure;
+    private array $config;
 
-    public function __construct(string $appDir, EntityStructureFactory $structureFactory, Structure $structure)
+    public function __construct(string $appDir, array $config, EntityStructureFactory $structureFactory, Structure $structure)
     {
         parent::__construct('repository:code-gen');
         $this->inflector = InflectorFactory::create()->build();
@@ -39,6 +40,7 @@ class RepositoryCodeGenerationCommand extends Command
         $this->namespace = 'App\\Core';
         $this->structureFactory = $structureFactory;
         $this->structure = $structure;
+        $this->config = $config;
     }
 
     public function findRepoDirs(array $tables, array &$repoDirs, array &$repoNamespaces): void
@@ -96,6 +98,9 @@ class RepositoryCodeGenerationCommand extends Command
 
         $structures = [];
         foreach ($tables as $table) {
+            if (isset($this->config['ignoreTables'][$table['name']])) {
+                continue;
+            }
             $namespace = $repoNamespaces[$table['name']] ?? $this->namespace;
             $dbDir = $repoDirs[$table['name']] ?? ($this->appDir . '/' . $this->repoDir);
             $structures[$table['name']] = $this->structureFactory->create($table['name'], $namespace, $dbDir);
