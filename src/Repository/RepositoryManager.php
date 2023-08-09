@@ -6,6 +6,7 @@ use Doctrine\Inflector\Inflector;
 use Doctrine\Inflector\InflectorFactory;
 use Efabrica\NetteRepository\CodeGen\ModuleWriter;
 use Nette\DI\Container;
+use RuntimeException;
 
 class RepositoryManager
 {
@@ -35,6 +36,9 @@ class RepositoryManager
     {
         $repo = $this->container->getByName(ModuleWriter::toRepoServiceName($table, $this->inflector));
         assert($repo instanceof Repository);
+        if ($repo->getTableName() !== $table) {
+            throw new RuntimeException("When looking for repository for table $table, found repository for table {$repo->getTableName()} (".get_class($repo).")");
+        }
         return $this->repositories[$table] ??= $repo;
     }
 

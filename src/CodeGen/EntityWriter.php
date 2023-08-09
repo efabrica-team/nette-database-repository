@@ -50,8 +50,9 @@ class EntityWriter
             $structure->entityGenNamespace->addUse($relatedEntity);
             $structure->entityGenNamespace->addUse($relatedRepository);
             $columnName = Strings::before($relatedColumn, '_id') ?? $relatedColumn;
+            $RELATED_COLUMN = mb_strtoupper($relatedColumn);
             $class->addMethod('get' . $structure->toClassName($columnName))
-                ->setBody("\$row = \$this->ref({$className}Repository::TableName, self::$relatedColumn);\n" .
+                ->setBody("\$row = \$this->ref({$className}Repository::TABLE_NAME, self::$RELATED_COLUMN);\n" .
                     "assert(\$row === null || \$row instanceof {$className});\n" .
                     'return $row;')
                 ->setReturnType($relatedEntity)
@@ -72,8 +73,9 @@ class EntityWriter
             $structure->entityGenNamespace->addUse($relatedEntity);
             $structure->entityGenNamespace->addUse(GroupedSelection::class);
             $structure->entityGenNamespace->addUse($relatedRepository);
+            $RELATED_COLUMN = mb_strtoupper($relatedColumn);
             $body = "/** @var iterable<{$className}>&GroupedSelection \$query */\n" .
-                "\$query = \$this->related({$className}Repository::TableName, $className::$relatedColumn);\n" .
+                "\$query = \$this->related({$className}Repository::TABLE_NAME, $className::$RELATED_COLUMN);\n" .
                 'return $query;';
 
             $class->addMethod('get' . $structure->toPluralName($className))
