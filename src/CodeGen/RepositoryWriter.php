@@ -55,7 +55,7 @@ class RepositoryWriter
 
         $class->setAbstract();
         $class->setExtends($baseClass);
-        $class->addConstant('TableName', $structure->getTableName());
+        $class->addConstant('TABLE_NAME', $structure->getTableName());
         $class->addComment('@generated Do Not Touch!');
         $class->addComment("@method {$structure->getClassName()}Query query()");
         $class->addComment("@method {$structure->getClassName()}[] fetchAll()");
@@ -74,7 +74,7 @@ class RepositoryWriter
             ->setParameters([
                 (new Parameter('deps'))->setType(RepositoryDependencies::class),
             ])
-            ->setBody("parent::__construct(static::TableName, {$structure->getClassName()}::class, {$structure->getClassName()}Query::class, \$deps);")
+            ->setBody("parent::__construct(static::TABLE_NAME, {$structure->getClassName()}::class, {$structure->getClassName()}Query::class, \$deps);")
         ;
 
         $writer->writeClass($class, $structure->repositoryGenDir);
