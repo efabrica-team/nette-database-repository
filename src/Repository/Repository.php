@@ -74,7 +74,7 @@ abstract class Repository
     }
 
     /**
-     * @return static cloned
+     * @return self&$this
      */
     public function scopeRaw(): self
     {
@@ -82,7 +82,7 @@ abstract class Repository
     }
 
     /**
-     * @return static cloned
+     * @return self&$this
      */
     public function scopeFull(): self
     {
@@ -265,9 +265,9 @@ abstract class Repository
     }
 
     /**
-     * @return iterable<E>
+     * @return E[]
      */
-    public function fetchAll(): iterable
+    public function fetchAll(): array
     {
         /** @var iterable<E> $fetchAll */
         $fetchAll = $this->query()->fetchAll();
