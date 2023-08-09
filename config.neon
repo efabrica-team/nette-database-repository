@@ -4,6 +4,7 @@ parameters:
             - migrations
             - migration_log
             - phoenix_log
+            - versions
 
 services:
     repoCodeGen: Efabrica\NetteRepository\CodeGen\RepositoryCodeGenerationCommand(%appDir%, %netteRepository%)
