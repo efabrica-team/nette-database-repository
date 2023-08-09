@@ -161,7 +161,7 @@ abstract class Repository
      ******************************/
 
     /**
-     * @param E ...$entities
+     * @param E|array ...$entities
      * @return bool|int|ActiveRow
      */
     public function insert(iterable ...$entities)
@@ -171,7 +171,7 @@ abstract class Repository
 
     /**
      * @param E|ActiveRow|array|string|int $row Entity, primary value (ID), or array where conditions
-     * @param iterable           $data Data to update
+     * @param iterable                     $data Data to update
      * @return int Number of affected rows
      */
     public function update($row, iterable $data): int
@@ -183,8 +183,10 @@ abstract class Repository
             $query->wherePrimary($row->getPrimary());
         } elseif (is_array($row)) {
             if (Arrays::isList($row)) {
-                assert(reset($row) instanceof ActiveRow);
-                $query->whereRows($row);
+                if (!reset($row) instanceof ActiveRow) {
+                    throw new LogicException('Array list must contain ActiveRow instances');
+                }
+                $query->whereRows(...$row);
             } else {
                 $query->where($row);
             }

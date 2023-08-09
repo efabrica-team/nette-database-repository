@@ -63,9 +63,9 @@ class RepositoryWriter
         $class->addComment("@method {$structure->getClassName()}|null findOneBy(array \$conditions)");
         $class->addComment("@method {$structure->getClassName()}Query findBy(array \$conditions)");
         $class->addComment("@method {$structure->getClassName()}|int insert({$structure->getClassName()}|iterable ...\$entities)");
-        $class->addComment("@method int update({$structure->getClassName()}|$primaryType \$entity, iterable \$data)");
+        $class->addComment("@method int update({$structure->getClassName()}|$primaryType|array \$entity, iterable \$data)");
         $class->addComment("@method void updateEntities({$structure->getClassName()}|$primaryType ...\$entities)");
-        $class->addComment("@method int delete({$structure->getClassName()}|$primaryType ...\$entities)");
+        $class->addComment("@method int delete({$structure->getClassName()}|$primaryType|array ...\$entities)");
         $class->addComment("@method class-string<{$structure->getClassName()}> getEntityClass()");
         $class->addComment("@method {$structure->getClassName()} createRow(array \$row = [])");
 
