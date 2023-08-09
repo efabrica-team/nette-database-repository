@@ -29,6 +29,7 @@ class RepositoryCodeGenerationCommand extends Command
     private EntityStructureFactory $structureFactory;
 
     private Structure $structure;
+
     private array $config;
 
     public function __construct(string $appDir, array $config, EntityStructureFactory $structureFactory, Structure $structure)
@@ -98,12 +99,18 @@ class RepositoryCodeGenerationCommand extends Command
 
         $structures = [];
         foreach ($tables as $table) {
-            if (isset($this->config['ignoreTables'][$table['name']])) {
+            if ($this->config['ignoreTables'][$table['name']] ?? false) {
                 continue;
             }
             $namespace = $repoNamespaces[$table['name']] ?? $this->namespace;
             $dbDir = $repoDirs[$table['name']] ?? ($this->appDir . '/' . $this->repoDir);
             $structures[$table['name']] = $this->structureFactory->create($table['name'], $namespace, $dbDir);
+        }
+        if (!isset($dbDir)) {
+            if ($tables === []) {
+                throw new RuntimeException('No database table found');
+            }
+            throw new RuntimeException('No non-ignored database table found');
         }
 
         $writer = new FileWriter();

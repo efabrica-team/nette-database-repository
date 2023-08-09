@@ -2,7 +2,6 @@
 
 namespace Efabrica\NetteRepository\CodeGen;
 
-use DateTimeInterface;
 use Doctrine\Inflector\Inflector;
 use Efabrica\NetteRepository\CodeGen\EntityProperty;
 use Nette\Database\Structure;

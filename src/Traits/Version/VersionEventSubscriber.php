@@ -19,11 +19,13 @@ use Nette\Utils\Json;
 class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscriber
 {
     public const TableName = 'versions';
+
     protected IrisUser $irisUser;
 
     protected string $transactionId;
 
     private ?Repository $versionRepository = null;
+
     private RepositoryManager $repositoryManager;
 
     public function __construct(RepositoryManager $repositoryManager, IrisUser $irisUser)

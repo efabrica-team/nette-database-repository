@@ -74,7 +74,7 @@ abstract class Repository
     }
 
     /**
-     * @return self&$this
+     * @return self&static
      */
     public function scopeRaw(): self
     {
@@ -82,7 +82,7 @@ abstract class Repository
     }
 
     /**
-     * @return self&$this
+     * @return self&static
      */
     public function scopeFull(): self
     {
@@ -251,7 +251,7 @@ abstract class Repository
      ******************************/
 
     /**
-     * @return Q
+     * @return Q&Query<E>
      */
     public function query(): Query
     {
@@ -269,7 +269,7 @@ abstract class Repository
      */
     public function fetchAll(): array
     {
-        /** @var iterable<E> $fetchAll */
+        /** @var E[] $fetchAll */
         $fetchAll = $this->query()->fetchAll();
         return $fetchAll;
     }

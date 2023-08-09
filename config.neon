@@ -1,10 +1,10 @@
 parameters:
     netteRepository:
         ignoreTables:
-            - migrations
-            - migration_log
-            - phoenix_log
-            - versions
+            migrations: true
+            migration_log: true
+            phoenix_log: true
+            versions: true
 
 services:
     repoCodeGen: Efabrica\NetteRepository\CodeGen\RepositoryCodeGenerationCommand(%appDir%, %netteRepository%)
