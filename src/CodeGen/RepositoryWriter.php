@@ -47,6 +47,7 @@ class RepositoryWriter
             $primaries = $structure->getPrimaries();
             $primaryType = reset($primaries);
         }
+        $primaryType = $primaryType ? "$primaryType|" : '';
         $primaryName = 'id';
         if (count($structure->getPrimaries()) === 1) {
             $primaryName = array_keys($structure->getPrimaries())[0];
@@ -55,17 +56,17 @@ class RepositoryWriter
         $class->setAbstract();
         $class->setExtends($baseClass);
         $class->addConstant('TableName', $structure->getTableName());
-        $class->addComment('@generated');
+        $class->addComment('@generated Do Not Touch!');
         $class->addComment("@method {$structure->getClassName()}Query query()");
         $class->addComment("@method {$structure->getClassName()}[] fetchAll()");
-        $class->addComment("@method {$structure->getClassName()}|null find($primaryType|{$structure->getClassName()} \$$primaryName)");
-        $class->addComment("@method {$structure->getClassName()}      load($primaryType|{$structure->getClassName()} \$$primaryName)");
+        $class->addComment("@method {$structure->getClassName()}|null find($primaryType{$structure->getClassName()} \$$primaryName)");
+        $class->addComment("@method {$structure->getClassName()}      load($primaryType{$structure->getClassName()} \$$primaryName)");
         $class->addComment("@method {$structure->getClassName()}|null findOneBy(array \$conditions)");
         $class->addComment("@method {$structure->getClassName()}Query findBy(array \$conditions)");
         $class->addComment("@method {$structure->getClassName()}|int insert({$structure->getClassName()}|iterable ...\$entities)");
-        $class->addComment("@method int update({$structure->getClassName()}|$primaryType|array \$entity, iterable \$data)");
-        $class->addComment("@method void updateEntities({$structure->getClassName()}|$primaryType ...\$entities)");
-        $class->addComment("@method int delete({$structure->getClassName()}|$primaryType|array ...\$entities)");
+        $class->addComment("@method int update({$structure->getClassName()}|{$primaryType}array \$entity, iterable \$data)");
+        $class->addComment("@method void updateEntities({$structure->getClassName()} ...\$entities)");
+        $class->addComment("@method int delete({$structure->getClassName()}|{$primaryType}array ...\$entities)");
         $class->addComment("@method class-string<{$structure->getClassName()}> getEntityClass()");
         $class->addComment("@method {$structure->getClassName()} createRow(array \$row = [])");
 
