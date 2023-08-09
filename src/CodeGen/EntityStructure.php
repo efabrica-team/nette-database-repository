@@ -88,12 +88,6 @@ class EntityStructure
         $this->entityGenNamespace = new PhpNamespace($namespace . '\\Repository\\Generated\\Entity');
         $this->entityGenDir = $dbDir . '/Repository/Generated/Entity';
 
-        foreach ($properties as $property) {
-            if ($property->getType() === DateTimeInterface::class) {
-                $this->entityNamespace->addUse(DateTimeInterface::class);
-                break;
-            }
-        }
         $this->primaries = $primaries;
 
         $this->toMany = $structure->getHasManyReference($table) ?? [];

@@ -15,6 +15,7 @@ class FileWriter
     {
         $contents = "<?php\n\n" . $classType->getNamespace() . $classType;
         $contents = str_replace("\t", '    ', $contents);
+        $contents = preg_replace('/\n{3,}/', "\n\n", $contents);
         $this->writeFile($dir . '/' . $classType->getName() . '.php', $contents);
     }
 
