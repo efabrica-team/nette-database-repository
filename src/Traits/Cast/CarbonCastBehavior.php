@@ -3,6 +3,7 @@
 namespace Efabrica\NetteRepository\Traits\Cast;
 
 use Carbon\CarbonImmutable;
+use DateTimeInterface;
 use Throwable;
 
 final class CarbonCastBehavior extends CastBehavior
@@ -21,6 +22,9 @@ final class CarbonCastBehavior extends CastBehavior
             return CarbonImmutable::createFromTimestamp($encoded);
         }
         try {
+            if (!is_string($encoded) && !$encoded instanceof DateTimeInterface) {
+                return null;
+            }
             return CarbonImmutable::parse($encoded);
         } catch (Throwable $e) {
             return null;

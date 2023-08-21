@@ -114,6 +114,8 @@ class RepositoryCodeGenerationCommand extends Command
         }
 
         $writer = new FileWriter();
+        /** @var bool $migrate */
+        $migrate = $input->getOption('migrate');
 
         foreach ($structures as $structure) {
             $output->writeln("Generating {$structure->getClassName()} Repository App Base");
@@ -132,7 +134,7 @@ class RepositoryCodeGenerationCommand extends Command
             $output->writeln("Generating {$structure->getClassName()} Repository Base");
             RepositoryWriter::writeRepositoryBase($structure, $writer);
             $output->writeln("Generating {$structure->getClassName()} Repository");
-            RepositoryWriter::writeRepository($structure, $input->getOption('migrate'), $writer);
+            RepositoryWriter::writeRepository($structure, $migrate, $writer);
 
             ModuleWriter::writeConfigNeon($structure, $dbDir, $writer);
         }

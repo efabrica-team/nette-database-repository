@@ -136,6 +136,18 @@ trait QueryTrait
     }
 
     /**
+     * Returns first result with LIMIT 1 without modifying the query.
+     * @return Entity|null
+     */
+    public function first(): ?Entity
+    {
+        $limit = $this->sqlBuilder->getLimit();
+        $entity = $this->limit(1, $this->sqlBuilder->getOffset())->fetch();
+        $this->limit($limit, $this->sqlBuilder->getOffset());
+        return $entity;
+    }
+
+    /**
      * @return E|null
      */
     public function fetch(): ?Entity

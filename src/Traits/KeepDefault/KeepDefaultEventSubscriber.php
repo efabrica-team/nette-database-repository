@@ -7,6 +7,7 @@ use Efabrica\NetteRepository\Event\InsertEventResponse;
 use Efabrica\NetteRepository\Event\InsertRepositoryEvent;
 use Efabrica\NetteRepository\Event\RepositoryEvent;
 use Efabrica\NetteRepository\Event\UpdateQueryEvent;
+use Efabrica\NetteRepository\Model\Entity;
 use Efabrica\NetteRepository\Repository\Repository;
 use Efabrica\NetteRepository\Subscriber\EventSubscriber;
 use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteQueryEvent;
@@ -33,9 +34,9 @@ final class KeepDefaultEventSubscriber extends EventSubscriber implements SoftDe
             return;
         }
         if ($count === 0) {
-            $entity = (clone $query)->limit(1)->fetch();
-            if ($entity) {
-                $repository->update($entity, [$defaultField => true]);
+            $entity = $query->first();
+            if ($entity instanceof Entity) {
+                $entity->update([$defaultField => true]);
             }
         }
 

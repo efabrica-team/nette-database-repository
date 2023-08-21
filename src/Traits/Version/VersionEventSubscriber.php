@@ -126,9 +126,11 @@ class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscr
         }
 
         $recordToLink = $this->processLinkedEntries($entity);
+        $primary = $entity->getPrimary();
+        assert(is_scalar($primary));
 
         $version = $this->getVersionRepository()->createRow();
-        $version->foreign_id = $entity->getPrimary();
+        $version->foreign_id = (string)$primary;
         $version->foreign_table = $entity->getTableName();
         $version->old_data = Json::encode($oldData);
         $version->new_data = Json::encode($newData);
@@ -143,10 +145,12 @@ class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscr
      * where a version entry should be created
      *
      * ex. 1: if you want to create a version entry for a page from a record which has a fk to the pages table
-     * ['pages' => $record->getPageId()]
+     * ['pages' => $entity->page_id]
+     * @return array<string,scalar>
      */
     protected function getRelatedTables(Entity $entity): array
     {
+        // TODO move to behavior
         return [];
     }
 
@@ -157,12 +161,12 @@ class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscr
     /**
      * Create linked version entries for related tables
      */
-    private function processLinkedEntries(Entity $entity): ?Entity
+    private function processLinkedEntries(Entity $entity): ?Version
     {
         $recordToLink = null;
 
         foreach ($this->getRelatedTables($entity) as $table => $foreignId) {
-            $recordToLink = $this->processLinkedEntry($foreignId, $table, $recordToLink);
+            $recordToLink = $this->processLinkedEntry((string)$foreignId, $table, $recordToLink);
         }
 
         return $recordToLink;
@@ -170,12 +174,12 @@ class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscr
 
     /**
      * Insert one linked version entry to a related table
-     * @param mixed    $foreignId
+     * @param string   $foreignId
      * @param string   $table
      * @param ?Version $recordToLink
      * @return Version
      */
-    private function processLinkedEntry($foreignId, string $table, Version $recordToLink = null): Entity
+    private function processLinkedEntry(string $foreignId, string $table, Version $recordToLink = null): Version
     {
         $existing = $this->getVersionRepository()->findOneBy([
             'transaction_id' => $this->transactionId,
@@ -183,7 +187,7 @@ class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscr
             'foreign_table' => $table,
         ]);
 
-        if ($existing) {
+        if ($existing !== null) {
             return $existing;
         }
 

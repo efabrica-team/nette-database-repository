@@ -20,11 +20,11 @@ class ModuleWriter
         $defLine = null;
         $servicesLine = null;
         foreach ($config as $i => $line) {
-            if (preg_match("/^\\s*$serviceName:/", $line)) {
+            if (preg_match("/^\\s*$serviceName:/", $line) === 1) {
                 $defLine = $i;
                 break;
             }
-            if (preg_match('/^\\s*services:/', $line)) {
+            if (preg_match('/^\\s*services:/', $line) === 1) {
                 $servicesLine = $i;
             }
         }

@@ -41,6 +41,7 @@ class QueryWriter
         $baseClass->addComment("@method insert({$structure->getClassName()}|array \$data)");
         $baseClass->addComment("@method {$structure->getClassName()}[] fetchAll()");
         $baseClass->addComment("@method {$structure->getClassName()}|null fetch()");
+        $baseClass->addComment("@method {$structure->getClassName()}|null first()");
         $baseClass->addComment("@method {$structure->getClassName()} createRow(array \$data = [])");
         $baseClass->addComment("@method {$structure->getClassName()} current()");
         $baseClass->addComment("@method {$structure->getClassName()}Repository getRepository()");

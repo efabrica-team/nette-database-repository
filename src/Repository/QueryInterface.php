@@ -55,6 +55,8 @@ interface QueryInterface extends Iterator, Countable, ArrayAccess
      */
     public function search(array $columns, string $search): self;
 
+    public function first(): ?Entity;
+
     public function fetch(): ?Entity;
 
     public function fetchAll(): array;

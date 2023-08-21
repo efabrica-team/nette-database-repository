@@ -60,7 +60,7 @@ class RepositoryWriter
         $class->addComment("@method {$structure->getClassName()}Query query()");
         $class->addComment("@method {$structure->getClassName()}[] fetchAll()");
         $class->addComment("@method {$structure->getClassName()}|null find($primaryType{$structure->getClassName()} \$$primaryName)");
-        $class->addComment("@method {$structure->getClassName()}      load($primaryType{$structure->getClassName()} \$$primaryName)");
+        $class->addComment("@method {$structure->getClassName()} findOrFail($primaryType{$structure->getClassName()} \$$primaryName)");
         $class->addComment("@method {$structure->getClassName()}|null findOneBy(array \$conditions)");
         $class->addComment("@method {$structure->getClassName()}Query findBy(array \$conditions)");
         $class->addComment("@method {$structure->getClassName()}|int insert({$structure->getClassName()}|iterable ...\$entities)");
@@ -172,7 +172,7 @@ class RepositoryWriter
     {
         $linesToUnset = [];
         foreach ($lines as $i => $line) {
-            if (preg_match('/@method.*\s+find(\w+)\(/', $line, $matches)) {
+            if (preg_match('/@method.*\s+find(\w+)\(/', $line, $matches) === 1) {
                 $linesToUnset[] = $i;
             } elseif (str_contains($line, ' $tableName = ')) {
                 $linesToUnset[] = $i;

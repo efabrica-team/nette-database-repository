@@ -2,13 +2,15 @@
 
 namespace Efabrica\NetteRepository\Event;
 
+use Nette\Database\Table\ActiveRow;
+
 final class InsertEventResponse extends RepositoryEventResponse
 {
     private $return;
 
     /**
-     * @param RepositoryEvent $event
-     * @param mixed           $return
+     * @param RepositoryEvent    $event
+     * @param bool|int|ActiveRow|null $return
      */
     public function __construct(RepositoryEvent $event, $return)
     {
@@ -17,10 +19,10 @@ final class InsertEventResponse extends RepositoryEventResponse
     }
 
     /**
-     * @return mixed
+     * @return bool|int|ActiveRow
      */
     public function getReturn()
     {
-        return $this->return;
+        return $this->return ?? false;
     }
 }

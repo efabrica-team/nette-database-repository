@@ -31,9 +31,9 @@ abstract class Entity extends ActiveRow
 
     /**
      * Sync state of entity into database
-     * @return bool
+     * @return $this
      */
-    public function save(): bool
+    public function save(): self
     {
         $query = $this->_query->getRepository()->query();
         if (!isset(self::$data)) {
@@ -44,13 +44,25 @@ abstract class Entity extends ActiveRow
         // if entity is new, insert it
         if (self::$data->getValue($this) === []) {
             $insert = $query->insert($this->_modified);
-            if ($insert instanceof ActiveRow) {
-                self::$data->setValue($this, $insert->toArray());
-                $this->_modified = [];
-            }
-            return $insert !== null;
+            assert($insert instanceof self);
+            self::$data->setValue($this, $insert->toArray());
+            $this->_modified = [];
+        } else {
+            $this->update();
         }
-        return $this->update() > 0;
+        return $this;
+    }
+
+    /**
+     * @param iterable $data
+     * @return self&$this
+     */
+    public function fill(iterable $data): self
+    {
+        foreach ($data as $key => $value) {
+            $this->$key = $value;
+        }
+        return $this;
     }
 
     /**
@@ -59,10 +71,8 @@ abstract class Entity extends ActiveRow
      */
     public function update(iterable $data = []): bool
     {
-        if ($data instanceof Traversable) {
-            $data = iterator_to_array($data);
-        }
-        $result = parent::update($data + $this->_modified);
+        $this->fill($data);
+        $result = parent::update($this->_modified);
         $this->_modified = [];
         return $result;
     }

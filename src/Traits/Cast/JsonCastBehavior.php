@@ -3,6 +3,7 @@
 namespace Efabrica\NetteRepository\Traits\Cast;
 
 use Nette\Utils\Json;
+use Nette\Utils\JsonException;
 
 final class JsonCastBehavior extends CastBehavior
 {
@@ -11,6 +12,11 @@ final class JsonCastBehavior extends CastBehavior
         return 'array';
     }
 
+    /**
+     * @param mixed $encoded
+     * @return mixed|string
+     * @throws JsonException
+     */
     public function decodeFromDB($encoded)
     {
         if (is_string($encoded)) {
@@ -20,7 +26,12 @@ final class JsonCastBehavior extends CastBehavior
         return $encoded;
     }
 
-    public function encodeForDB($decoded): string
+    /**
+     * @param mixed $decoded
+     * @return string|mixed
+     * @throws JsonException
+     */
+    public function encodeForDB($decoded)
     {
         return is_array($decoded) ? Json::encode($decoded) : $decoded;
     }

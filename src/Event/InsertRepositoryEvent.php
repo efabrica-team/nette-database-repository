@@ -5,6 +5,7 @@ namespace Efabrica\NetteRepository\Event;
 use Efabrica\NetteRepository\Model\Entity;
 use Efabrica\NetteRepository\Repository\Repository;
 use Efabrica\NetteRepository\Subscriber\EventSubscriber;
+use Nette\Database\Table\ActiveRow;
 use Traversable;
 
 /**
@@ -67,7 +68,7 @@ class InsertRepositoryEvent extends RepositoryEvent
     }
 
     /**
-     * @param mixed $response
+     * @param bool|int|ActiveRow|null $response
      * @return InsertEventResponse
      */
     public function stopPropagation($response = null): InsertEventResponse

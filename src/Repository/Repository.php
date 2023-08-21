@@ -37,7 +37,7 @@ abstract class Repository
 
     private RepositoryManager $manager;
 
-    protected string $lookupMessage = 'Entity not found';
+    protected string $findOrFailMessage = 'Entity not found';
 
     /**
      * @param class-string<E> $entityClass
@@ -101,16 +101,16 @@ abstract class Repository
         if ($id instanceof ActiveRow) {
             $id = $id->getPrimary();
         }
-        return $this->query()->wherePrimary($id)->limit(1)->fetch();
+        return $this->query()->wherePrimary($id)->first();
     }
 
     /**
      * @return E|null
      */
-    public function findOneBy(array $conditions): ?Entity
+    public function findOneBy(array $conditions = []): ?Entity
     {
         /** @var E|null $e */
-        $e = $this->findBy($conditions)->fetch();
+        $e = $this->findBy($conditions)->first();
         return $e;
     }
 
@@ -129,7 +129,10 @@ abstract class Repository
         return $this->findBy($conditions)->count('*');
     }
 
-    public function sumBy(string $column, array $conditions = []): int
+    /**
+     * @return mixed
+     */
+    public function sumBy(string $column, array $conditions = [])
     {
         return $this->findBy($conditions)->sum($column);
     }
@@ -144,16 +147,43 @@ abstract class Repository
      * Made to be used in Presenter actions. Throws BadRequestException if not found.
      * @param Entity|string|int|array $id
      */
-    public function load($id): Entity
+    public function findOrFail($id): Entity
     {
-        if ($id instanceof Entity) {
-            return $id;
-        }
         $entity = $this->find($id);
-        if ($entity) {
+        if ($entity instanceof Entity) {
             return $entity;
         }
-        throw new BadRequestException($this->lookupMessage);
+        throw new BadRequestException($this->findOrFailMessage);
+    }
+
+    /**
+     * Get the first entity matching the attributes or create it.
+     * @param array $conditions Conditions to find by
+     * @param array $newValues New values to set if entity is needed to be created
+     * @return Entity inserted or found
+     */
+    public function findOrCreate(array $conditions, array $newValues = []): Entity
+    {
+        $entity = $this->findOneBy($conditions);
+        if ($entity instanceof Entity) {
+            return $entity;
+        }
+        return $this->createRow($conditions + $newValues)->save();
+    }
+
+    /**
+     * Get the first entity matching the attributes or instantiate it.
+     * @param array $conditions Conditions to find by
+     * @param array $newValues New values to set if entity is needed to be created
+     * @return Entity
+     */
+    public function findOrNew(array $conditions, array $newValues = []): Entity
+    {
+        $entity = $this->findOneBy($conditions);
+        if ($entity instanceof Entity) {
+            return $entity;
+        }
+        return $this->createRow($conditions + $newValues);
     }
 
     /********************************
@@ -194,6 +224,15 @@ abstract class Repository
             throw new LogicException('Invalid row to update');
         }
         return $query->update($data);
+    }
+
+    public function updateOrCreate(array $where, array $newValues = []): Entity {
+        $entity = $this->findOneBy($where);
+        if ($entity instanceof Entity) {
+            $entity->update($newValues);
+            return $entity;
+        }
+        return $this->createRow($where + $newValues)->save();
     }
 
     /**

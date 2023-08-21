@@ -134,11 +134,14 @@ class RepositoryBehaviors
         return $this;
     }
 
-    public function setScope(Scope $scope): self
+    /**
+     * @internal does not clone self
+     * @param Scope $scope
+     */
+    public function setScope(Scope $scope): void
     {
         $this->scope = $this->scope->withScope($scope);
         $this->scoped = null;
-        return $this;
     }
 
     public function getScopeContainer(): ScopeContainer
