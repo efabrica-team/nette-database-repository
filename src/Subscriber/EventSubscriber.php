@@ -18,9 +18,9 @@ use Efabrica\NetteRepository\Subscriber\Inline\UpdateEventSubscriber;
 abstract class EventSubscriber implements InsertEventSubscriber, UpdateEventSubscriber, DeleteEventSubscriber, SelectEventSubscriber
 {
     /**
+     * [!] Do keep in mind that this method is ran only once, when the repository is created.
      * @param Repository $repository
      * @return bool should the event subscriber be used for this repository?
-     * If it returns false, the event subscriber will not be added to the repository.
      * @see RepositoryEvents::forRepository()
      */
     public function supportsRepository(Repository $repository): bool
@@ -62,6 +62,7 @@ abstract class EventSubscriber implements InsertEventSubscriber, UpdateEventSubs
 
     /**
      * Called when an entity is loaded from the database.
+     * Be aware that calling createRow() here might cause an infinite loop.
      */
     public function onLoad(Entity $entity, Repository $repository): void
     {

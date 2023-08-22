@@ -38,9 +38,9 @@ trait QueryTrait
         if (is_array($data)) {
             if (Arrays::isList($data)) {
                 $data = array_map(fn($row) => $row instanceof Entity ? $row :
-                    $this->repository->createRow($row, $this), $data);
+                    $this->repository->create($row, $this), $data);
             } else {
-                $data = [$this->repository->createRow($data, $this)];
+                $data = [$this->repository->create($data, $this)];
             }
         } elseif ($data instanceof Entity) {
             $data = [$data];
@@ -142,8 +142,9 @@ trait QueryTrait
     public function first(): ?Entity
     {
         $limit = $this->sqlBuilder->getLimit();
-        $entity = $this->limit(1, $this->sqlBuilder->getOffset())->fetch();
-        $this->limit($limit, $this->sqlBuilder->getOffset());
+        $offset = $this->sqlBuilder->getOffset();
+        $entity = $this->limit(1, $offset)->fetch();
+        $this->limit($limit, $offset);
         return $entity;
     }
 
@@ -236,7 +237,7 @@ trait QueryTrait
 
     protected function createRow(array $row = []): Entity
     {
-        return $this->repository->createRow($row, $this);
+        return $this->repository->create($row, $this);
     }
 
     public function getScope(): Scope

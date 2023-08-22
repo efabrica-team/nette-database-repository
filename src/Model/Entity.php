@@ -12,7 +12,6 @@ use Nette\Database\Table\ActiveRow;
 use Nette\Database\Table\GroupedSelection;
 use Nette\Database\Table\Selection;
 use ReflectionProperty;
-use Traversable;
 
 abstract class Entity extends ActiveRow
 {
@@ -35,12 +34,12 @@ abstract class Entity extends ActiveRow
      */
     public function save(): self
     {
-        $query = $this->_query->getRepository()->query();
         if (!isset(self::$data)) {
             self::$data = new ReflectionProperty(ActiveRow::class, 'data');
             self::$data->setAccessible(true);
         }
 
+        $query = $this->_query->getRepository()->query();
         // if entity is new, insert it
         if (self::$data->getValue($this) === []) {
             $insert = $query->insert($this->_modified);

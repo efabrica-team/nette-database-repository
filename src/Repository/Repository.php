@@ -162,13 +162,13 @@ abstract class Repository
      * @param array $newValues New values to set if entity is needed to be created
      * @return Entity inserted or found
      */
-    public function findOrCreate(array $conditions, array $newValues = []): Entity
+    public function findOrInsert(array $conditions, array $newValues = []): Entity
     {
         $entity = $this->findOneBy($conditions);
         if ($entity instanceof Entity) {
             return $entity;
         }
-        return $this->createRow($conditions + $newValues)->save();
+        return $this->create($conditions + $newValues)->save();
     }
 
     /**
@@ -183,7 +183,7 @@ abstract class Repository
         if ($entity instanceof Entity) {
             return $entity;
         }
-        return $this->createRow($conditions + $newValues);
+        return $this->create($conditions + $newValues);
     }
 
     /********************************
@@ -226,13 +226,14 @@ abstract class Repository
         return $query->update($data);
     }
 
-    public function updateOrCreate(array $where, array $newValues = []): Entity {
+    public function updateOrCreate(array $where, array $newValues = []): Entity
+    {
         $entity = $this->findOneBy($where);
         if ($entity instanceof Entity) {
             $entity->update($newValues);
             return $entity;
         }
-        return $this->createRow($where + $newValues)->save();
+        return $this->create($where + $newValues)->save();
     }
 
     /**
@@ -370,7 +371,7 @@ abstract class Repository
     /**
      * @return E
      */
-    public function createRow(array $row = [], ?QueryInterface $query = null): Entity
+    public function create(array $row = [], ?QueryInterface $query = null): Entity
     {
         $class = $this->entityClass;
         $entity = new $class($row, $query ?? $this->query());
