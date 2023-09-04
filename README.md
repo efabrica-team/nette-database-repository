@@ -111,16 +111,17 @@ The active Scope is passed down from Repository to Query and from Query down to 
 
 `->scopeRaw()` returns a clone of the object with raw scope. Raw scope removes all behaviors.
 
-`->scopeFull()` returns a clone of the object with full scope. Full scope keeps all behaviors.
+`->scopeFull()` returns a clone of the object with full scope. Full scope keeps all behaviors. 
+This is the default scope, unless you change the scope in setup() method.
 
 #### Example
 
 ```php
-final class ApiScope implements \Efabrica\NetteRepository\Repository\Scope\Scope
+final class AdminScope implements \Efabrica\NetteRepository\Repository\Scope\Scope
 {
     public function apply(RepositoryBehaviors $behaviors, Repository $repository): void
     {
-        // Remove these behaviors because they are not needed for the API
+        // Remove these behaviors because they are not needed for the Admin
         $behaviors
             ->remove(SoftDeleteBehavior::class)
             ->remove(PublishBehavior::class);
@@ -140,14 +141,21 @@ final class ApiScope implements \Efabrica\NetteRepository\Repository\Scope\Scope
 To use the Scope as a **container service**, which may not be necessary in your case, please follow these steps:
 
 ```php
+use Efabrica\NetteRepository\Repository\RepositoryBehaviors;
 abstract class RepositoryBase extends \Efabrica\NetteRepository\Repository\Repository
 {
     /** @inject */
-    public ApiScope $apiScope;
+    public AdminScope $adminScope;
     
-    public function scopeApi(): self
+    public function scopeAdmin(): self
     {
-        return $this->withScope($this->apiScope);
+        return $this->withScope($this->adminScope);
+    }
+    
+    // Do this if you want to set the AdminScope as default:
+    protected function setup(RepositoryBehaviors $behaviors) : void 
+    {
+        $behaviors->setScope($this->adminScope);
     }
 }
 ```
@@ -155,17 +163,17 @@ abstract class RepositoryBase extends \Efabrica\NetteRepository\Repository\Repos
 And **optionally** implement shorthand methods for your queries:
 
 ```php
-use YourBeautifulApplication\Api\ApiScope;
+use YourBeautifulApplication\Admin\AdminScope;
 
 abstract class QueryBase extends \Efabrica\NetteRepository\Repository\Query
 {
-    public function scopeApi(): self
+    public function scopeAdmin(): self
     {
-        // This method returns a copy of the query with your own API scope applied
-        // The Api scope removes some behaviors that are not relevant for the API
-        return $this->withScope($this->repository->apiScope);
-        // Alternatively, if the Api scope does not depend on any parameters, you can create a new instance of it like this:
-        return $this->withScope(new ApiScope());
+        // This method returns a copy of the query with your own Admin scope applied
+        // The Admin scope removes some behaviors that are not relevant for the Admin
+        return $this->withScope($this->repository->adminScope);
+        // Alternatively, if the Admin scope does not depend on any parameters, you can create a new instance of it like this:
+        return $this->withScope(new AdminScope());
     }
 }
 ```
@@ -174,11 +182,11 @@ Usage:
 
 ```php
 // all of these are equivalent:
-$repository->findBy(['age > ?' => 18])->scopeApi()->fetchAll();
-$repository->scopeApi()->findBy(['age > ?' => 18])->fetchAll();
-$repository->query()->where('age > ?', 18)->scopeApi()->fetchAll();
-$repository->scopeApi()->query()->where('age > ?', 18)->fetchAll();
-$repository->query()->scopeApi()->where('age > ?', 18)->fetchAll();
+$repository->findBy(['age > ?' => 18])->scopeAdmin()->fetchAll();
+$repository->scopeAdmin()->findBy(['age > ?' => 18])->fetchAll();
+$repository->query()->where('age > ?', 18)->scopeAdmin()->fetchAll();
+$repository->scopeAdmin()->query()->where('age > ?', 18)->fetchAll();
+$repository->query()->scopeAdmin()->where('age > ?', 18)->fetchAll();
 ```
 
 ## Code Generator
