@@ -69,7 +69,7 @@ interface QueryInterface extends Iterator, Countable, ArrayAccess
 
     public function getRepository(): Repository;
 
-    public function getEvents(): RepositoryEventSubscribers;
+    public function getEventSubscribers(): RepositoryEventSubscribers;
 
     public function getBehaviors(): RepositoryBehaviors;
 

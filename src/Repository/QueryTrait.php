@@ -220,9 +220,9 @@ trait QueryTrait
         return $this->repository;
     }
 
-    public function getEvents(): RepositoryEventSubscribers
+    public function getEventSubscribers(): RepositoryEventSubscribers
     {
-        return $this->repository->getEvents();
+        return $this->repository->getEventSubscribers();
     }
 
     public function getBehaviors(): RepositoryBehaviors

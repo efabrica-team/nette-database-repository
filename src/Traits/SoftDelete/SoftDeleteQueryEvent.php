@@ -16,7 +16,7 @@ class SoftDeleteQueryEvent extends UpdateQueryEvent
     public function __construct(QueryInterface $query)
     {
         parent::__construct($query);
-        foreach ($query->getEvents()->toArray() as $subscriber) {
+        foreach ($query->getEventSubscribers()->toArray() as $subscriber) {
             if ($subscriber instanceof SoftDeleteSubscriber) {
                 $this->subscribers[] = $subscriber;
             }

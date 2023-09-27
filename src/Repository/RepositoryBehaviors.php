@@ -76,9 +76,9 @@ class RepositoryBehaviors
      * @param class-string<T> $behaviorClass
      * @return T
      */
-    public function get(string $behaviorClass, bool $raw = false): ?RepositoryBehavior
+    public function get(string $behaviorClass, bool $ignoreScope = false): ?RepositoryBehavior
     {
-        $behaviors = $raw ? $this->allRaw() : $this->all();
+        $behaviors = $ignoreScope ? $this->allRaw() : $this->all();
         if (isset($behaviors[$behaviorClass]) && $behaviors[$behaviorClass] instanceof $behaviorClass) {
             return $behaviors[$behaviorClass];
         }

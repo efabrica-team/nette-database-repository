@@ -333,7 +333,7 @@ abstract class Repository
         return $this->explorer;
     }
 
-    public function getEvents(): RepositoryEventSubscribers
+    public function getEventSubscribers(): RepositoryEventSubscribers
     {
         return $this->events;
     }
@@ -376,7 +376,7 @@ abstract class Repository
         $class = $this->entityClass;
         $query ??= $this->query();
         $entity = new $class($row, $query);
-        foreach ($query->getEvents() as $event) {
+        foreach ($query->getEventSubscribers() as $event) {
             $event->onLoad($entity, $this);
         }
         return $entity;
