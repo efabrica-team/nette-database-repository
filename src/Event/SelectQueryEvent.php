@@ -2,8 +2,6 @@
 
 namespace Efabrica\NetteRepository\Event;
 
-use Efabrica\NetteRepository\Subscriber\EventSubscriber;
-
 class SelectQueryEvent extends QueryEvent
 {
     public function handle(): SelectQueryResponse

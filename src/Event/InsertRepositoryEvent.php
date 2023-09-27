@@ -4,7 +4,6 @@ namespace Efabrica\NetteRepository\Event;
 
 use Efabrica\NetteRepository\Model\Entity;
 use Efabrica\NetteRepository\Repository\Repository;
-use Efabrica\NetteRepository\Subscriber\EventSubscriber;
 use Nette\Database\Table\ActiveRow;
 use Traversable;
 

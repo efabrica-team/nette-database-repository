@@ -2,8 +2,6 @@
 
 namespace Efabrica\NetteRepository\Event;
 
-use Efabrica\NetteRepository\Subscriber\EventSubscriber;
-
 class UpdateQueryEvent extends QueryEvent
 {
     public function handle(array &$data): int
