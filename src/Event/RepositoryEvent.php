@@ -64,7 +64,7 @@ abstract class RepositoryEvent
      */
     public function hasBehavior(string $class): bool
     {
-        return $this->getBehavior($class) !== null;
+        return $this->getBehaviors()->has($class);
     }
 
     /**
