@@ -9,7 +9,6 @@ use Efabrica\NetteRepository\Event\RepositoryEvent;
 use Efabrica\NetteRepository\Event\SelectQueryEvent;
 use Efabrica\NetteRepository\Event\SelectQueryResponse;
 use Efabrica\NetteRepository\Event\UpdateQueryEvent;
-use Efabrica\NetteRepository\Repository\Repository;
 use Efabrica\NetteRepository\Subscriber\Inline\DeleteEventSubscriber;
 use Efabrica\NetteRepository\Subscriber\Inline\InsertEventSubscriber;
 use Efabrica\NetteRepository\Subscriber\Inline\SelectEventSubscriber;

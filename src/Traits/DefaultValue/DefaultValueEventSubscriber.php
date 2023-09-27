@@ -5,7 +5,6 @@ namespace Efabrica\NetteRepository\Traits\DefaultValue;
 use Efabrica\NetteRepository\Event\InsertEventResponse;
 use Efabrica\NetteRepository\Event\InsertRepositoryEvent;
 use Efabrica\NetteRepository\Event\RepositoryEvent;
-use Efabrica\NetteRepository\Repository\RepositoryBehaviors;
 use Efabrica\NetteRepository\Subscriber\EventSubscriber;
 
 final class DefaultValueEventSubscriber extends EventSubscriber

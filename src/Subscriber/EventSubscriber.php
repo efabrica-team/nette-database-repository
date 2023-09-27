@@ -11,12 +11,10 @@ use Efabrica\NetteRepository\Event\SelectQueryResponse;
 use Efabrica\NetteRepository\Event\UpdateQueryEvent;
 use Efabrica\NetteRepository\Model\Entity;
 use Efabrica\NetteRepository\Repository\Repository;
-use Efabrica\NetteRepository\Repository\RepositoryBehaviors;
 use Efabrica\NetteRepository\Subscriber\Inline\DeleteEventSubscriber;
 use Efabrica\NetteRepository\Subscriber\Inline\InsertEventSubscriber;
 use Efabrica\NetteRepository\Subscriber\Inline\SelectEventSubscriber;
 use Efabrica\NetteRepository\Subscriber\Inline\UpdateEventSubscriber;
-use Efabrica\NetteRepository\Traits\Date\DateBehavior;
 
 abstract class EventSubscriber implements InsertEventSubscriber, UpdateEventSubscriber, DeleteEventSubscriber, SelectEventSubscriber
 {

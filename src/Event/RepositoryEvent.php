@@ -76,7 +76,7 @@ abstract class RepositoryEvent
     {
         $behavior = $this->getBehaviors()->get($class);
         if (!$behavior instanceof RepositoryBehavior) {
-            throw new LogicException("getBehavior() was called incorrectly");
+            throw new LogicException('getBehavior() was called incorrectly');
         }
         return $behavior;
     }
