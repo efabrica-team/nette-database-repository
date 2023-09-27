@@ -5,10 +5,11 @@ namespace Efabrica\NetteRepository\Traits\Account;
 use Efabrica\IrisClient\IrisUser;
 use Efabrica\NetteRepository\Event\InsertEventResponse;
 use Efabrica\NetteRepository\Event\InsertRepositoryEvent;
+use Efabrica\NetteRepository\Event\RepositoryEvent;
 use Efabrica\NetteRepository\Event\SelectQueryEvent;
 use Efabrica\NetteRepository\Event\SelectQueryResponse;
 use Efabrica\NetteRepository\Event\UpdateQueryEvent;
-use Efabrica\NetteRepository\Repository\Repository;
+use Efabrica\NetteRepository\Repository\RepositoryBehaviors;
 use Efabrica\NetteRepository\Subscriber\EventSubscriber;
 
 final class AccountEventSubscriber extends EventSubscriber
@@ -20,9 +21,9 @@ final class AccountEventSubscriber extends EventSubscriber
         $this->irisUser = $irisUser;
     }
 
-    public function supportsRepository(Repository $repository): bool
+    public function supportsEvent(RepositoryEvent $event): bool
     {
-        return $repository->behaviors()->has(AccountBehavior::class);
+        return $event->hasBehavior(AccountBehavior::class);
     }
 
     private function getAccountId(): ?string
@@ -36,7 +37,7 @@ final class AccountEventSubscriber extends EventSubscriber
     public function onSelect(SelectQueryEvent $event): SelectQueryResponse
     {
         /** @var AccountBehavior $behavior */
-        $behavior = $event->getRepository()->behaviors()->get(AccountBehavior::class);
+        $behavior = $event->getBehavior(AccountBehavior::class);
         $field = $behavior->getAccountField();
 
         $permissions = $this->irisUser->getByKey('permissions');

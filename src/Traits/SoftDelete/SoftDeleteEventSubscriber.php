@@ -3,16 +3,17 @@
 namespace Efabrica\NetteRepository\Traits\SoftDelete;
 
 use Efabrica\NetteRepository\Event\DeleteQueryEvent;
+use Efabrica\NetteRepository\Event\RepositoryEvent;
 use Efabrica\NetteRepository\Event\SelectQueryEvent;
 use Efabrica\NetteRepository\Event\SelectQueryResponse;
-use Efabrica\NetteRepository\Repository\Repository;
+use Efabrica\NetteRepository\Repository\RepositoryBehaviors;
 use Efabrica\NetteRepository\Subscriber\EventSubscriber;
 
 class SoftDeleteEventSubscriber extends EventSubscriber
 {
-    public function supportsRepository(Repository $repository): bool
+    public function supportsEvent(RepositoryEvent $event): bool
     {
-        return $repository->behaviors()->has(SoftDeleteBehavior::class);
+        return $event->hasBehavior(SoftDeleteBehavior::class);
     }
 
     public function onSelect(SelectQueryEvent $event): SelectQueryResponse

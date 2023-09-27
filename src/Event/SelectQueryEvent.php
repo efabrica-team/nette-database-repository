@@ -8,7 +8,7 @@ class SelectQueryEvent extends QueryEvent
     {
         while ($subscriber = current($this->subscribers)) {
             next($this->subscribers);
-            if ($subscriber->supportsRepository($this->getRepository())) {
+            if ($subscriber->supportsEvent($this)) {
                 return $subscriber->onSelect($this);
             }
         }

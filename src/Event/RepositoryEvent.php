@@ -7,6 +7,8 @@ use Efabrica\NetteRepository\Repository\Query;
 use Efabrica\NetteRepository\Repository\Repository;
 use Efabrica\NetteRepository\Repository\RepositoryBehaviors;
 use Efabrica\NetteRepository\Subscriber\EventSubscriber;
+use Efabrica\NetteRepository\Traits\RepositoryBehavior;
+use LogicException;
 
 /**
  * @template E of Entity
@@ -54,6 +56,29 @@ abstract class RepositoryEvent
     public function getBehaviors(): RepositoryBehaviors
     {
         return $this->repository->behaviors();
+    }
+
+    /**
+     * @param class-string<RepositoryBehavior> $class
+     * @return bool
+     */
+    public function hasBehavior(string $class): bool
+    {
+        return $this->getBehavior($class) !== null;
+    }
+
+    /**
+     * @template T of RepositoryBehavior
+     * @param class-string<T> $class
+     * @return T
+     */
+    public function getBehavior(string $class): RepositoryBehavior
+    {
+        $behavior = $this->getBehaviors()->get($class);
+        if (!$behavior instanceof RepositoryBehavior) {
+            throw new LogicException("getBehavior() was called incorrectly");
+        }
+        return $behavior;
     }
 
     /**

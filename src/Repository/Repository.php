@@ -53,7 +53,7 @@ abstract class Repository
         $this->queryClass = $queryClass;
         $this->behaviors = new RepositoryBehaviors($this, $deps->getScopeContainer());
         $this->setup($this->behaviors);
-        $this->events = $deps->getEvents()->forRepository($this);
+        $this->events = clone $deps->getEvents();
         $this->manager = $deps->getManager();
     }
 

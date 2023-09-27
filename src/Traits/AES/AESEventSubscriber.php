@@ -4,25 +4,27 @@ namespace Efabrica\NetteRepository\Traits\AES;
 
 use Efabrica\NetteRepository\Event\InsertEventResponse;
 use Efabrica\NetteRepository\Event\InsertRepositoryEvent;
+use Efabrica\NetteRepository\Event\RepositoryEvent;
 use Efabrica\NetteRepository\Event\SelectQueryEvent;
 use Efabrica\NetteRepository\Event\SelectQueryResponse;
 use Efabrica\NetteRepository\Event\UpdateQueryEvent;
 use Efabrica\NetteRepository\Repository\Repository;
+use Efabrica\NetteRepository\Repository\RepositoryBehaviors;
 use Efabrica\NetteRepository\Subscriber\EventSubscriber;
 use Nette\Database\Row;
 use Nette\Database\Table\ActiveRow;
 
 final class AESEventSubscriber extends EventSubscriber
 {
-    public function supportsRepository(Repository $repository): bool
+    public function supportsEvent(RepositoryEvent $event): bool
     {
-        return $repository->behaviors()->has(AESBehavior::class);
+        return $event->hasBehavior(AESBehavior::class);
     }
 
     public function onSelect(SelectQueryEvent $event): SelectQueryResponse
     {
         /** @var AESBehavior $behavior */
-        $behavior = $event->getBehaviors()->get(AESBehavior::class);
+        $behavior = $event->getBehavior(AESBehavior::class);
         $repository = $event->getRepository();
         $selectParts = [$repository->getTableName() . '.*'];
         foreach ($behavior->encryptedFields() as $field) {

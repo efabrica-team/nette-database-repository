@@ -6,10 +6,12 @@ use Efabrica\IrisClient\IrisUser;
 use Efabrica\NetteRepository\Event\DeleteQueryEvent;
 use Efabrica\NetteRepository\Event\InsertEventResponse;
 use Efabrica\NetteRepository\Event\InsertRepositoryEvent;
+use Efabrica\NetteRepository\Event\RepositoryEvent;
 use Efabrica\NetteRepository\Event\UpdateQueryEvent;
 use Efabrica\NetteRepository\Model\Entity;
 use Efabrica\NetteRepository\Repository\Query;
 use Efabrica\NetteRepository\Repository\Repository;
+use Efabrica\NetteRepository\Repository\RepositoryBehaviors;
 use Efabrica\NetteRepository\Repository\RepositoryManager;
 use Efabrica\NetteRepository\Subscriber\EventSubscriber;
 use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteQueryEvent;
@@ -43,9 +45,9 @@ class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscr
         return $this->versionRepository ??= $this->repositoryManager->byTableName(self::TableName);
     }
 
-    public function supportsRepository(Repository $repository): bool
+    public function supportsEvent(RepositoryEvent $event): bool
     {
-        return $repository->behaviors()->has(VersionBehavior::class);
+        return $event->hasBehavior(VersionBehavior::class);
     }
 
     /**
@@ -60,9 +62,9 @@ class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscr
         ])->order('created_at DESC')->limit($limit, $offset);
     }
 
-    /********************************************************************\
-     * | After/before methods
-     * \********************************************************************/
+    /*********************************************************************\
+     * After/before methods
+     * *******************************************************************/
 
     public function onInsert(InsertRepositoryEvent $event): InsertEventResponse
     {

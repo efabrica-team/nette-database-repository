@@ -4,17 +4,18 @@ namespace Efabrica\NetteRepository\Traits\Date;
 
 use Efabrica\NetteRepository\Event\InsertEventResponse;
 use Efabrica\NetteRepository\Event\InsertRepositoryEvent;
+use Efabrica\NetteRepository\Event\RepositoryEvent;
 use Efabrica\NetteRepository\Event\UpdateQueryEvent;
-use Efabrica\NetteRepository\Repository\Repository;
+use Efabrica\NetteRepository\Repository\RepositoryBehaviors;
 use Efabrica\NetteRepository\Subscriber\EventSubscriber;
 use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteQueryEvent;
 use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteSubscriber;
 
 final class DateEventSubscriber extends EventSubscriber implements SoftDeleteSubscriber
 {
-    public function supportsRepository(Repository $repository): bool
+    public function supportsEvent(RepositoryEvent $event): bool
     {
-        return $repository->behaviors()->has(DateBehavior::class);
+        return $event->hasBehavior(DateBehavior::class);
     }
 
     public function onInsert(InsertRepositoryEvent $event): InsertEventResponse

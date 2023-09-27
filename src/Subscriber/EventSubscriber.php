@@ -5,28 +5,22 @@ namespace Efabrica\NetteRepository\Subscriber;
 use Efabrica\NetteRepository\Event\DeleteQueryEvent;
 use Efabrica\NetteRepository\Event\InsertEventResponse;
 use Efabrica\NetteRepository\Event\InsertRepositoryEvent;
+use Efabrica\NetteRepository\Event\RepositoryEvent;
 use Efabrica\NetteRepository\Event\SelectQueryEvent;
 use Efabrica\NetteRepository\Event\SelectQueryResponse;
 use Efabrica\NetteRepository\Event\UpdateQueryEvent;
 use Efabrica\NetteRepository\Model\Entity;
 use Efabrica\NetteRepository\Repository\Repository;
+use Efabrica\NetteRepository\Repository\RepositoryBehaviors;
 use Efabrica\NetteRepository\Subscriber\Inline\DeleteEventSubscriber;
 use Efabrica\NetteRepository\Subscriber\Inline\InsertEventSubscriber;
 use Efabrica\NetteRepository\Subscriber\Inline\SelectEventSubscriber;
 use Efabrica\NetteRepository\Subscriber\Inline\UpdateEventSubscriber;
+use Efabrica\NetteRepository\Traits\Date\DateBehavior;
 
 abstract class EventSubscriber implements InsertEventSubscriber, UpdateEventSubscriber, DeleteEventSubscriber, SelectEventSubscriber
 {
-    /**
-     * [!] Do keep in mind that this method is ran only once, when the repository is created.
-     * @param Repository $repository
-     * @return bool should the event subscriber be used for this repository?
-     * @see RepositoryEventSubscribers::forRepository()
-     */
-    public function supportsRepository(Repository $repository): bool
-    {
-        return true;
-    }
+    abstract public function supportsEvent(RepositoryEvent $event): bool;
 
     /**
      * @return InsertEventResponse returned by $event->handle() or $event->stopPropagation()

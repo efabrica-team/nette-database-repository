@@ -4,14 +4,15 @@ namespace Efabrica\NetteRepository\Traits\DefaultValue;
 
 use Efabrica\NetteRepository\Event\InsertEventResponse;
 use Efabrica\NetteRepository\Event\InsertRepositoryEvent;
-use Efabrica\NetteRepository\Repository\Repository;
+use Efabrica\NetteRepository\Event\RepositoryEvent;
+use Efabrica\NetteRepository\Repository\RepositoryBehaviors;
 use Efabrica\NetteRepository\Subscriber\EventSubscriber;
 
 final class DefaultValueEventSubscriber extends EventSubscriber
 {
-    public function supportsRepository(Repository $repository): bool
+    public function supportsEvent(RepositoryEvent $event): bool
     {
-        return $repository->behaviors()->has(DefaultValueBehavior::class);
+        return $event->hasBehavior(DefaultValueBehavior::class);
     }
 
     public function onInsert(InsertRepositoryEvent $event): InsertEventResponse

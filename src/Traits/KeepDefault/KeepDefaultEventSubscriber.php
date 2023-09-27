@@ -8,23 +8,23 @@ use Efabrica\NetteRepository\Event\InsertRepositoryEvent;
 use Efabrica\NetteRepository\Event\RepositoryEvent;
 use Efabrica\NetteRepository\Event\UpdateQueryEvent;
 use Efabrica\NetteRepository\Model\Entity;
-use Efabrica\NetteRepository\Repository\Repository;
+use Efabrica\NetteRepository\Repository\RepositoryBehaviors;
 use Efabrica\NetteRepository\Subscriber\EventSubscriber;
 use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteQueryEvent;
 use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteSubscriber;
 
 final class KeepDefaultEventSubscriber extends EventSubscriber implements SoftDeleteSubscriber
 {
-    public function supportsRepository(Repository $repository): bool
+    public function supportsEvent(RepositoryEvent $event): bool
     {
-        return $repository->behaviors()->has(KeepDefaultBehavior::class);
+        return $event->hasBehavior(KeepDefaultBehavior::class);
     }
 
     private function ensureDefault(RepositoryEvent $event): void
     {
         $repository = $event->getRepository();
         /** @var KeepDefaultBehavior $behavior */
-        $behavior = $event->getBehaviors()->get(KeepDefaultBehavior::class);
+        $behavior = $event->getBehavior(KeepDefaultBehavior::class);
         $defaultField = $behavior->getField();
         $query = $behavior->getQuery() ?? $repository->query();
 

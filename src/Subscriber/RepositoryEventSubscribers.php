@@ -3,6 +3,7 @@
 namespace Efabrica\NetteRepository\Subscriber;
 
 use ArrayIterator;
+use Efabrica\NetteRepository\Event\InitialRepositoryEvent;
 use Efabrica\NetteRepository\Repository\Repository;
 use IteratorAggregate;
 use Traversable;
@@ -29,8 +30,9 @@ final class RepositoryEventSubscribers implements IteratorAggregate
     {
         $events = clone $this;
         $repository = $repository->scopeFull();
+        $event = new InitialRepositoryEvent($repository);
         foreach ($events->subscribers as $key => $subscriber) {
-            if (!$subscriber->supportsRepository($repository)) {
+            if (!$subscriber->supportsEvent($event)) {
                 unset($events->subscribers[$key]);
             }
         }

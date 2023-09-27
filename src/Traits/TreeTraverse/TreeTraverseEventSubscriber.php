@@ -5,17 +5,19 @@ namespace Efabrica\NetteRepository\Traits\TreeTraverse;
 use Efabrica\NetteRepository\Event\DeleteQueryEvent;
 use Efabrica\NetteRepository\Event\InsertEventResponse;
 use Efabrica\NetteRepository\Event\InsertRepositoryEvent;
+use Efabrica\NetteRepository\Event\RepositoryEvent;
 use Efabrica\NetteRepository\Event\UpdateQueryEvent;
 use Efabrica\NetteRepository\Repository\Repository;
+use Efabrica\NetteRepository\Repository\RepositoryBehaviors;
 use Efabrica\NetteRepository\Subscriber\EventSubscriber;
 use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteQueryEvent;
 use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteSubscriber;
 
 class TreeTraverseEventSubscriber extends EventSubscriber implements SoftDeleteSubscriber
 {
-    public function supportsRepository(Repository $repository): bool
+    public function supportsEvent(RepositoryEvent $event): bool
     {
-        return $repository->behaviors()->has(TreeTraverseBehavior::class);
+        return $event->hasBehavior(TreeTraverseBehavior::class);
     }
 
     public function onInsert(InsertRepositoryEvent $event): InsertEventResponse

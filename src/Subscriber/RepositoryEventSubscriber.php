@@ -5,6 +5,7 @@ namespace Efabrica\NetteRepository\Subscriber;
 use Efabrica\NetteRepository\Event\DeleteQueryEvent;
 use Efabrica\NetteRepository\Event\InsertEventResponse;
 use Efabrica\NetteRepository\Event\InsertRepositoryEvent;
+use Efabrica\NetteRepository\Event\RepositoryEvent;
 use Efabrica\NetteRepository\Event\SelectQueryEvent;
 use Efabrica\NetteRepository\Event\SelectQueryResponse;
 use Efabrica\NetteRepository\Event\UpdateQueryEvent;
@@ -18,8 +19,9 @@ use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteSubscriber;
 
 class RepositoryEventSubscriber extends EventSubscriber implements SoftDeleteSubscriber
 {
-    public function supportsRepository(Repository $repository): bool
+    public function supportsEvent(RepositoryEvent $event): bool
     {
+        $repository = $event->getRepository();
         return $repository instanceof InsertEventSubscriber
             || $repository instanceof UpdateEventSubscriber
             || $repository instanceof DeleteEventSubscriber

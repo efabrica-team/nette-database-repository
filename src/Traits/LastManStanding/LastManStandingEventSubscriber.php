@@ -4,7 +4,7 @@ namespace Efabrica\NetteRepository\Traits\LastManStanding;
 
 use Efabrica\NetteRepository\Event\DeleteQueryEvent;
 use Efabrica\NetteRepository\Event\RepositoryEvent;
-use Efabrica\NetteRepository\Repository\Repository;
+use Efabrica\NetteRepository\Repository\RepositoryBehaviors;
 use Efabrica\NetteRepository\Subscriber\EventSubscriber;
 use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteQueryEvent;
 use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteSubscriber;
@@ -12,9 +12,9 @@ use LogicException;
 
 final class LastManStandingEventSubscriber extends EventSubscriber implements SoftDeleteSubscriber
 {
-    public function supportsRepository(Repository $repository): bool
+    public function supportsEvent(RepositoryEvent $event): bool
     {
-        return $repository->behaviors()->has(LastManStandingBehavior::class);
+        return $event->hasBehavior(LastManStandingBehavior::class);
     }
 
     private function ensureLastMan(RepositoryEvent $event): void
