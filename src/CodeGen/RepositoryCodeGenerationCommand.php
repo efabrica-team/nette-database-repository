@@ -34,7 +34,7 @@ class RepositoryCodeGenerationCommand extends Command
 
     public function __construct(string $appDir, array $config, EntityStructureFactory $structureFactory, Structure $structure)
     {
-        parent::__construct('repository:code-gen');
+        parent::__construct('ndr:code-gen');
         $this->inflector = InflectorFactory::create()->build();
         $this->appDir = $appDir;
         $this->repoDir = 'modules/Core';

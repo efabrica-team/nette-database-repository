@@ -38,9 +38,9 @@ trait QueryTrait
         if (is_array($data)) {
             if (Arrays::isList($data)) {
                 $data = array_map(fn($row) => $row instanceof Entity ? $row :
-                    $this->repository->create($row, $this), $data);
+                    $this->repository->createRow($row, $this), $data);
             } else {
-                $data = [$this->repository->create($data, $this)];
+                $data = [$this->repository->createRow($data, $this)];
             }
         } elseif ($data instanceof Entity) {
             $data = [$data];
@@ -232,12 +232,12 @@ trait QueryTrait
 
     protected function doesEvents(): bool
     {
-        return $this->behaviors->isScope(RawScope::class);
+        return !$this->behaviors->isScope(RawScope::class);
     }
 
     protected function createRow(array $row = []): Entity
     {
-        return $this->repository->create($row, $this);
+        return $this->repository->createRow($row, $this);
     }
 
     public function getScope(): Scope

@@ -26,7 +26,7 @@ symfonyConsoleApp:
 Finally, you can run the repository code generation command to generate the necessary classes and files:
 
 ```sh
-$ php bin/console repository:code-gen
+$ php bin/console ndr:code-gen
 ```
 
 ## Usage
@@ -112,7 +112,7 @@ The active Scope is passed down from Repository to Query and from Query down to 
 `->scopeRaw()` returns a clone of the object with raw scope. Raw scope removes all behaviors.
 
 `->scopeFull()` returns a clone of the object with full scope. Full scope keeps all behaviors. 
-This is the default scope, unless you change the scope in setup() method.
+This is the default scope, unless you change the scope in repository's setup() method.
 
 #### Example
 
@@ -193,6 +193,11 @@ $repository->query()->scopeAdmin()->where('age > ?', 18)->fetchAll();
 
 Code generation is fully optional, but it is recommended to use it.
 
+>To run the code generation, use this command:
+>```sh
+>$ php bin/console ndr:code-gen
+>```
+
 For every table in the database, it will generate these classes in the `/Generated/` namespace: (Example: `person` table)
 
 - `Repository\Generated\Repository\PersonRepositoryBase` - Repository base class, holds typehints for `PersonQuery` and `Person` entity. (
@@ -212,7 +217,9 @@ exist. If they exist, they will not be overwritten:
 These classes are **not regenerated** when you run the code generator. They are meant to be customized by you. If you want to regenerate
 them, you have to delete them first.
 
-### Behaviors and Traits
+
+
+## Behaviors and Traits
 
 #### DateBehavior
 

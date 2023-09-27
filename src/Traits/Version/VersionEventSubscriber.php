@@ -129,7 +129,7 @@ class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscr
         $primary = $entity->getPrimary();
         assert(is_scalar($primary));
 
-        $version = $this->getVersionRepository()->create();
+        $version = $this->getVersionRepository()->createRow();
         $version->foreign_id = (string)$primary;
         $version->foreign_table = $entity->getTableName();
         $version->old_data = Json::encode($oldData);
@@ -191,7 +191,7 @@ class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscr
             return $existing;
         }
 
-        $entity = $this->getVersionRepository()->create();
+        $entity = $this->getVersionRepository()->createRow();
         $entity->foreign_id = $foreignId;
         $entity->foreign_table = $table;
         $entity->flag = 'update';

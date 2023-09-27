@@ -168,7 +168,7 @@ abstract class Repository
         if ($entity instanceof Entity) {
             return $entity;
         }
-        return $this->create($conditions + $newValues)->save();
+        return $this->createRow($conditions + $newValues)->save();
     }
 
     /**
@@ -183,7 +183,7 @@ abstract class Repository
         if ($entity instanceof Entity) {
             return $entity;
         }
-        return $this->create($conditions + $newValues);
+        return $this->createRow($conditions + $newValues);
     }
 
     /********************************
@@ -233,7 +233,7 @@ abstract class Repository
             $entity->update($newValues);
             return $entity;
         }
-        return $this->create($where + $newValues)->save();
+        return $this->createRow($where + $newValues)->save();
     }
 
     /**
@@ -371,12 +371,12 @@ abstract class Repository
     /**
      * @return E
      */
-    public function create(array $row = [], ?QueryInterface $query = null): Entity
+    public function createRow(array $row = [], ?QueryInterface $query = null): Entity
     {
         $class = $this->entityClass;
-        $entity = new $class($row, $query ?? $this->query());
-        $events = $query !== null ? $query->getEvents() : $this->getEvents();
-        foreach ($events as $event) {
+        $query ??= $this->query();
+        $entity = new $class($row, $query);
+        foreach ($query->getEvents() as $event) {
             $event->onLoad($entity, $this);
         }
         return $entity;
