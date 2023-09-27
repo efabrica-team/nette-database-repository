@@ -2,15 +2,15 @@
 
 namespace Efabrica\NetteRepository\Subscriber;
 
+use ArrayIterator;
 use Efabrica\NetteRepository\Repository\Repository;
-use Generator;
 use IteratorAggregate;
 
 /**
  * @implements IteratorAggregate<EventSubscriber>
  * @immutable
  */
-final class RepositoryEvents implements IteratorAggregate
+final class RepositoryEventSubscribers implements IteratorAggregate
 {
     /**
      * @var array<class-string<EventSubscriber>, EventSubscriber>
@@ -37,11 +37,11 @@ final class RepositoryEvents implements IteratorAggregate
     }
 
     /**
-     * @return Generator<EventSubscriber>
+     * @return iterable<EventSubscriber>
      */
-    public function getIterator(): Generator
+    public function getIterator(): iterable
     {
-        yield from $this->subscribers;
+        return new ArrayIterator($this->subscribers);
     }
 
     /**

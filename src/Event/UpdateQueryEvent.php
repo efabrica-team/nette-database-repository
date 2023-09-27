@@ -8,10 +8,11 @@ class UpdateQueryEvent extends QueryEvent
 {
     public function handle(array &$data): int
     {
-        $subscriber = current($this->subscribers);
-        next($this->subscribers);
-        if ($subscriber instanceof EventSubscriber) {
-            return $subscriber->onUpdate($this, $data);
+        while ($subscriber = current($this->subscribers)) {
+            next($this->subscribers);
+            if ($subscriber->supportsRepository($this->getRepository())) {
+                return $subscriber->onUpdate($this, $data);
+            }
         }
         return (clone $this->query)->scopeRaw()->update($data);
     }

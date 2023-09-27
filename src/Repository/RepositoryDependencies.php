@@ -4,7 +4,7 @@ namespace Efabrica\NetteRepository\Repository;
 
 use Efabrica\NetteRepository\Repository\Scope\ScopeContainer;
 use Efabrica\NetteRepository\Subscriber\EventSubscriber;
-use Efabrica\NetteRepository\Subscriber\RepositoryEvents;
+use Efabrica\NetteRepository\Subscriber\RepositoryEventSubscribers;
 use Nette\Database\Explorer;
 use Nette\DI\Container;
 
@@ -12,7 +12,7 @@ final class RepositoryDependencies
 {
     private Explorer $explorer;
 
-    private RepositoryEvents $events;
+    private RepositoryEventSubscribers $events;
 
     private RepositoryManager $repositoryManager;
 
@@ -29,7 +29,7 @@ final class RepositoryDependencies
                 $subscribers[] = $eventSubscriber;
             }
         }
-        $this->events = new RepositoryEvents(...$subscribers);
+        $this->events = new RepositoryEventSubscribers(...$subscribers);
         $this->repositoryManager = $repositoryManager;
         $this->scopeContainer = $scopeContainer;
     }
@@ -39,7 +39,7 @@ final class RepositoryDependencies
         return $this->explorer;
     }
 
-    public function getEvents(): RepositoryEvents
+    public function getEvents(): RepositoryEventSubscribers
     {
         return $this->events;
     }

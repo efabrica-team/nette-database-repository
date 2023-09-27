@@ -10,7 +10,7 @@ use Efabrica\NetteRepository\Model\Entity;
 use Efabrica\NetteRepository\Repository\Scope\FullScope;
 use Efabrica\NetteRepository\Repository\Scope\RawScope;
 use Efabrica\NetteRepository\Repository\Scope\Scope;
-use Efabrica\NetteRepository\Subscriber\RepositoryEvents;
+use Efabrica\NetteRepository\Subscriber\RepositoryEventSubscribers;
 use Generator;
 use LogicException;
 use Nette\Database\Table\ActiveRow;
@@ -220,7 +220,7 @@ trait QueryTrait
         return $this->repository;
     }
 
-    public function getEvents(): RepositoryEvents
+    public function getEvents(): RepositoryEventSubscribers
     {
         return $this->repository->getEvents();
     }

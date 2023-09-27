@@ -21,7 +21,7 @@ abstract class EventSubscriber implements InsertEventSubscriber, UpdateEventSubs
      * [!] Do keep in mind that this method is ran only once, when the repository is created.
      * @param Repository $repository
      * @return bool should the event subscriber be used for this repository?
-     * @see RepositoryEvents::forRepository()
+     * @see RepositoryEventSubscribers::forRepository()
      */
     public function supportsRepository(Repository $repository): bool
     {

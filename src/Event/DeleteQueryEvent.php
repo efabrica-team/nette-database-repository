@@ -8,10 +8,11 @@ class DeleteQueryEvent extends QueryEvent
 {
     public function handle(): int
     {
-        $subscriber = current($this->subscribers);
-        next($this->subscribers);
-        if ($subscriber instanceof EventSubscriber) {
-            return $subscriber->onDelete($this);
+        while ($subscriber = current($this->subscribers)) {
+            next($this->subscribers);
+            if ($subscriber->supportsRepository($this->getRepository())) {
+                return $subscriber->onDelete($this);
+            }
         }
         return (clone $this->query)->scopeRaw()->delete();
     }

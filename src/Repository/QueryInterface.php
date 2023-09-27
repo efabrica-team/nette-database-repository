@@ -6,7 +6,7 @@ use ArrayAccess;
 use Countable;
 use Efabrica\NetteRepository\Model\Entity;
 use Efabrica\NetteRepository\Repository\Scope\Scope;
-use Efabrica\NetteRepository\Subscriber\RepositoryEvents;
+use Efabrica\NetteRepository\Subscriber\RepositoryEventSubscribers;
 use Generator;
 use Iterator;
 use Nette\Database\Table\ActiveRow;
@@ -69,7 +69,7 @@ interface QueryInterface extends Iterator, Countable, ArrayAccess
 
     public function getRepository(): Repository;
 
-    public function getEvents(): RepositoryEvents;
+    public function getEvents(): RepositoryEventSubscribers;
 
     public function getBehaviors(): RepositoryBehaviors;
 

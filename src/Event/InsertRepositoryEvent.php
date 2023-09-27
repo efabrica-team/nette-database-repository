@@ -30,10 +30,11 @@ class InsertRepositoryEvent extends RepositoryEvent
 
     public function handle(): InsertEventResponse
     {
-        $subscriber = current($this->subscribers);
-        next($this->subscribers);
-        if ($subscriber instanceof EventSubscriber) {
-            return $subscriber->onInsert($this);
+        while ($subscriber = current($this->subscribers)) {
+            next($this->subscribers);
+            if ($subscriber->supportsRepository($this->getRepository())) {
+                return $subscriber->onInsert($this);
+            }
         }
         $entities = [];
         foreach ($this->entities as $entity) {
