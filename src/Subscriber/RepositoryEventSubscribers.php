@@ -5,6 +5,7 @@ namespace Efabrica\NetteRepository\Subscriber;
 use ArrayIterator;
 use Efabrica\NetteRepository\Repository\Repository;
 use IteratorAggregate;
+use Traversable;
 
 /**
  * @implements IteratorAggregate<EventSubscriber>
@@ -37,9 +38,9 @@ final class RepositoryEventSubscribers implements IteratorAggregate
     }
 
     /**
-     * @return iterable<EventSubscriber>
+     * @return Traversable<EventSubscriber>
      */
-    public function getIterator(): iterable
+    public function getIterator(): Traversable
     {
         return new ArrayIterator($this->subscribers);
     }
