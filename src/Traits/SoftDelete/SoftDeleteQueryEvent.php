@@ -30,6 +30,6 @@ class SoftDeleteQueryEvent extends UpdateQueryEvent
         if ($subscriber instanceof SoftDeleteSubscriber) {
             return $subscriber->onSoftDelete($this, $data);
         }
-        return $this->query->getRepository()->query()->scopeRaw()->update($data);
+        return $this->query->scopeRaw()->update($data);
     }
 }
