@@ -12,7 +12,7 @@ class DeleteQueryEvent extends QueryEvent
                 return $subscriber->onDelete($this);
             }
         }
-        return (clone $this->query)->scopeRaw()->delete();
+        return $this->query->scopeRaw()->delete();
     }
 
     public function stopPropagation(): int

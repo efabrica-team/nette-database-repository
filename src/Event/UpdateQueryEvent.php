@@ -12,7 +12,7 @@ class UpdateQueryEvent extends QueryEvent
                 return $subscriber->onUpdate($this, $data);
             }
         }
-        return (clone $this->query)->scopeRaw()->update($data);
+        return $this->query->scopeRaw()->update($data);
     }
 
     public function stopPropagation(): int
