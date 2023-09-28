@@ -171,7 +171,7 @@ class RepositoryBehaviors
      */
     public function isScope(string $class): bool
     {
-        $scope = $this;
+        $scope = $this->scope;
         while ($scope instanceof ScopeContainer) {
             if ($scope instanceof $class) {
                 return true;

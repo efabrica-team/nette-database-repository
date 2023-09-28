@@ -4,6 +4,7 @@ namespace Efabrica\NetteRepository\Event;
 
 use Efabrica\NetteRepository\Model\Entity;
 use Efabrica\NetteRepository\Repository\Repository;
+use LogicException;
 use Nette\Database\Table\ActiveRow;
 use Traversable;
 
@@ -13,13 +14,13 @@ use Traversable;
 class InsertRepositoryEvent extends RepositoryEvent
 {
     /**
-     * @var Entity[]
+     * @var iterable<Entity> (can be array or Selection)
      */
-    private array $entities;
+    private iterable $entities;
 
     /**
      * @param Repository $repository
-     * @param Entity[] $entities
+     * @param iterable<Entity>   $entities
      */
     public function __construct(Repository $repository, iterable $entities)
     {
@@ -39,15 +40,23 @@ class InsertRepositoryEvent extends RepositoryEvent
         foreach ($this->entities as $entity) {
             $entities[] = $entity->toArray();
         }
-        return $this->stopPropagation(
-            $this->getRepository()->rawQuery()->insert($entities)
-        );
+
+        $result = $this->getRepository()->rawQuery()->insert($entities);
+        if ($result instanceof Entity) {
+            $this->entities = [$result];
+        } elseif (is_int($result)) {
+            $this->entities = $this->getRepository()->rawQuery()->whereRows(...$entities);
+        } else {
+            throw new LogicException('Insert query must return entity or int, returned ' . gettype($result));
+        }
+
+        return $this->stopPropagation($result);
     }
 
     /**
-     * @return Entity[]
+     * @return iterable<Entity>
      */
-    public function getEntities(): array
+    public function getEntities(): iterable
     {
         return $this->entities;
     }
@@ -68,10 +77,9 @@ class InsertRepositoryEvent extends RepositoryEvent
     }
 
     /**
-     * @param bool|int|ActiveRow|null $response
-     * @return InsertEventResponse
+     * @param bool|int|ActiveRow $response
      */
-    public function stopPropagation($response = null): InsertEventResponse
+    public function stopPropagation($response = false): InsertEventResponse
     {
         $this->subscribers = [];
         return new InsertEventResponse($this, $response);

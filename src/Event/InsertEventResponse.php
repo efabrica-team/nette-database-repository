@@ -6,11 +6,14 @@ use Nette\Database\Table\ActiveRow;
 
 final class InsertEventResponse extends RepositoryEventResponse
 {
+    /**
+     * @var bool|int|ActiveRow
+     */
     private $return;
 
     /**
      * @param RepositoryEvent    $event
-     * @param bool|int|ActiveRow|null $return
+     * @param bool|int|ActiveRow $return
      */
     public function __construct(RepositoryEvent $event, $return)
     {
@@ -23,6 +26,6 @@ final class InsertEventResponse extends RepositoryEventResponse
      */
     public function getReturn()
     {
-        return $this->return ?? false;
+        return $this->return;
     }
 }
