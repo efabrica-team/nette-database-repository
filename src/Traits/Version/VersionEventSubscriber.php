@@ -2,6 +2,7 @@
 
 namespace Efabrica\NetteRepository\Traits\Version;
 
+use DateTimeImmutable;
 use Efabrica\IrisClient\IrisUser;
 use Efabrica\NetteRepository\Event\DeleteQueryEvent;
 use Efabrica\NetteRepository\Event\InsertEventResponse;
@@ -138,6 +139,7 @@ class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscr
         $version->flag = $flag;
         $version->transaction_id = $this->transactionId;
         $version->linked_id = $recordToLink->id ?? null;
+        $version->created_at = new \DateTimeImmutable();
         return $version;
     }
 
@@ -192,14 +194,13 @@ class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscr
             return $existing;
         }
 
-        $entity = $this->getVersionRepository()->createRow();
-        $entity->foreign_id = $foreignId;
-        $entity->foreign_table = $table;
-        $entity->flag = 'update';
-        $entity->transaction_id = $this->transactionId;
-        $entity->linked_id = $recordToLink->id ?? null;
-        $entity->created_at = new \DateTimeImmutable();
-        $this->getVersionRepository()->insert($entity);
-        return $entity;
+        $version = $this->getVersionRepository()->createRow();
+        $version->foreign_id = $foreignId;
+        $version->foreign_table = $table;
+        $version->flag = 'update';
+        $version->transaction_id = $this->transactionId;
+        $version->linked_id = $recordToLink->id ?? null;
+        $version->created_at = new DateTimeImmutable();
+        return $version->save();
     }
 }
