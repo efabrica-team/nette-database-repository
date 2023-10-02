@@ -70,7 +70,7 @@ class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscr
         $result = $event->handle();
         $versions = [];
         foreach ($event->getEntities() as $entity) {
-            $versions[] = $this->insertVersion($entity, [], 'create');
+            $versions[] = $this->createVersion($entity, $entity->toArray(), 'create');
         }
         $this->getVersionRepository()->insert(...$versions);
         return $result;
@@ -78,21 +78,21 @@ class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscr
 
     public function onUpdate(UpdateQueryEvent $event, array &$data): int
     {
-        $entities = $event->getQuery()->fetchAll();
-        $result = $event->handle($data);
-        foreach ($entities as $entity) {
-            $this->insertVersion($entity, $data, 'update');
+        $versions = [];
+        foreach ($event->getEntities() as $entity) {
+            $versions[] = $this->createVersion($entity, $entity->fill($data)->diff(), 'update');
         }
+        $result = $event->handle($data);
+        $this->getVersionRepository()->insert(...$versions);
         return $result;
     }
 
     public function onDelete(DeleteQueryEvent $event): int
     {
-        $entities = $event->getQuery()->fetchAll();
         $result = $event->handle();
         $versions = [];
-        foreach ($entities as $entity) {
-            $versions[] = $this->insertVersion($entity, [], 'delete');
+        foreach ($event->getEntities() as $entity) {
+            $versions[] = $this->createVersion($entity, [], 'delete');
         }
         $this->getVersionRepository()->insert(...$versions);
         return $result;
@@ -104,7 +104,7 @@ class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscr
         $result = $event->handle($data);
         $versions = [];
         foreach ($entities as $entity) {
-            $versions[] = $this->insertVersion($entity, $data, 'soft-delete');
+            $versions[] = $this->createVersion($entity, $data, 'soft-delete');
         }
         $this->getVersionRepository()->insert(...$versions);
         return $result;
@@ -114,7 +114,7 @@ class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscr
      * | Protected methods
      * \********************************************************************/
 
-    protected function insertVersion(Entity $entity, array $newData, string $flag): Version
+    protected function createVersion(Entity $entity, array $newData, string $flag): Version
     {
         $oldData = [];
         if ($flag === 'update') {
@@ -198,6 +198,7 @@ class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscr
         $entity->flag = 'update';
         $entity->transaction_id = $this->transactionId;
         $entity->linked_id = $recordToLink->id ?? null;
+        $entity->created_at = new \DateTimeImmutable();
         $this->getVersionRepository()->insert($entity);
         return $entity;
     }
