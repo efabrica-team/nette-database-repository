@@ -19,6 +19,7 @@ use Efabrica\NetteRepository\Traits\Date\DateBehavior;
 use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteQueryEvent;
 use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteSubscriber;
 use Nette\Utils\Json;
+use SplObjectStorage;
 
 class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscriber
 {
@@ -89,11 +90,16 @@ class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscr
 
     public function onUpdate(UpdateQueryEvent $event, array &$data): int
     {
-        $versions = [];
+        $entities = new SplObjectStorage();
         foreach ($event->getEntities() as $entity) {
-            $versions[] = $this->createVersion($entity, $entity->fill($data)->diff(), 'update');
+            $entities[$entity] = clone $entity;
         }
         $result = $event->handle($data);
+        $versions = [];
+        foreach ($event->getEntities() as $newEntity) {
+            $oldEntity = $entities[$newEntity];
+            $versions[] = $this->createVersion($oldEntity, (clone $oldEntity)->fill($newEntity)->diff(), 'update');
+        }
         $this->getVersionRepository()->insert(...$versions);
         return $result;
     }

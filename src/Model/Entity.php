@@ -2,6 +2,7 @@
 
 namespace Efabrica\NetteRepository\Model;
 
+use DateTimeInterface;
 use Efabrica\NetteRepository\Repository\Query;
 use Efabrica\NetteRepository\Repository\QueryInterface;
 use Efabrica\NetteRepository\Repository\Repository;
@@ -119,7 +120,13 @@ abstract class Entity extends ActiveRow
      */
     public function __set($column, $value): void
     {
-        if (parent::__isset($column) && parent::__get($column) === $value) {
+        if (parent::__isset($column)) {
+            if ($this->isSameValue(parent::__get($column), $value)) {
+                unset($this->_modified[$column]);
+            } else {
+                $this->_modified[$column] = $value;
+            }
+        } elseif ($value === null) {
             unset($this->_modified[$column]);
         } else {
             $this->_modified[$column] = $value;
@@ -195,5 +202,30 @@ abstract class Entity extends ActiveRow
     public function scopeFull(): self
     {
         return $this->setScope(new FullScope());
+    }
+
+    /**
+     * @param mixed $a
+     * @param mixed $b
+     * @return bool
+     */
+    private function isSameValue($a, $b): bool
+    {
+        return $this->normalizeValue($a) === $this->normalizeValue($b);
+    }
+
+    private function normalizeValue($a)
+    {
+        if (is_bool($a)) {
+            $a = $a ? 1 : 0;
+        } elseif ($a instanceof DateTimeInterface) {
+            $a->format('c');
+        } elseif (is_float($a)) {
+            $a = rtrim(rtrim(number_format($a, 10, '.', ''), '0'), '.');
+        }
+        if (is_int($a)) {
+            $a = (string)$a;
+        }
+        return $a;
     }
 }
