@@ -11,7 +11,7 @@ use Efabrica\NetteRepository\Event\SelectQueryResponse;
 use Efabrica\NetteRepository\Event\UpdateQueryEvent;
 use Efabrica\NetteRepository\Subscriber\EventSubscriber;
 
-final class AccountEventSubscriber extends EventSubscriber
+final class UserOwnedEventSubscriber extends EventSubscriber
 {
     private IrisUser $irisUser;
 
@@ -22,7 +22,7 @@ final class AccountEventSubscriber extends EventSubscriber
 
     public function supportsEvent(RepositoryEvent $event): bool
     {
-        return $event->hasBehavior(AccountBehavior::class);
+        return $event->hasBehavior(UserOwnedBehavior::class);
     }
 
     private function getAccountId(): ?string
@@ -35,8 +35,8 @@ final class AccountEventSubscriber extends EventSubscriber
 
     public function onSelect(SelectQueryEvent $event): SelectQueryResponse
     {
-        /** @var AccountBehavior $behavior */
-        $behavior = $event->getBehavior(AccountBehavior::class);
+        /** @var UserOwnedBehavior $behavior */
+        $behavior = $event->getBehavior(UserOwnedBehavior::class);
         $field = $behavior->getAccountField();
 
         $permissions = $this->irisUser->getByKey('permissions');
@@ -55,8 +55,8 @@ final class AccountEventSubscriber extends EventSubscriber
 
     public function onInsert(InsertRepositoryEvent $event): InsertEventResponse
     {
-        /** @var AccountBehavior $behavior */
-        $behavior = $event->getRepository()->behaviors()->get(AccountBehavior::class);
+        /** @var UserOwnedBehavior $behavior */
+        $behavior = $event->getRepository()->behaviors()->get(UserOwnedBehavior::class);
         $field = $behavior->getAccountField();
 
         $permissions = $this->irisUser->getByKey('permissions');
@@ -75,8 +75,8 @@ final class AccountEventSubscriber extends EventSubscriber
 
     public function onUpdate(UpdateQueryEvent $event, array &$data): int
     {
-        /** @var AccountBehavior $behavior */
-        $behavior = $event->getRepository()->behaviors()->get(AccountBehavior::class);
+        /** @var UserOwnedBehavior $behavior */
+        $behavior = $event->getRepository()->behaviors()->get(UserOwnedBehavior::class);
         $field = $behavior->getAccountField();
 
         if (array_key_exists($field, $data) && empty($data[$field])) {

@@ -4,7 +4,7 @@ namespace Efabrica\NetteRepository\Traits\Account;
 
 use Efabrica\NetteRepository\Traits\RepositoryBehavior;
 
-final class AccountBehavior extends RepositoryBehavior
+final class UserOwnedBehavior extends RepositoryBehavior
 {
     private string $accountField;
 

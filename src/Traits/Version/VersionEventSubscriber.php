@@ -14,6 +14,8 @@ use Efabrica\NetteRepository\Repository\Query;
 use Efabrica\NetteRepository\Repository\Repository;
 use Efabrica\NetteRepository\Repository\RepositoryManager;
 use Efabrica\NetteRepository\Subscriber\EventSubscriber;
+use Efabrica\NetteRepository\Traits\Account\UserOwnedBehavior;
+use Efabrica\NetteRepository\Traits\Date\DateBehavior;
 use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteQueryEvent;
 use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteSubscriber;
 use Nette\Utils\Json;
@@ -42,7 +44,15 @@ class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscr
      */
     private function getVersionRepository(): Repository
     {
-        return $this->versionRepository ??= $this->repositoryManager->byTableName(self::TableName);
+        if ($this->versionRepository === null) {
+            $this->versionRepository = $this->repositoryManager->byTableName(self::TableName);
+            $behaviors = $this->versionRepository->behaviors();
+            if ($behaviors->all() === []) {
+                $behaviors->add(new DateBehavior(Version::CREATED_AT, null));
+                $behaviors->add(new UserOwnedBehavior(Version::USER_ID));
+            }
+        }
+        return $this->versionRepository;
     }
 
     public function supportsEvent(RepositoryEvent $event): bool
@@ -139,7 +149,6 @@ class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscr
         $version->flag = $flag;
         $version->transaction_id = $this->transactionId;
         $version->linked_id = $recordToLink->id ?? null;
-        $version->created_at = new \DateTimeImmutable();
         return $version;
     }
 
@@ -200,7 +209,6 @@ class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscr
         $version->flag = 'update';
         $version->transaction_id = $this->transactionId;
         $version->linked_id = $recordToLink->id ?? null;
-        $version->created_at = new DateTimeImmutable();
         return $version->save();
     }
 }
