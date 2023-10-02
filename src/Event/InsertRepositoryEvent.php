@@ -19,13 +19,13 @@ class InsertRepositoryEvent extends RepositoryEvent
     private iterable $entities;
 
     /**
-     * @param Repository $repository
-     * @param iterable<Entity>   $entities
+     * @param Repository       $repository
+     * @param iterable<Entity> $entities
      */
     public function __construct(Repository $repository, iterable $entities)
     {
         parent::__construct($repository);
-        $this->entities = $entities instanceof Traversable ? iterator_to_array($entities) : $entities;
+        $this->entities = array_values($entities instanceof Traversable ? iterator_to_array($entities) : $entities);
     }
 
     public function handle(): InsertEventResponse
@@ -42,15 +42,7 @@ class InsertRepositoryEvent extends RepositoryEvent
         }
 
         $result = $this->getRepository()->rawQuery()->insert($entities);
-        if ($result instanceof Entity) {
-            $this->entities = [$result];
-        } elseif (is_int($result)) {
-            $this->entities = $this->getRepository()->rawQuery()->whereRows(...$entities);
-        } else {
-            throw new LogicException('Insert query must return entity or int, returned ' . gettype($result));
-        }
-
-        return $this->stopPropagation($result);
+        return $this->stopPropagation($this->updateEntities($result, $entities));
     }
 
     /**
@@ -83,5 +75,26 @@ class InsertRepositoryEvent extends RepositoryEvent
     {
         $this->subscribers = [];
         return new InsertEventResponse($this, $response);
+    }
+
+    /**
+     * @param mixed $result
+     * @return Entity|int
+     */
+    protected function updateEntities($result, array $entities)
+    {
+        if (is_int($result)) {
+            $i = 0;
+            /** @var Entity $newEntity */
+            foreach ($this->getRepository()->rawQuery()->whereRows(...$entities)->fetchChunked() as $newEntity) {
+                $this->entities[$i++]->internalData($newEntity, false);
+            }
+            return $result;
+        }
+        if ($result instanceof Entity) {
+            $this->entities[0]->internalData($result, false);
+            return $this->entities[0];
+        }
+        throw new LogicException('Insert query must return entity or int, returned ' . gettype($result));
     }
 }

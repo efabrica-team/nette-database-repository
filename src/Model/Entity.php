@@ -34,22 +34,32 @@ abstract class Entity extends ActiveRow
      */
     public function save(): self
     {
-        if (!isset(self::$data)) {
-            self::$data = new ReflectionProperty(ActiveRow::class, 'data');
-            self::$data->setAccessible(true);
-        }
-
         $query = $this->_query->getRepository()->query();
         // if entity is new, insert it
-        if (self::$data->getValue($this) === []) {
+        if ($this->internalData() === []) {
             $insert = $query->insert($this->_modified);
             assert($insert instanceof self);
-            self::$data->setValue($this, $insert->toArray());
-            $this->_modified = [];
+            $this->internalData($insert->toArray(), false);
         } else {
             $this->update();
         }
         return $this;
+    }
+
+    /**
+     * @internal
+     */
+    public function internalData(iterable $data = [], bool $merge = true): array
+    {
+        $newData = $merge ? (((array)$this)["\x00" . ActiveRow::class . "\x00data"] ?? []) : [];
+        foreach ($data as $key => $value) {
+            $newData[$key] = $value;
+            unset($this->_modified[$key]);
+        }
+        if (!$merge || $data !== []) {
+            array_walk($this, static fn(&$value, $key) => str_ends_with($key, "\x00data") ? $value = $newData : null);
+        }
+        return $newData;
     }
 
     /**

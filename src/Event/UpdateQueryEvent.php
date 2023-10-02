@@ -12,6 +12,9 @@ class UpdateQueryEvent extends QueryEvent
                 return $subscriber->onUpdate($this, $data);
             }
         }
+        foreach ($this->getEntities() as $entity) {
+            $entity->internalData($data);
+        }
         return $this->query->scopeRaw()->update($data);
     }
 
