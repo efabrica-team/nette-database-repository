@@ -13,7 +13,7 @@ services:
     repoManager: Efabrica\NetteRepository\Repository\RepositoryManager
     scopeContainer: Efabrica\NetteRepository\Repository\Scope\ScopeContainer()
 
-    accountEventSubscriber: Efabrica\NetteRepository\Traits\Account\UserOwnedEventSubscriber
+    userOwnedEventSubscriber: Efabrica\NetteRepository\Traits\Account\AccountEventSubscriber
     aesEventSubscriber: Efabrica\NetteRepository\Traits\AES\AESEventSubscriber
     castEventSubscriber: Efabrica\NetteRepository\Traits\Cast\CastEventSubscriber
     dateEventSubscriber: Efabrica\NetteRepository\Traits\Date\DateEventSubscriber

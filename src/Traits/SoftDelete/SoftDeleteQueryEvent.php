@@ -25,10 +25,11 @@ class SoftDeleteQueryEvent extends UpdateQueryEvent
 
     public function handle(array &$data): int
     {
-        $subscriber = current($this->subscribers);
-        next($this->subscribers);
-        if ($subscriber instanceof SoftDeleteSubscriber) {
-            return $subscriber->onSoftDelete($this, $data);
+        while ($subscriber = current($this->subscribers)) {
+            next($this->subscribers);
+            if ($subscriber instanceof SoftDeleteSubscriber && $subscriber->supportsEvent($this)) {
+                return $subscriber->onSoftDelete($this, $data);
+            }
         }
         return $this->query->scopeRaw()->update($data);
     }

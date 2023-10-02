@@ -11,7 +11,7 @@ use Efabrica\NetteRepository\Event\SelectQueryResponse;
 use Efabrica\NetteRepository\Event\UpdateQueryEvent;
 use Efabrica\NetteRepository\Subscriber\EventSubscriber;
 
-final class UserOwnedEventSubscriber extends EventSubscriber
+final class AccountEventSubscriber extends EventSubscriber
 {
     private IrisUser $irisUser;
 
@@ -22,21 +22,21 @@ final class UserOwnedEventSubscriber extends EventSubscriber
 
     public function supportsEvent(RepositoryEvent $event): bool
     {
-        return $event->hasBehavior(UserOwnedBehavior::class);
+        return $event->hasBehavior(AccountBehavior::class);
     }
 
     private function getAccountId(): ?string
     {
+        bdump($this->irisUser->getAccounts());
         if (count($this->irisUser->getAccounts()) > 0) {
-            return (string)$this->irisUser->getAccounts()[0];
+            return (string)($this->irisUser->getDefaultAccount() ?? $this->irisUser->getAccounts()[0]);
         }
         return null;
     }
 
     public function onSelect(SelectQueryEvent $event): SelectQueryResponse
     {
-        /** @var UserOwnedBehavior $behavior */
-        $behavior = $event->getBehavior(UserOwnedBehavior::class);
+        $behavior = $event->getBehavior(AccountBehavior::class);
         $field = $behavior->getAccountField();
 
         $permissions = $this->irisUser->getByKey('permissions');
@@ -55,11 +55,9 @@ final class UserOwnedEventSubscriber extends EventSubscriber
 
     public function onInsert(InsertRepositoryEvent $event): InsertEventResponse
     {
-        /** @var UserOwnedBehavior $behavior */
-        $behavior = $event->getRepository()->behaviors()->get(UserOwnedBehavior::class);
-        $field = $behavior->getAccountField();
-
+        $field = $event->getBehavior(AccountBehavior::class)->getAccountField();
         $permissions = $this->irisUser->getByKey('permissions');
+
         if (isset($permissions['superuser'])) {
             return $event->handle();
         }
@@ -75,8 +73,8 @@ final class UserOwnedEventSubscriber extends EventSubscriber
 
     public function onUpdate(UpdateQueryEvent $event, array &$data): int
     {
-        /** @var UserOwnedBehavior $behavior */
-        $behavior = $event->getRepository()->behaviors()->get(UserOwnedBehavior::class);
+        /** @var AccountBehavior $behavior */
+        $behavior = $event->getRepository()->behaviors()->get(AccountBehavior::class);
         $field = $behavior->getAccountField();
 
         if (array_key_exists($field, $data) && empty($data[$field])) {

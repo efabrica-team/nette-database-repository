@@ -18,8 +18,7 @@ final class LastManStandingEventSubscriber extends EventSubscriber implements So
 
     private function ensureLastMan(RepositoryEvent $event): void
     {
-        /** @var LastManStandingBehavior $behavior */
-        $behavior = $event->getBehaviors()->get(LastManStandingBehavior::class);
+        $behavior = $event->getBehavior(LastManStandingBehavior::class);
         if ($behavior->getQuery()->count('*') <= 1) {
             throw new LogicException('At least one record must exist in table');
         }

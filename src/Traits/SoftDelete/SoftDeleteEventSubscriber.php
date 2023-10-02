@@ -27,8 +27,7 @@ class SoftDeleteEventSubscriber extends EventSubscriber
 
     public function onDelete(DeleteQueryEvent $event): int
     {
-        /** @var SoftDeleteBehavior $behavior */
-        $behavior = $event->getRepository()->behaviors()->get(SoftDeleteBehavior::class);
+        $behavior = $event->getBehavior(SoftDeleteBehavior::class);
         $data = [$behavior->getColumn() => $behavior->getNewValue()];
         return (new SoftDeleteQueryEvent($event->getQuery()))->handle($data);
     }

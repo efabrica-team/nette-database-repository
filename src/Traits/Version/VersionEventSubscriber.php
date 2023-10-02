@@ -14,8 +14,9 @@ use Efabrica\NetteRepository\Repository\Query;
 use Efabrica\NetteRepository\Repository\Repository;
 use Efabrica\NetteRepository\Repository\RepositoryManager;
 use Efabrica\NetteRepository\Subscriber\EventSubscriber;
-use Efabrica\NetteRepository\Traits\Account\UserOwnedBehavior;
+use Efabrica\NetteRepository\Traits\Account\AccountBehavior;
 use Efabrica\NetteRepository\Traits\Date\DateBehavior;
+use Efabrica\NetteRepository\Traits\Owner\OwnerBehavior;
 use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteQueryEvent;
 use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteSubscriber;
 use Nette\Utils\Json;
@@ -50,7 +51,7 @@ class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscr
             $behaviors = $this->versionRepository->behaviors();
             if ($behaviors->all() === []) {
                 $behaviors->add(new DateBehavior(Version::CREATED_AT, null));
-                $behaviors->add(new UserOwnedBehavior(Version::USER_ID));
+                $behaviors->add(new OwnerBehavior(Version::USER_ID, null));
             }
         }
         return $this->versionRepository;
@@ -141,6 +142,8 @@ class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscr
         } elseif ($flag === 'delete') {
             $oldData = $entity->toArray();
             $newData = [];
+        } elseif ($flag === 'soft-delete') {
+            $oldData = $entity->toArray();
         }
 
         $recordToLink = $this->processLinkedEntries($entity);
