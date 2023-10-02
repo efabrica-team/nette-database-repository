@@ -24,10 +24,10 @@ final class DateEventSubscriber extends EventSubscriber implements SoftDeleteSub
         $createdAt = $behavior->getCreatedAtField();
         $updatedAt = $behavior->getUpdatedAtField();
         foreach ($event->getEntities() as $entity) {
-            if (!isset($entity[$createdAt])) {
+            if (isset($createdAt) && !isset($entity[$createdAt])) {
                 $entity[$createdAt] = $behavior->getNewValue();
             }
-            if (!isset($entity[$updatedAt])) {
+            if (isset($updatedAt) && !isset($entity[$updatedAt])) {
                 $entity[$updatedAt] = $behavior->getNewValue();
             }
         }
@@ -39,7 +39,7 @@ final class DateEventSubscriber extends EventSubscriber implements SoftDeleteSub
         /** @var DateBehavior $behavior */
         $behavior = $event->getBehaviors()->get(DateBehavior::class);
         $updatedAt = $behavior->getUpdatedAtField();
-        if (!isset($data[$updatedAt])) {
+        if (isset($updatedAt) && !isset($data[$updatedAt])) {
             $data[$updatedAt] = $behavior->getNewValue();
         }
         return $event->handle($data);
