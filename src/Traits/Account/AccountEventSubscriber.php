@@ -74,7 +74,7 @@ final class AccountEventSubscriber extends EventSubscriber
     public function onUpdate(UpdateQueryEvent $event, array &$data): int
     {
         /** @var AccountBehavior $behavior */
-        $behavior = $event->getRepository()->behaviors()->get(AccountBehavior::class);
+        $behavior = $event->getRepository()->getBehaviors()->get(AccountBehavior::class);
         $field = $behavior->getAccountField();
 
         if (array_key_exists($field, $data) && empty($data[$field])) {

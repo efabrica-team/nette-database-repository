@@ -104,7 +104,7 @@ class EntityStructureFactory
             /** @var Repository $repo */
             $repo = $this->container->getByName(ModuleWriter::getRepoServiceName($structure));
             if ($repo instanceof Repository) {
-                foreach ($repo->behaviors()->all() as $behavior) {
+                foreach ($repo->getBehaviors()->all() as $behavior) {
                     if ($behavior instanceof CastBehavior) {
                         foreach ($behavior->getFields() as $field) {
                             $casts[$field] = $behavior->getCastType();

@@ -48,7 +48,7 @@ class TreeTraverseEventSubscriber extends EventSubscriber implements SoftDeleteS
     protected function onTreeStructure(Repository $repository): void
     {
         /** @var TreeTraverseBehavior $behavior */
-        $behavior = $repository->behaviors()->get(TreeTraverseBehavior::class);
+        $behavior = $repository->getBehaviors()->get(TreeTraverseBehavior::class);
         $order = $behavior->getSortingColumn();
         $select = 'id, ' . $behavior->getParentColumn() . ', ' . $order;
 

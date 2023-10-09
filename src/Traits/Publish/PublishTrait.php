@@ -16,7 +16,7 @@ trait PublishTrait
     public function publish($entity): int
     {
         /** @var PublishBehavior $publishBehavior */
-        $publishBehavior = $this->behaviors()->get(PublishBehavior::class, true);
+        $publishBehavior = $this->getBehaviors()->get(PublishBehavior::class, true);
         $publishField = $publishBehavior->getPublishedField();
         return $this->update($entity, [$publishField => true]);
     }
@@ -27,7 +27,7 @@ trait PublishTrait
     public function hide($entity): int
     {
         /** @var PublishBehavior $publishBehavior */
-        $publishBehavior = $this->behaviors()->get(PublishBehavior::class, true);
+        $publishBehavior = $this->getBehaviors()->get(PublishBehavior::class, true);
         $publishField = $publishBehavior->getPublishedField();
         return $this->update($entity, [$publishField => false]);
     }

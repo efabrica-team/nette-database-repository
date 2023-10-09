@@ -59,7 +59,7 @@ final class KeepDefaultEventSubscriber extends EventSubscriber implements SoftDe
         $result = $event->handle($data);
         $repository = $event->getRepository();
         /** @var KeepDefaultBehavior $behavior */
-        $behavior = $repository->behaviors()->get(KeepDefaultBehavior::class);
+        $behavior = $repository->getBehaviors()->get(KeepDefaultBehavior::class);
         if (!isset($data[$behavior->getField()])) {
             return $result;
         }

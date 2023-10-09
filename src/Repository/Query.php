@@ -20,7 +20,7 @@ class Query extends Selection implements QueryInterface
     public function __construct(Repository $repository)
     {
         $this->repository = $repository;
-        $this->behaviors = clone $repository->behaviors();
+        $this->behaviors = clone $repository->getBehaviors();
         parent::__construct($repository->getExplorer(), $repository->getExplorer()->getConventions(), $repository->getTableName());
     }
 

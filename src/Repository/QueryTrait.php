@@ -141,11 +141,8 @@ trait QueryTrait
      */
     public function first(): ?Entity
     {
-        $limit = $this->sqlBuilder->getLimit();
         $offset = $this->sqlBuilder->getOffset();
-        $entity = $this->limit(1, $offset)->fetch();
-        $this->limit($limit, $offset);
-        return $entity;
+        return clone ($this->limit(1, $offset))->fetch();
     }
 
     /**

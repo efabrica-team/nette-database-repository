@@ -48,7 +48,7 @@ class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscr
     {
         if ($this->versionRepository === null) {
             $this->versionRepository = $this->repositoryManager->byTableName(self::TableName);
-            $behaviors = $this->versionRepository->behaviors();
+            $behaviors = $this->versionRepository->getBehaviors();
             if ($behaviors->all() === []) {
                 $behaviors->add(new DateBehavior(Version::CREATED_AT, null));
                 $behaviors->add(new OwnerBehavior(Version::USER_ID, null));

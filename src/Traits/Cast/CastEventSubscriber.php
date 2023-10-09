@@ -19,7 +19,7 @@ final class CastEventSubscriber extends EventSubscriber
 
     public function onLoad(Entity $entity, Repository $repository): void
     {
-        foreach ($repository->behaviors()->all() as $behavior) {
+        foreach ($repository->getBehaviors()->all() as $behavior) {
             if ($behavior instanceof CastBehavior) {
                 foreach ($behavior->getFields() as $field) {
                     if (isset($entity[$field])) {

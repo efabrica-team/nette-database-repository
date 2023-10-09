@@ -323,7 +323,7 @@ abstract class Repository
         return $query->fetchPairs($key, $value);
     }
 
-    public function behaviors(): RepositoryBehaviors
+    public function getBehaviors(): RepositoryBehaviors
     {
         return $this->behaviors;
     }

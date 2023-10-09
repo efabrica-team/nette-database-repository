@@ -20,8 +20,8 @@ final class GroupedQuery extends GroupedSelection implements QueryInterface
         $explorer = $query->getRepository()->getExplorer();
         parent::__construct($explorer, $explorer->getConventions(), $tableName, $column, $refTable);
         $this->query = $query;
-        $this->repository = $query->getRepository();
-        $this->behaviors = clone $query->getBehaviors();
+        $this->repository = $query->getRepository()->getManager()->byTableName($tableName);
+        $this->behaviors = clone $this->repository->getBehaviors();
     }
 
     public static function fromQuery(Query $query, string $tableName, string $column): self

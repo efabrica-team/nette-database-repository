@@ -55,7 +55,7 @@ abstract class RepositoryEvent
 
     public function getBehaviors(): RepositoryBehaviors
     {
-        return $this->repository->behaviors();
+        return $this->repository->getBehaviors();
     }
 
     /**
