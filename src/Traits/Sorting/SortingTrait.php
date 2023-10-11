@@ -27,10 +27,10 @@ trait SortingTrait
             return false;
         }
 
-        $sortField = $this->tableName . '.' . $this->sortingField();
+        $sortField = $this->getTableName() . '.' . $this->sortingField();
         $where[$sortField . ($up ? ' < ?' : ' > ?')] = $record[$this->sortingField()];
 
-        $upperRecord = $this->findBy($where)->order($sortField . ' DESC')->limit(1)->fetch();
+        $upperRecord = $this->findBy($where)->order($sortField . ($up ? ' DESC' : ' ASC'))->limit(1)->fetch();
         if (!$upperRecord) {
             return false;
         }
@@ -49,14 +49,14 @@ trait SortingTrait
 
     public function insertAfter(int $sorting, array $where): void
     {
-        $sortField = $this->tableName . '.' . $this->sortingField();
+        $sortField = $this->getTableName() . '.' . $this->sortingField();
         $where[$sortField . ' <= ?'] = $sorting;
         $this->findBy($where)->update([$this->sortingField() . '-=' => $this->sortingStep()]);
     }
 
     public function insertBefore(int $sorting, array $where): void
     {
-        $sortField = $this->tableName . '.' . $this->sortingField();
+        $sortField = $this->getTableName() . '.' . $this->sortingField();
         $where[$sortField . ' >= ?'] = $sorting;
         $this->findBy($where)->update([$this->sortingField() . '+=' => $this->sortingStep()]);
     }
@@ -70,7 +70,7 @@ trait SortingTrait
             }
         }
 
-        $sortField = $this->tableName . '.' . $this->sortingField();
+        $sortField = $this->getTableName() . '.' . $this->sortingField();
         $equals = $this->query()
             ->select($sortField)
             ->where($where)
@@ -90,7 +90,7 @@ trait SortingTrait
 
     private function fixEqualSorting(array $where = []): void
     {
-        $sortField = $this->tableName . '.' . $this->sortingField();
+        $sortField = $this->getTableName() . '.' . $this->sortingField();
         $sortingStep = $this->sortingStep();
 
         $sorting = 0;

@@ -266,7 +266,7 @@ abstract class Repository
         $count = 0;
         /** @var Entity[] $chunk */
         foreach ($chunks as $chunk) {
-            $count += $this->query()->whereRows($chunk)->update($chunk[0]->diff());
+            $count += $this->query()->whereRows(...$chunk)->update($chunk[0]->diff());
         }
         return $count;
     }
