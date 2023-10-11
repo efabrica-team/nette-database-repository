@@ -30,7 +30,7 @@ trait SortingTrait
         $sortField = $this->getTableName() . '.' . $this->sortingField();
         $where[$sortField . ($up ? ' < ?' : ' > ?')] = $record[$this->sortingField()];
 
-        $upperRecord = $this->findBy($where)->order($sortField . ' DESC')->limit(1)->fetch();
+        $upperRecord = $this->findBy($where)->order($sortField . ($up ? ' DESC' : ' ASC'))->limit(1)->fetch();
         if (!$upperRecord) {
             return false;
         }
