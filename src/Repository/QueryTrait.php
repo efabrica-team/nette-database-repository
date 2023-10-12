@@ -142,7 +142,7 @@ trait QueryTrait
     public function first(): ?Entity
     {
         $offset = $this->sqlBuilder->getOffset();
-        return clone ($this->limit(1, $offset))->fetch();
+        return (clone $this)->limit(1, $offset)->fetch();
     }
 
     /**
