@@ -13,12 +13,12 @@ trait PublishTrait
     /**
      * @param ActiveRow|int|string $entity
      */
-    public function publish($entity): int
+    public function publish($entity, bool $published = true): int
     {
         /** @var PublishBehavior $publishBehavior */
         $publishBehavior = $this->getBehaviors()->get(PublishBehavior::class, true);
         $publishField = $publishBehavior->getPublishedField();
-        return $this->update($entity, [$publishField => true]);
+        return (int)$entity->update([$publishField => $published]);
     }
 
     /**
@@ -26,9 +26,6 @@ trait PublishTrait
      */
     public function hide($entity): int
     {
-        /** @var PublishBehavior $publishBehavior */
-        $publishBehavior = $this->getBehaviors()->get(PublishBehavior::class, true);
-        $publishField = $publishBehavior->getPublishedField();
-        return $this->update($entity, [$publishField => false]);
+        return $this->publish($entity, false);
     }
 }

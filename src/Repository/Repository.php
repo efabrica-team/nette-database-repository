@@ -210,7 +210,7 @@ abstract class Repository
         if (is_scalar($row)) {
             $query->wherePrimary($row);
         } elseif ($row instanceof ActiveRow) {
-            $query->wherePrimary($row->getPrimary());
+            $query->whereRows($row);
         } elseif (is_array($row)) {
             if (Arrays::isList($row)) {
                 if (!reset($row) instanceof ActiveRow) {

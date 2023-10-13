@@ -2,7 +2,6 @@
 
 namespace Efabrica\NetteRepository\Traits\Version;
 
-use DateTimeImmutable;
 use Efabrica\IrisClient\IrisUser;
 use Efabrica\NetteRepository\Event\DeleteQueryEvent;
 use Efabrica\NetteRepository\Event\InsertEventResponse;
@@ -14,7 +13,6 @@ use Efabrica\NetteRepository\Repository\Query;
 use Efabrica\NetteRepository\Repository\Repository;
 use Efabrica\NetteRepository\Repository\RepositoryManager;
 use Efabrica\NetteRepository\Subscriber\EventSubscriber;
-use Efabrica\NetteRepository\Traits\Account\AccountBehavior;
 use Efabrica\NetteRepository\Traits\Date\DateBehavior;
 use Efabrica\NetteRepository\Traits\Owner\OwnerBehavior;
 use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteQueryEvent;

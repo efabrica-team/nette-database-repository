@@ -27,6 +27,8 @@ trait QueryTrait
 
     protected RepositoryBehaviors $behaviors;
 
+    private array $whereRows = [];
+
     public function insert(iterable $data)
     {
         if (!$this->doesEvents()) {
@@ -96,6 +98,7 @@ trait QueryTrait
 
     public function whereRows(...$entities): self
     {
+        $this->whereRows = $entities;
         $where = $values = [];
         $primary = $this->getPrimary();
         if ($primary === null) {
@@ -121,6 +124,14 @@ trait QueryTrait
         }
         parent::where(implode(' OR ', $where), ...$values);
         return $this;
+    }
+
+    /**
+     * @internal
+     */
+    public function getWhereRows(): array
+    {
+        return $this->whereRows;
     }
 
     public function search(array $columns, string $search): self

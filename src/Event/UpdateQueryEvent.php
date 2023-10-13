@@ -2,6 +2,8 @@
 
 namespace Efabrica\NetteRepository\Event;
 
+use Efabrica\NetteRepository\Model\Entity;
+
 class UpdateQueryEvent extends QueryEvent
 {
     public function handle(array &$data): int
@@ -12,10 +14,19 @@ class UpdateQueryEvent extends QueryEvent
                 return $subscriber->onUpdate($this, $data);
             }
         }
-        foreach ($this->getEntities() as $entity) {
-            $entity->internalData($data);
+        $updateQuery = $this->query->scopeRaw();
+        $update = $updateQuery->update($data);
+        foreach ($this->query->getWhereRows() as $row) {
+            if ($row instanceof Entity) {
+                $updatedEntities ??= $updateQuery->select('*')->fetchAll();
+                foreach ($updatedEntities as $entity) {
+                    if ($entity->getPrimary() === $row->getPrimary()) {
+                        $row->internalData($entity->toArray());
+                    }
+                }
+            }
         }
-        return $this->query->scopeRaw()->update($data);
+        return $update;
     }
 
     public function stopPropagation(): int

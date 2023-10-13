@@ -59,6 +59,9 @@ interface QueryInterface extends Iterator, Countable, ArrayAccess
 
     public function fetch(): ?Entity;
 
+    /**
+     * @return array<E>
+     */
     public function fetchAll(): array;
 
     public function fetchChunked(int $chunkSize = Query::CHUNK_SIZE): Generator;
@@ -238,6 +241,9 @@ interface QueryInterface extends Iterator, Countable, ArrayAccess
      */
     public function getReferencingTable(string $table, ?string $column = null, $active = null): ?GroupedSelection;
 
+    /**
+     * @return E
+     */
     #[ReturnTypeWillChange]
     public function current();
 
