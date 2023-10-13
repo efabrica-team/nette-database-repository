@@ -1,4 +1,4 @@
-# Nette Repository
+# eFabrica Nette Database Repository
 
 This extension enhances the static analysis of your Nette Database by providing typehinted entities (ActiveRows), queries (Selections) and
 repositories (services).
@@ -8,7 +8,7 @@ repositories (services).
 You can install this extension using [Composer](http://getcomposer.org/), the dependency manager for PHP:
 
 ```sh
-$ composer require efabrica/nette-repository
+composer require efabrica/nette-repository
 ```
 
 To enable the extension, you need to register its configuration file:
@@ -26,7 +26,11 @@ symfonyConsoleApp:
 Finally, you can run the repository code generation command to generate the necessary classes and files:
 
 ```sh
-$ php bin/console ndr:code-gen
+$ php bin/console efabrica:nette-repo:code-gen
+```
+or for short:
+```sh
+$ php bin/console e:n:c
 ```
 
 ## Usage
@@ -107,7 +111,7 @@ Scope is a class that defines which existing behaviors are disabled for the Repo
 
 The active Scope is passed down from Repository to Query and from Query down to Entity.
 
-`->withScope(Scope $scope)` returns a clone of the object with the given scope applied.§
+`->withScope(Scope $scope)` returns a clone of the object with the given scope applied.
 
 `->scopeRaw()` returns a clone of the object with raw scope. Raw scope removes all behaviors.
 
@@ -195,7 +199,7 @@ Code generation is fully optional, but it is recommended to use it.
 
 >To run the code generation, use this command:
 >```sh
->$ php bin/console ndr:code-gen
+>$ php bin/console efabrica:nette-repo:code-gen
 >```
 
 For every table in the database, it will generate these classes in the `/Generated/` namespace: (Example: `person` table)
