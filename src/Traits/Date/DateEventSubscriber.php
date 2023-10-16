@@ -1,0 +1,52 @@
+<?php
+
+namespace Efabrica\NetteRepository\Traits\Date;
+
+use Efabrica\NetteRepository\Event\InsertEventResponse;
+use Efabrica\NetteRepository\Event\InsertRepositoryEvent;
+use Efabrica\NetteRepository\Event\RepositoryEvent;
+use Efabrica\NetteRepository\Event\UpdateQueryEvent;
+use Efabrica\NetteRepository\Subscriber\EventSubscriber;
+use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteQueryEvent;
+use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteSubscriber;
+
+final class DateEventSubscriber extends EventSubscriber implements SoftDeleteSubscriber
+{
+    public function supportsEvent(RepositoryEvent $event): bool
+    {
+        return $event->hasBehavior(DateBehavior::class);
+    }
+
+    public function onInsert(InsertRepositoryEvent $event): InsertEventResponse
+    {
+        /** @var DateBehavior $behavior */
+        $behavior = $event->getBehaviors()->get(DateBehavior::class);
+        $createdAt = $behavior->getCreatedAtField();
+        $updatedAt = $behavior->getUpdatedAtField();
+        foreach ($event->getEntities() as $entity) {
+            if (isset($createdAt) && !isset($entity[$createdAt])) {
+                $entity[$createdAt] = $behavior->getNewValue();
+            }
+            if (isset($updatedAt) && !isset($entity[$updatedAt])) {
+                $entity[$updatedAt] = $behavior->getNewValue();
+            }
+        }
+        return $event->handle();
+    }
+
+    public function onUpdate(UpdateQueryEvent $event, array &$data): int
+    {
+        /** @var DateBehavior $behavior */
+        $behavior = $event->getBehaviors()->get(DateBehavior::class);
+        $updatedAt = $behavior->getUpdatedAtField();
+        if (isset($updatedAt) && !isset($data[$updatedAt])) {
+            $data[$updatedAt] = $behavior->getNewValue();
+        }
+        return $event->handle($data);
+    }
+
+    public function onSoftDelete(SoftDeleteQueryEvent $event, array &$data): int
+    {
+        return $this->onUpdate($event, $data);
+    }
+}
