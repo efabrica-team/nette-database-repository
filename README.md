@@ -221,7 +221,20 @@ exist. If they exist, they will not be overwritten:
 These classes are **not regenerated** when you run the code generator. They are meant to be customized by you. If you want to regenerate
 them, you have to delete them first.
 
+#### Ignoring tables
 
+It is also possible to ignore some tables. To do that, you can modify the `ignoredTables` parameter in the config file:
+
+```neon
+parameters:
+    netteRepository:
+        ignoreTables:
+            # These are the defaultly ignored tables:
+            migrations: true
+            migration_log: true
+            phoenix_log: true
+            phinxlog: true
+```
 
 ## Behaviors and Traits
 
