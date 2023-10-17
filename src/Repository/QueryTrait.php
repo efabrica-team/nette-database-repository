@@ -31,6 +31,9 @@ trait QueryTrait
 
     public function insert(iterable $data)
     {
+        if ($data === []) {
+            return 0;
+        }
         if (!$this->doesEvents()) {
             if (Arrays::isList($data) && is_countable($data) && count($data) === 1) {
                 $data = reset($data);
