@@ -34,6 +34,7 @@ class EntityStructureFactory
         'tinytext' => 'string',
         'mediumtext' => 'string',
         'longtext' => 'string',
+        'json' => 'string',
 
         'blob' => 'string',
         'tinyblob' => 'string',
