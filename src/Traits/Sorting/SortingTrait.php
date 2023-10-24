@@ -10,14 +10,9 @@ use Efabrica\NetteRepository\Repository\Repository;
  */
 trait SortingTrait
 {
-    public function sortingField(): string
+    public function getSorting(): SortingBehavior
     {
-        return 'sorting';
-    }
-
-    public function sortingStep(): int
-    {
-        return 100;
+        return $this->getBehaviors()->get(SortingBehavior::class);
     }
 
     public function moveUp($record, array $where = [], bool $up = true): bool
@@ -27,17 +22,18 @@ trait SortingTrait
             return false;
         }
 
-        $sortField = $this->getTableName() . '.' . $this->sortingField();
-        $where[$sortField . ($up ? ' < ?' : ' > ?')] = $record[$this->sortingField()];
+        $behavior = $this->getSorting();
+        $sortField = $this->getTableName() . '.' . $behavior->getColumn();
+        $where[$sortField . ($up ? ' < ?' : ' > ?')] = $record[($behavior->getColumn())];
 
         $upperRecord = $this->findBy($where)->order($sortField . ($up ? ' DESC' : ' ASC'))->limit(1)->fetch();
         if (!$upperRecord) {
             return false;
         }
 
-        $upperSorting = $upperRecord[$this->sortingField()];
-        $upperRecord[$this->sortingField()] = $record[$this->sortingField()];
-        $record[$this->sortingField()] = $upperSorting;
+        $upperSorting = $upperRecord[($behavior->getColumn())];
+        $upperRecord[($behavior->getColumn())] = $record[($behavior->getColumn())];
+        $record[($behavior->getColumn())] = $upperSorting;
         $this->updateEntities($upperRecord, $record);
         return true;
     }
@@ -49,16 +45,18 @@ trait SortingTrait
 
     public function insertAfter(int $sorting, array $where): void
     {
-        $sortField = $this->getTableName() . '.' . $this->sortingField();
+        $behavior = $this->getSorting();
+        $sortField = $this->getTableName() . '.' . $behavior->getColumn();
         $where[$sortField . ' <= ?'] = $sorting;
-        $this->findBy($where)->update([$this->sortingField() . '-=' => $this->sortingStep()]);
+        $this->findBy($where)->update([$behavior->getColumn() . '-=' => $behavior->getStep()]);
     }
 
     public function insertBefore(int $sorting, array $where): void
     {
-        $sortField = $this->getTableName() . '.' . $this->sortingField();
+        $behavior = $this->getSorting();
+        $sortField = $this->getTableName() . '.' . $behavior->getColumn();
         $where[$sortField . ' >= ?'] = $sorting;
-        $this->findBy($where)->update([$this->sortingField() . '+=' => $this->sortingStep()]);
+        $this->findBy($where)->update([$behavior->getColumn() . '+=' => $behavior->getStep()]);
     }
 
     private function getRecordForShifting($record, array $where = []): ?Entity
@@ -70,13 +68,14 @@ trait SortingTrait
             }
         }
 
-        $sortField = $this->getTableName() . '.' . $this->sortingField();
+        $behavior = $this->getSorting();
+        $sortField = $this->getTableName() . '.' . $behavior->getColumn();
         $equals = $this->query()
             ->select($sortField)
             ->where($where)
             ->group($sortField)
             ->having('COUNT(*) > 1')
-            ->fetchPairs(null, $this->sortingField())
+            ->fetchPairs(null, $behavior->getColumn())
         ;
 
         if ($equals !== []) {
@@ -90,14 +89,15 @@ trait SortingTrait
 
     private function fixEqualSorting(array $where = []): void
     {
-        $sortField = $this->getTableName() . '.' . $this->sortingField();
-        $sortingStep = $this->sortingStep();
+        $behavior = $this->getSorting();
+        $sortField = $this->getTableName() . '.' . $behavior->getColumn();
+        $sortingStep = $behavior->getStep();
 
         $sorting = 0;
         $query = $this->findBy($where)->order(implode(',', [$sortField, $this->query()->getPrimary()]))->fetchAll();
         foreach ($query as $row) {
             $sorting += $sortingStep;
-            $this->update($row, [$this->sortingField() => $sorting]);
+            $this->update($row, [$behavior->getColumn() => $sorting]);
         }
     }
 }

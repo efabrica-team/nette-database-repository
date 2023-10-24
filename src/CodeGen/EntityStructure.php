@@ -56,6 +56,9 @@ class EntityStructure
 
     public array $toOne;
 
+    /** @var array [mnTable, selfColumn, otherColumn] */
+    public array $manyToMany;
+
     /**
      * @param EntityProperty[] $properties
      */
@@ -91,6 +94,29 @@ class EntityStructure
 
         $this->toMany = $structure->getHasManyReference($table) ?? [];
         $this->toOne = $structure->getBelongsToReference($table) ?? [];
+        $this->manyToMany = $this->getManyToManyTables($structure);
+    }
+
+    private function getManyToManyTables(Structure $structure): array
+    {
+        $tables = [];
+        foreach ($this->toMany as $mnTable => $mnColumns) {
+            if ($mnTable === $this->tableName) {
+                continue;
+            }
+            if (count($mnColumns) !== 1) {
+                continue;
+            }
+            $toOne = $structure->getBelongsToReference($mnTable) ?? [];
+            $refColumns = array_flip(array_diff($toOne, [$mnTable]));
+            if (count($refColumns) !== 2) {
+                continue;
+            }
+            $otherTable = array_diff($toOne, [$this->tableName]);
+            $otherTable = reset($otherTable);
+            $tables[$otherTable] = [$mnTable, $refColumns[$this->tableName], $refColumns[$otherTable]];
+        }
+        return $tables;
     }
 
     public function toClassName(string $string): string

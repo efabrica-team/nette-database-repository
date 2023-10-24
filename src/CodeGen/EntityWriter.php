@@ -4,7 +4,8 @@ namespace Efabrica\NetteRepository\CodeGen;
 
 use DateTimeInterface;
 use Efabrica\NetteRepository\Model\Entity;
-use Nette\Database\Table\GroupedSelection;
+use Efabrica\NetteRepository\Repository\GroupedQuery;
+use Efabrica\NetteRepository\Repository\Query;
 use Nette\PhpGenerator\ClassType;
 use Nette\Utils\Strings;
 use function str_contains;
@@ -41,55 +42,99 @@ class EntityWriter
             $class->addConstant(mb_strtoupper($prop->getName()), $prop->getName())->setPublic();
         }
 
-        foreach ($structure->toOne as $relatedColumn => $relatedTable) {
+        $ignoreTables = [];
+        foreach ($structure->manyToMany as $relatedTable => [$mnTable, $selfColumn, $otherColumn]) {
             /** @var EntityStructure $relatedStructure */
             $relatedStructure = $structures[$relatedTable];
-            $className = $relatedStructure->getClassName();
+            $relatedClassName = $relatedStructure->getClassName();
+            $relatedEntity = $relatedStructure->entityGenNamespace->getName() . '\\' . $relatedClassName;
+            $mnStructure = $structures[$mnTable];
+            $mnClassName = $mnStructure->getClassName();
+            $structure->entityGenNamespace->addUse($relatedEntity);
+            $structure->entityGenNamespace->addUse(Query::class);
+            $structure->entityGenNamespace->addUse($relatedStructure->repositoryNamespace->getName() . '\\' . $relatedClassName . 'Repository');
+            $structure->entityGenNamespace->addUse($mnStructure->entityGenNamespace->getName() . '\\' . $mnClassName);
+            $structure->entityGenNamespace->addUse($mnStructure->repositoryNamespace->getName() . '\\' . $mnClassName . 'Repository');
+            $SELF_COLUMN = mb_strtoupper($selfColumn);
+            $OTHER_COLUMN = mb_strtoupper($otherColumn);
+
+            $class->addMethod('get' . $structure->toPluralName($relatedClassName))
+                ->setBody(
+                    "/** @var iterable<{$relatedClassName}>&Query<{$relatedClassName}> \$query */" .
+                    "\$query = \$this->relatedManyToMany({$mnClassName}Repository::class, {$relatedClassName}Repository::class, $mnClassName::$SELF_COLUMN, $mnClassName::$OTHER_COLUMN);\n" .
+                    'return $query;'
+                )
+                ->setReturnType(Query::class)
+                ->addComment("@return iterable<{$relatedClassName}>")
+                ->addComment("@phpstan-return Query<{$relatedClassName}>")
+            ;
+
+            $relatedPrimaryType = implode('|', $relatedStructure->getPrimaries());
+            $body = "\$this->setRelatedManyToMany({$mnClassName}Repository::class, $mnClassName::$SELF_COLUMN, $mnClassName::$OTHER_COLUMN, \$owned);\nreturn \$this;";
+            $class->addMethod('set' . $structure->toPluralName($relatedClassName))
+                ->setBody($body)
+                ->setReturnType('self')
+                ->addComment("@param iterable<{$relatedClassName}|$relatedPrimaryType> \$owned")
+                ->addComment('@return $this')
+                ->addParameter('owned')->setType('iterable')
+            ;
+            $ignoreTables[] = $mnTable;
+        }
+
+        foreach ($structure->toOne as $relatedColumn => $relatedTable) {
+            if (in_array($relatedTable, $ignoreTables, true)) {
+                continue;
+            }
+            /** @var EntityStructure $relatedStructure */
+            $relatedStructure = $structures[$relatedTable];
+            $relatedClassName = $relatedStructure->getClassName();
             $columnName = Strings::before($relatedColumn, '_id') ?? $relatedColumn;
             // if $relatedColumn does not end with _id, add getter instead of property
             if ($columnName === $relatedColumn) {
-                $relatedEntity = $relatedStructure->entityGenNamespace->getName() . '\\' . $className;
-                $relatedRepository = $relatedStructure->repositoryNamespace->getName() . '\\' . $className . 'Repository';
+                $relatedEntity = $relatedStructure->entityGenNamespace->getName() . '\\' . $relatedClassName;
+                $relatedRepository = $relatedStructure->repositoryNamespace->getName() . '\\' . $relatedClassName . 'Repository';
                 $structure->entityGenNamespace->addUse($relatedEntity);
                 $structure->entityGenNamespace->addUse($relatedRepository);
                 $RELATED_COLUMN = mb_strtoupper($relatedColumn);
                 $class->addMethod('get' . $structure->toClassName($columnName))
-                    ->setBody("\$row = \$this->ref({$className}Repository::TABLE_NAME, self::$RELATED_COLUMN);\n" .
-                        "assert(\$row === null || \$row instanceof {$className});\n" .
+                    ->setBody("\$row = \$this->ref({$relatedClassName}Repository::TABLE_NAME, self::$RELATED_COLUMN);\n" .
+                        "assert(\$row === null || \$row instanceof {$relatedClassName});\n" .
                         'return $row;')
                     ->setReturnType($relatedEntity)
                     ->setReturnNullable()
                 ;
             } else {
-                $class->addComment("@property {$className}|null \${$columnName} @ForeignKey('$relatedTable')");
+                $class->addComment("@property {$relatedClassName}|null \${$columnName} @ForeignKey('$relatedTable')");
             }
         }
         foreach ($structure->toMany as $relatedTable => $relatedColumns) {
+            if (in_array($relatedTable, $ignoreTables, true)) {
+                continue;
+            }
             if (count($relatedColumns) > 1) {
                 continue;
             }
             [$relatedColumn] = $relatedColumns;
             /** @var EntityStructure $relatedStructure */
             $relatedStructure = $structures[$relatedTable];
-            $className = $relatedStructure->getClassName();
-            $relatedEntity = $relatedStructure->entityGenNamespace->getName() . '\\' . $className;
-            $relatedQuery = $relatedStructure->queryNamespace->getName() . '\\' . $className . 'Query';
-            $relatedRepository = $relatedStructure->repositoryNamespace->getName() . '\\' . $className . 'Repository';
+            $relatedClassName = $relatedStructure->getClassName();
+            $relatedEntity = $relatedStructure->entityGenNamespace->getName() . '\\' . $relatedClassName;
+            $relatedRepository = $relatedStructure->repositoryNamespace->getName() . '\\' . $relatedClassName . 'Repository';
             $structure->entityGenNamespace->addUse($relatedEntity);
-            $structure->entityGenNamespace->addUse(GroupedSelection::class);
+            $structure->entityGenNamespace->addUse(GroupedQuery::class);
             $structure->entityGenNamespace->addUse($relatedRepository);
             $RELATED_COLUMN = mb_strtoupper($relatedColumn);
-            $body = "/** @var iterable<{$className}>&GroupedSelection \$query */\n" .
-                "\$query = \$this->related({$className}Repository::TABLE_NAME, $className::$RELATED_COLUMN);\n" .
+            $body = "/** @var iterable<{$relatedClassName}>&GroupedQuery \$query */\n" .
+                "\$query = \$this->related({$relatedClassName}Repository::TABLE_NAME, $relatedClassName::$RELATED_COLUMN);\n" .
                 'return $query;';
 
-            $class->addMethod('get' . $structure->toPluralName($className))
+            $class->addMethod('get' . $structure->toPluralName($relatedClassName))
                 ->setBody($body)
-                ->setReturnType(GroupedSelection::class)
-                ->addComment("@return iterable<{$className}>&GroupedSelection")
+                ->setReturnType(GroupedQuery::class)
+                ->addComment("@return iterable<{$relatedClassName}>")
+                ->addComment('@phpstan-return GroupedQuery')
             ;
         }
-
         return $class;
     }
 

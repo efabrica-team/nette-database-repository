@@ -9,6 +9,7 @@ use Efabrica\NetteRepository\Repository\Repository;
 use Efabrica\NetteRepository\Repository\Scope\FullScope;
 use Efabrica\NetteRepository\Repository\Scope\RawScope;
 use Efabrica\NetteRepository\Repository\Scope\Scope;
+use Efabrica\NetteRepository\Traits\ManyToMany\ManyToManyRepositoryEvent;
 use Nette\Database\Table\ActiveRow;
 use Nette\Database\Table\GroupedSelection;
 use Nette\Database\Table\Selection;
@@ -58,7 +59,7 @@ abstract class Entity extends ActiveRow
             unset($this->_modified[$key]);
         }
         if (!$merge || $data !== []) {
-            array_walk($this, static fn(&$value, $key) => str_ends_with($key, "\x00data") ? $value = $newData : null);
+            array_walk($this, static fn(&$value, $key) => str_ends_with((string)$key, "\x00data") ? $value = $newData : null);
         }
         return $newData;
     }
@@ -170,6 +171,20 @@ abstract class Entity extends ActiveRow
     public function related(string $key, ?string $throughColumn = null): GroupedSelection
     {
         return parent::related($key, $throughColumn);
+    }
+
+    public function relatedManyToMany(string $mnRepoClass, string $otherRepoClass, string $selfColumn, string $otherColumn): Query
+    {
+        $otherIds = $this->query($mnRepoClass)->where($selfColumn, $this->getPrimary())->fetchPairs(null, $otherColumn);
+        return $this->query($otherRepoClass)->wherePrimary($otherIds);
+    }
+
+    public function setRelatedManyToMany(string $mnRepoClass, string $selfColumn, string $otherColumn, iterable $owned): self
+    {
+        $mnRepo = $this->_query->getRepository()->getManager()->byClass($mnRepoClass);
+        $event = new ManyToManyRepositoryEvent($mnRepo, $this, $owned, $selfColumn, $otherColumn);
+        $event->handle();
+        return $this;
     }
 
     /**

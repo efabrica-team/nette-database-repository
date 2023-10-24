@@ -241,6 +241,8 @@ interface QueryInterface extends Iterator, Countable, ArrayAccess
      */
     public function getReferencingTable(string $table, ?string $column = null, $active = null): ?GroupedSelection;
 
+    public function getWhereRows(): array;
+
     /**
      * @return E
      */

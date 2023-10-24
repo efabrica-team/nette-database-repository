@@ -3,26 +3,9 @@
 namespace Efabrica\NetteRepository\Traits\SoftDelete;
 
 use Efabrica\NetteRepository\Event\UpdateQueryEvent;
-use Efabrica\NetteRepository\Repository\QueryInterface;
-use Efabrica\NetteRepository\Subscriber\EventSubscriber;
 
 class SoftDeleteQueryEvent extends UpdateQueryEvent
 {
-    /**
-     * @var (SoftDeleteSubscriber&EventSubscriber)[]
-     */
-    protected array $subscribers = [];
-
-    public function __construct(QueryInterface $query)
-    {
-        parent::__construct($query);
-        foreach ($query->getEventSubscribers()->toArray() as $subscriber) {
-            if ($subscriber instanceof SoftDeleteSubscriber) {
-                $this->subscribers[] = $subscriber;
-            }
-        }
-    }
-
     public function handle(array &$data): int
     {
         while ($subscriber = current($this->subscribers)) {

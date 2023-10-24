@@ -27,7 +27,6 @@ final class AccountEventSubscriber extends EventSubscriber
 
     private function getAccountId(): ?string
     {
-        bdump($this->irisUser->getAccounts());
         if (count($this->irisUser->getAccounts()) > 0) {
             return (string)($this->irisUser->getDefaultAccount() ?? $this->irisUser->getAccounts()[0]);
         }

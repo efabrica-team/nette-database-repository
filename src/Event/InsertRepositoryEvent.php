@@ -57,11 +57,17 @@ class InsertRepositoryEvent extends RepositoryEvent
     {
         $entityClass = $this->getRepository()->getEntityClass();
         assert(is_a($entity, $entityClass));
+        if (!is_array($this->entities)) {
+            $this->entities = iterator_to_array($this->entities);
+        }
         $this->entities[] = $entity;
     }
 
     public function removeEntity(Entity $entity): void
     {
+        if (!is_array($this->entities)) {
+            $this->entities = iterator_to_array($this->entities);
+        }
         $key = array_search($entity, $this->entities, true);
         if ($key !== false) {
             unset($this->entities[$key]);
