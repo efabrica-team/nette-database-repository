@@ -8,6 +8,7 @@ use Efabrica\NetteRepository\Traits\RepositoryBehavior;
 class DefaultOrderBehavior extends RepositoryBehavior
 {
     private string $columns;
+
     private array $params;
 
     public function __construct(string $columns, ...$params)

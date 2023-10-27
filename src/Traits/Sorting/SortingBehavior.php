@@ -11,6 +11,7 @@ class SortingBehavior extends RepositoryBehavior
     private string $column;
 
     private int $step;
+
     private bool $ascending;
 
     public function __construct(string $column = 'sorting', int $step = self::DEFAULT_STEP, bool $ascending = true)

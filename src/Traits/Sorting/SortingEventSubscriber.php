@@ -25,7 +25,7 @@ class SortingEventSubscriber extends EventSubscriber implements RelatedThroughEv
     {
         $behavior = $event->getBehavior(SortingBehavior::class);
         if ($event->getQuery()->getOrder() === []) {
-            $event->getQuery()->order($behavior->getColumn().' '.$behavior->getDirection());
+            $event->getQuery()->order($behavior->getColumn() . ' ' . $behavior->getDirection());
         }
         return $event->handle();
     }

@@ -2,7 +2,6 @@
 
 namespace Efabrica\NetteRepository\Traits\RelatedThrough;
 
-use Efabrica\NetteRepository\Event\QueryEvent;
 use Efabrica\NetteRepository\Event\RepositoryEvent;
 use Efabrica\NetteRepository\Model\Entity;
 use Efabrica\NetteRepository\Repository\Query;
@@ -13,7 +12,9 @@ use LogicException;
 class GetRelatedThroughQueryEvent extends RepositoryEvent
 {
     public const PIVOT = 'pivot';
+
     private Query $query;
+
     private Repository $throughRepo;
 
     private Entity $owner;
@@ -26,7 +27,7 @@ class GetRelatedThroughQueryEvent extends RepositoryEvent
     {
         $otherPrimary = $otherRepo->getPrimary();
         if (count($otherPrimary) !== 1) {
-            throw new LogicException("Related entity " . $otherRepo->getEntityClass() . " has none or more than one primary column");
+            throw new LogicException('Related entity ' . $otherRepo->getEntityClass() . ' has none or more than one primary column');
         }
         parent::__construct($throughRepo);
         $this->query = $otherRepo->query()->alias(':' . $throughRepo->getTableName(), self::PIVOT)->where([
