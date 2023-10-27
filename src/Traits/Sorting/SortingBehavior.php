@@ -2,9 +2,10 @@
 
 namespace Efabrica\NetteRepository\Traits\Sorting;
 
+use Efabrica\NetteRepository\Traits\DefaultOrder\DefaultOrderBehavior;
 use Efabrica\NetteRepository\Traits\RepositoryBehavior;
 
-class SortingBehavior extends RepositoryBehavior
+class SortingBehavior extends DefaultOrderBehavior
 {
     public const DEFAULT_STEP = 100;
 
@@ -19,6 +20,7 @@ class SortingBehavior extends RepositoryBehavior
         $this->column = $column;
         $this->step = $step;
         $this->ascending = $ascending;
+        parent::__construct($column.' '.$this->getDirection());
     }
 
     public function getColumn(): string

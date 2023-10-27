@@ -21,15 +21,6 @@ class SortingEventSubscriber extends EventSubscriber implements RelatedThroughEv
         return $event->hasBehavior(SortingBehavior::class);
     }
 
-    public function onSelect(SelectQueryEvent $event): SelectQueryResponse
-    {
-        $behavior = $event->getBehavior(SortingBehavior::class);
-        if ($event->getQuery()->getOrder() === []) {
-            $event->getQuery()->order($behavior->getColumn() . ' ' . $behavior->getDirection());
-        }
-        return $event->handle();
-    }
-
     public function onInsert(InsertRepositoryEvent $event): InsertEventResponse
     {
         $behavior = $event->getBehavior(SortingBehavior::class);
