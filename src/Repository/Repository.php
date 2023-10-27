@@ -7,7 +7,7 @@ use Efabrica\NetteRepository\Repository\Scope\FullScope;
 use Efabrica\NetteRepository\Repository\Scope\RawScope;
 use Efabrica\NetteRepository\Repository\Scope\Scope;
 use Efabrica\NetteRepository\Subscriber\RepositoryEventSubscribers;
-use Efabrica\NetteRepository\Traits\ManyToMany\ManyToManyRepositoryEvent;
+use Efabrica\NetteRepository\Traits\RelatedThrough\SetRelatedThroughRepositoryEvent;
 use LogicException;
 use Nette\Application\BadRequestException;
 use Nette\Database\Explorer;
@@ -274,7 +274,7 @@ abstract class Repository
 
     public function updateManyToMany(Entity $owner, array $owned, string $ownerColumn, string $ownedColumn): int
     {
-        $event = new ManyToManyRepositoryEvent($this, $owner, $owned, $ownerColumn, $ownedColumn);
+        $event = new SetRelatedThroughRepositoryEvent($this, $owner, $owned, $ownerColumn, $ownedColumn);
         return $event->handle();
     }
 

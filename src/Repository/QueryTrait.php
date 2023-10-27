@@ -137,6 +137,11 @@ trait QueryTrait
         return $this->whereRows;
     }
 
+    public function getOrder(): array
+    {
+        return $this->sqlBuilder->getOrder();
+    }
+
     public function search(array $columns, string $search): self
     {
         $where = [];

@@ -18,11 +18,13 @@ services:
     castEventSubscriber: Efabrica\NetteRepository\Traits\Cast\CastEventSubscriber
     dateEventSubscriber: Efabrica\NetteRepository\Traits\Date\DateEventSubscriber
     defaultValueEventSubscriber: Efabrica\NetteRepository\Traits\DefaultValue\DefaultValueEventSubscriber
-    defaultWhereEventSubscriber: Efabrica\NetteRepository\Traits\Filter\FilterEventSubscriber
+    defaultOrderEventSubscriber: Efabrica\NetteRepository\Traits\DefaultOrder\DefaultOrderEventSubscriber
+    filterEventSubscriber: Efabrica\NetteRepository\Traits\Filter\FilterEventSubscriber
     keepDefaultEventSubscriber: Efabrica\NetteRepository\Traits\KeepDefault\KeepDefaultEventSubscriber
     lastManStandingEventSubscriber: Efabrica\NetteRepository\Traits\LastManStanding\LastManStandingEventSubscriber
     softDeleteEventSubscriber: Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteEventSubscriber
     repoEventSubscriber: Efabrica\NetteRepository\Subscriber\RepositoryEventSubscriber
+    sortingEventSubscriber: Efabrica\NetteRepository\Traits\Sorting\SortingEventSubscriber
 
     # efabrica-specific, will be moved:
     userOwnedEventSubscriber: Efabrica\NetteRepository\Traits\Account\AccountEventSubscriber

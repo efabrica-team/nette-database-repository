@@ -1,6 +1,6 @@
 <?php
 
-namespace Efabrica\NetteRepository\Traits\ManyToMany;
+namespace Efabrica\NetteRepository\Traits\RelatedThrough;
 
 use Efabrica\NetteRepository\Event\RepositoryEvent;
 use Efabrica\NetteRepository\Model\Entity;
@@ -8,9 +8,9 @@ use Efabrica\NetteRepository\Repository\Repository;
 use Efabrica\NetteRepository\Subscriber\EventSubscriber;
 use LogicException;
 
-class ManyToManyRepositoryEvent extends RepositoryEvent
+class SetRelatedThroughRepositoryEvent extends RepositoryEvent
 {
-    private Repository $mnRepo;
+    private Repository $throughRepo;
 
     private Entity $owner;
 
@@ -24,13 +24,13 @@ class ManyToManyRepositoryEvent extends RepositoryEvent
     private string $ownedColumn;
 
     /**
-     * @param Repository $mnRepo Many to many repository
+     * @param Repository $throughRepo Many to many repository
      * @param iterable   $owned Entities or IDs
      */
-    public function __construct(Repository $mnRepo, Entity $owner, iterable $owned, string $ownerColumn, string $ownedColumn)
+    public function __construct(Repository $throughRepo, Entity $owner, iterable $owned, string $ownerColumn, string $ownedColumn)
     {
-        parent::__construct($mnRepo);
-        $this->mnRepo = $mnRepo;
+        parent::__construct($throughRepo);
+        $this->throughRepo = $throughRepo;
         $this->owner = $owner;
         $this->owned = $owned;
         $this->ownedIds = $this->mapOwnedToIds($owned);
@@ -43,8 +43,8 @@ class ManyToManyRepositoryEvent extends RepositoryEvent
         while ($subscriber = current($this->subscribers)) {
             /** @var EventSubscriber $subscriber */
             next($this->subscribers);
-            if ($subscriber instanceof ManyToManyEventSubscriber && $subscriber->supportsEvent($this)) {
-                return $subscriber->onManyToMany($this);
+            if ($subscriber instanceof RelatedThroughEventSubscriber && $subscriber->supportsEvent($this)) {
+                return $subscriber->onSetRelated($this);
             }
         }
         return $this->execute();
@@ -70,7 +70,7 @@ class ManyToManyRepositoryEvent extends RepositoryEvent
     private function execute(): int
     {
         $ownerId = $this->owner->getPrimary();
-        $existingIds = $this->mnRepo->query()
+        $existingIds = $this->throughRepo->query()
             ->select($this->ownedColumn)
             ->where([$this->ownerColumn => $ownerId])
             ->fetchPairs($this->ownedColumn, $this->ownedColumn)
@@ -78,13 +78,13 @@ class ManyToManyRepositoryEvent extends RepositoryEvent
 
         $idsToDelete = array_diff($existingIds, $this->ownedIds);
         if ($idsToDelete === []) {
-            $this->mnRepo->findBy([
+            $this->throughRepo->findBy([
                 $this->ownerColumn => $ownerId,
                 $this->ownedColumn => $idsToDelete,
             ])->delete();
         }
         $idsToInsert = array_diff($this->ownedIds, $existingIds);
-        $this->mnRepo->insert(array_map(fn($idToInsert) => [
+        $this->throughRepo->insert(array_map(fn($idToInsert) => [
             $this->ownerColumn => $ownerId,
             $this->ownedColumn => $idToInsert,
         ], $idsToInsert));
@@ -92,9 +92,9 @@ class ManyToManyRepositoryEvent extends RepositoryEvent
         return count($idsToInsert) + count($idsToDelete);
     }
 
-    public function getMnRepo(): Repository
+    public function getThroughRepo(): Repository
     {
-        return $this->mnRepo;
+        return $this->throughRepo;
     }
 
     public function getOwner(): Entity

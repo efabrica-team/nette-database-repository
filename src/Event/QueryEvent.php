@@ -13,7 +13,7 @@ abstract class QueryEvent extends RepositoryEvent
     /**
      * @var iterable<Entity>|null
      */
-    private $entities;
+    private ?iterable $entities;
 
     /**
      * @param iterable<Entity>|null  $entities

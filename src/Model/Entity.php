@@ -6,10 +6,13 @@ use DateTimeInterface;
 use Efabrica\NetteRepository\Repository\Query;
 use Efabrica\NetteRepository\Repository\QueryInterface;
 use Efabrica\NetteRepository\Repository\Repository;
+use Efabrica\NetteRepository\Repository\RepositoryManager;
 use Efabrica\NetteRepository\Repository\Scope\FullScope;
 use Efabrica\NetteRepository\Repository\Scope\RawScope;
 use Efabrica\NetteRepository\Repository\Scope\Scope;
-use Efabrica\NetteRepository\Traits\ManyToMany\ManyToManyRepositoryEvent;
+use Efabrica\NetteRepository\Traits\RelatedThrough\GetRelatedThroughQueryEvent;
+use Efabrica\NetteRepository\Traits\RelatedThrough\SetRelatedThroughRepositoryEvent;
+use LogicException;
 use Nette\Database\Table\ActiveRow;
 use Nette\Database\Table\GroupedSelection;
 use Nette\Database\Table\Selection;
@@ -173,16 +176,17 @@ abstract class Entity extends ActiveRow
         return parent::related($key, $throughColumn);
     }
 
-    public function relatedManyToMany(string $mnRepoClass, string $otherRepoClass, string $selfColumn, string $otherColumn): Query
+    public function relatedThrough(string $throughRepoClass, string $otherRepoClass, string $selfColumn, string $otherColumn): Query
     {
-        $otherIds = $this->query($mnRepoClass)->where($selfColumn, $this->getPrimary())->fetchPairs(null, $otherColumn);
-        return $this->query($otherRepoClass)->wherePrimary($otherIds);
+        $throughRepo = $this->getManager()->byClass($throughRepoClass);
+        $otherRepo = $this->getManager()->byClass($otherRepoClass);
+        return (new GetRelatedThroughQueryEvent($this, $throughRepo, $otherRepo, $selfColumn, $otherColumn))->handle();
     }
 
-    public function setRelatedManyToMany(string $mnRepoClass, string $selfColumn, string $otherColumn, iterable $owned): self
+    public function setRelatedThrough(string $throughRepoClass, string $selfColumn, string $otherColumn, iterable $owned): self
     {
-        $mnRepo = $this->_query->getRepository()->getManager()->byClass($mnRepoClass);
-        $event = new ManyToManyRepositoryEvent($mnRepo, $this, $owned, $selfColumn, $otherColumn);
+        $throughRepo = $this->getManager()->byClass($throughRepoClass);
+        $event = new SetRelatedThroughRepositoryEvent($throughRepo, $this, $owned, $selfColumn, $otherColumn);
         $event->handle();
         return $this;
     }
@@ -192,9 +196,12 @@ abstract class Entity extends ActiveRow
      */
     protected function query(string $repository): Query
     {
-        return $this->_query->getRepository()->getManager()
-            ->byClass($repository)->query()
-        ;
+        return $this->getManager()->byClass($repository)->query();
+    }
+
+    protected function getManager(): RepositoryManager
+    {
+        return $this->_query->getRepository()->getManager();
     }
 
     public function getTableName(): string

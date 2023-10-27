@@ -5,15 +5,29 @@ namespace Efabrica\NetteRepository\Traits\Sorting;
 use Efabrica\NetteRepository\Event\InsertEventResponse;
 use Efabrica\NetteRepository\Event\InsertRepositoryEvent;
 use Efabrica\NetteRepository\Event\RepositoryEvent;
+use Efabrica\NetteRepository\Event\SelectQueryEvent;
+use Efabrica\NetteRepository\Event\SelectQueryResponse;
+use Efabrica\NetteRepository\Repository\Query;
 use Efabrica\NetteRepository\Subscriber\EventSubscriber;
-use Efabrica\NetteRepository\Traits\ManyToMany\ManyToManyEventSubscriber;
-use Efabrica\NetteRepository\Traits\ManyToMany\ManyToManyRepositoryEvent;
+use Efabrica\NetteRepository\Traits\DefaultOrder\DefaultOrderBehavior;
+use Efabrica\NetteRepository\Traits\RelatedThrough\GetRelatedThroughQueryEvent;
+use Efabrica\NetteRepository\Traits\RelatedThrough\RelatedThroughEventSubscriber;
+use Efabrica\NetteRepository\Traits\RelatedThrough\SetRelatedThroughRepositoryEvent;
 
-class SortingManyToManyEventSubscriber extends EventSubscriber implements ManyToManyEventSubscriber
+class SortingEventSubscriber extends EventSubscriber implements RelatedThroughEventSubscriber
 {
     public function supportsEvent(RepositoryEvent $event): bool
     {
         return $event->hasBehavior(SortingBehavior::class);
+    }
+
+    public function onSelect(SelectQueryEvent $event): SelectQueryResponse
+    {
+        $behavior = $event->getBehavior(SortingBehavior::class);
+        if ($event->getQuery()->getOrder() === []) {
+            $event->getQuery()->order($behavior->getColumn().' '.$behavior->getDirection());
+        }
+        return $event->handle();
     }
 
     public function onInsert(InsertRepositoryEvent $event): InsertEventResponse
@@ -30,7 +44,14 @@ class SortingManyToManyEventSubscriber extends EventSubscriber implements ManyTo
         return $event->handle();
     }
 
-    public function onManyToMany(ManyToManyRepositoryEvent $event): int
+    public function onGetRelated(GetRelatedThroughQueryEvent $event): Query
+    {
+        $behavior = $event->getBehavior(SortingBehavior::class);
+        $event->getQuery()->getBehaviors()->add(new DefaultOrderBehavior($behavior->getColumn(), $behavior->getDirection()));
+        return $event->handle();
+    }
+
+    public function onSetRelated(SetRelatedThroughRepositoryEvent $event): int
     {
         $result = $event->handle();
         $behavior = $event->getBehavior(SortingBehavior::class);

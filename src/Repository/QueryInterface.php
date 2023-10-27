@@ -172,6 +172,8 @@ interface QueryInterface extends Iterator, Countable, ArrayAccess
      */
     public function order(string $columns, ...$params);
 
+    public function getOrder(): array;
+
     /**
      * Sets limit clause, more calls rewrite old values.
      * @return self&$this
