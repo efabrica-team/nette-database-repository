@@ -77,18 +77,21 @@ class SetRelatedThroughRepositoryEvent extends RepositoryEvent
         ;
 
         $idsToDelete = array_diff($existingIds, $this->ownedIds);
-        if ($idsToDelete === []) {
+        if ($idsToDelete !== []) {
             $this->throughRepo->findBy([
                 $this->ownerColumn => $ownerId,
                 $this->ownedColumn => $idsToDelete,
             ])->delete();
         }
         $idsToInsert = array_diff($this->ownedIds, $existingIds);
-        $this->throughRepo->insert(array_map(fn($idToInsert) => [
-            $this->ownerColumn => $ownerId,
-            $this->ownedColumn => $idToInsert,
-        ], $idsToInsert));
-
+        if ($idsToInsert !== []) {
+            $this->throughRepo->insert(
+                array_map(fn($idToInsert) => [
+                    $this->ownerColumn => $ownerId,
+                    $this->ownedColumn => $idToInsert,
+                ], $idsToInsert)
+            );
+        }
         return count($idsToInsert) + count($idsToDelete);
     }
 
