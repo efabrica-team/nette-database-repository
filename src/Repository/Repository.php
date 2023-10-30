@@ -195,7 +195,7 @@ abstract class Repository
      * @param E|array ...$entities
      * @return bool|int|ActiveRow
      */
-    public function insert(iterable ...$entities)
+    public function insert(iterable $entities)
     {
         return $this->query()->insert($entities);
     }

@@ -83,7 +83,7 @@ class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscr
         foreach ($event->getEntities() as $entity) {
             $versions[] = $this->createVersion($entity, $entity->toArray(), 'create');
         }
-        $this->getVersionRepository()->insert(...$versions);
+        $this->getVersionRepository()->insert($versions);
         return $result;
     }
 
@@ -99,7 +99,7 @@ class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscr
             $oldEntity = $entities[$newEntity];
             $versions[] = $this->createVersion($oldEntity, (clone $oldEntity)->fill($newEntity)->diff(), 'update');
         }
-        $this->getVersionRepository()->insert(...$versions);
+        $this->getVersionRepository()->insert($versions);
         return $result;
     }
 
@@ -110,7 +110,7 @@ class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscr
         foreach ($event->getEntities() as $entity) {
             $versions[] = $this->createVersion($entity, [], 'delete');
         }
-        $this->getVersionRepository()->insert(...$versions);
+        $this->getVersionRepository()->insert($versions);
         return $result;
     }
 
@@ -122,7 +122,7 @@ class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscr
         foreach ($entities as $entity) {
             $versions[] = $this->createVersion($entity, $data, 'soft-delete');
         }
-        $this->getVersionRepository()->insert(...$versions);
+        $this->getVersionRepository()->insert($versions);
         return $result;
     }
 
