@@ -192,7 +192,7 @@ abstract class Repository
      ******************************/
 
     /**
-     * @param E|array ...$entities
+     * @param E[]|array[]|E|array $entities
      * @return bool|int|ActiveRow
      */
     public function insert(iterable $entities)

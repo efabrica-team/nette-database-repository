@@ -89,7 +89,7 @@ class InsertRepositoryEvent extends RepositoryEvent
      */
     protected function updateEntities($result, array $entities)
     {
-        if (is_int($result)) {
+        if (count($entities) > 1) {
             $i = 0;
             /** @var Entity $newEntity */
             foreach ($this->getRepository()->rawQuery()->whereRows(...$entities)->fetchChunked() as $newEntity) {
@@ -101,6 +101,6 @@ class InsertRepositoryEvent extends RepositoryEvent
             $this->entities[0]->internalData($result, false);
             return $this->entities[0];
         }
-        throw new LogicException('Insert query must return entity or int, returned ' . gettype($result));
+        throw new LogicException('Insert query must return entity for single insert, returned ' . gettype($result));
     }
 }
