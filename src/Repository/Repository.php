@@ -201,30 +201,27 @@ abstract class Repository
     }
 
     /**
-     * @param E|ActiveRow|array|string|int $row Entity, primary value (ID), or array where conditions
+     * @param E|ActiveRow|array|string|int $where Entity, primary value (ID), or array where conditions
      * @param iterable                     $data Data to update
      * @return int Number of affected rows
      */
-    public function update($row, iterable $data): int
+    public function update($where, iterable $data): int
     {
         $query = $this->query();
-        if (is_scalar($row)) {
-            $query->wherePrimary($row);
-        } elseif ($row instanceof ActiveRow) {
-            $query->whereRows($row);
-        } elseif (is_array($row)) {
-            if (Arrays::isList($row)) {
-                if (!reset($row) instanceof ActiveRow) {
-                    throw new LogicException('Array list must contain ActiveRow instances');
-                }
-                $query->whereRows(...$row);
-            } else {
-                $query->where($row);
-            }
-        } else {
-            throw new LogicException('Invalid row to update');
+        if (is_scalar($where)) {
+            return $query->wherePrimary($where)->update($data);
         }
-        return $query->update($data);
+        if ($where instanceof ActiveRow) {
+            return $query->update($data, [$where]);
+        }
+        if (is_array($where)) {
+            if (Arrays::isList($where)) {
+                return $query->update($data, $where);
+            }
+            return $query->where($where)->update($data);
+        }
+
+        throw new LogicException('Invalid where to update');
     }
 
     public function updateOrCreate(array $where, array $newValues = []): Entity

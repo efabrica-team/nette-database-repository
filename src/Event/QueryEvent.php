@@ -16,7 +16,7 @@ abstract class QueryEvent extends RepositoryEvent
     private ?iterable $entities;
 
     /**
-     * @param iterable<Entity>|null  $entities
+     * @param iterable<Entity>|null $entities
      */
     public function __construct(QueryInterface $query, ?iterable $entities = null)
     {
@@ -35,9 +35,17 @@ abstract class QueryEvent extends RepositoryEvent
      */
     public function getEntities(): iterable
     {
-        /** @var iterable<Entity> $query */
-        $query = $this->query;
-        return $this->entities ??= $query;
+        return $this->entities ??= $this->query;
+    }
+
+    private function findWhereRowsMatch(Entity $entity): Entity
+    {
+        foreach ($this->query->getWhereRows() as $row) {
+            if ($row instanceof Entity && $row->getPrimary() === $entity->getPrimary()) {
+                return $row->fill($entity);
+            }
+        }
+        return $entity;
     }
 
     /**

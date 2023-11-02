@@ -2,6 +2,7 @@
 
 namespace Efabrica\NetteRepository\Model;
 
+use ArrayIterator;
 use DateTimeInterface;
 use Efabrica\NetteRepository\Repository\Query;
 use Efabrica\NetteRepository\Repository\QueryInterface;
@@ -33,24 +34,6 @@ abstract class Entity extends ActiveRow
     }
 
     /**
-     * Sync state of entity into database
-     * @return $this
-     */
-    public function save(): self
-    {
-        $query = $this->_query->getRepository()->query();
-        // if entity is new, insert it
-        if ($this->internalData() === []) {
-            $insert = $query->insert($this->_modified);
-            assert($insert instanceof self);
-            $this->internalData($insert->toArray(), false);
-        } else {
-            $this->update();
-        }
-        return $this;
-    }
-
-    /**
      * @internal
      */
     public function internalData(iterable $data = [], bool $merge = true): array
@@ -79,24 +62,39 @@ abstract class Entity extends ActiveRow
     }
 
     /**
+     * Sync state of entity into database
+     * @return $this
+     */
+    public function save(): self
+    {
+        $query = $this->_query->createSelectionInstance();
+        // if entity is new, insert it
+        if ($this->internalData() === []) {
+            $insert = $query->insert($this->_modified);
+            if ($insert instanceof self) {
+                $this->internalData($insert->toArray(), false);
+            }
+        } else {
+            $this->update();
+        }
+        return $this;
+    }
+
+    /**
      * @param array<static::*,mixed> $data
      * @return bool
      */
     public function update(iterable $data = []): bool
     {
         $this->fill($data);
-        $result = parent::update($this->_modified);
+        $result = $this->_query->createSelectionInstance()->update($this->_modified, [$this]);
         $this->_modified = [];
-        return $result;
+        return (bool)$result;
     }
 
     public function delete(): int
     {
-        return $this->_query->getRepository()
-            ->query()
-            ->wherePrimary($this->getPrimary())
-            ->delete()
-        ;
+        return $this->_query->createSelectionInstance()->delete([$this]);
     }
 
     /**
@@ -240,7 +238,7 @@ abstract class Entity extends ActiveRow
         if (is_bool($a)) {
             $a = $a ? 1 : 0;
         } elseif ($a instanceof DateTimeInterface) {
-            $a->format('c');
+            $a = $a->format('c');
         } elseif (is_float($a)) {
             $a = rtrim(rtrim(number_format($a, 10, '.', ''), '0'), '.');
         }
@@ -248,5 +246,10 @@ abstract class Entity extends ActiveRow
             $a = (string)$a;
         }
         return $a;
+    }
+
+    public function getIterator(): \Iterator
+    {
+        return new ArrayIterator($this->_modified + parent::toArray());
     }
 }

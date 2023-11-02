@@ -16,12 +16,13 @@ class UpdateQueryEvent extends QueryEvent
         }
         $updateQuery = $this->query->scopeRaw();
         $update = $updateQuery->update($data);
-        foreach ($this->query->getWhereRows() as $row) {
-            if ($row instanceof Entity) {
-                $updatedEntities ??= $updateQuery->select('*')->fetchAll();
-                foreach ($updatedEntities as $entity) {
-                    if ($entity->getPrimary() === $row->getPrimary()) {
-                        $row->internalData($entity->toArray());
+        if ($this->query->getPrimary(false) !== null) {
+            foreach ($this->query->getWhereRows() as $row) {
+                if ($row instanceof Entity) {
+                    foreach ($updateQuery->where('1=1')->fetchAll() as $entity) {
+                        if ($entity->getPrimary() === $row->getPrimary()) {
+                            $row->internalData($entity->toArray());
+                        }
                     }
                 }
             }

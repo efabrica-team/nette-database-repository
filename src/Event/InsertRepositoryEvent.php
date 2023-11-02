@@ -14,9 +14,9 @@ use Traversable;
 class InsertRepositoryEvent extends RepositoryEvent
 {
     /**
-     * @var iterable<Entity> (can be array or Selection)
+     * @var Entity[]
      */
-    private iterable $entities;
+    private array $entities = [];
 
     /**
      * @param Repository       $repository
@@ -25,7 +25,9 @@ class InsertRepositoryEvent extends RepositoryEvent
     public function __construct(Repository $repository, iterable $entities)
     {
         parent::__construct($repository);
-        $this->entities = array_values($entities instanceof Traversable ? iterator_to_array($entities) : $entities);
+        foreach ($entities as $entity) {
+            $this->entities[] = $entity;
+        }
     }
 
     public function handle(): InsertEventResponse
@@ -36,13 +38,14 @@ class InsertRepositoryEvent extends RepositoryEvent
                 return $subscriber->onInsert($this);
             }
         }
-        $entities = [];
+        $query = $this->getRepository()->rawQuery();
         foreach ($this->entities as $entity) {
-            $entities[] = $entity->toArray();
+            $result = $query->insert($entity);
+            if ($result instanceof ActiveRow) {
+                $entity->internalData($result->toArray(), false);
+            }
         }
-
-        $result = $this->getRepository()->rawQuery()->insert($entities);
-        return $this->stopPropagation($this->updateEntities($result, $entities));
+        return $this->stopPropagation(count($this->entities) === 1 ? $this->entities[0] : count($this->entities));
     }
 
     /**
@@ -57,17 +60,11 @@ class InsertRepositoryEvent extends RepositoryEvent
     {
         $entityClass = $this->getRepository()->getEntityClass();
         assert(is_a($entity, $entityClass));
-        if (!is_array($this->entities)) {
-            $this->entities = iterator_to_array($this->entities);
-        }
         $this->entities[] = $entity;
     }
 
     public function removeEntity(Entity $entity): void
     {
-        if (!is_array($this->entities)) {
-            $this->entities = iterator_to_array($this->entities);
-        }
         $key = array_search($entity, $this->entities, true);
         if ($key !== false) {
             unset($this->entities[$key]);
@@ -81,26 +78,5 @@ class InsertRepositoryEvent extends RepositoryEvent
     {
         $this->subscribers = [];
         return new InsertEventResponse($this, $response);
-    }
-
-    /**
-     * @param mixed $result
-     * @return Entity|int
-     */
-    protected function updateEntities($result, array $entities)
-    {
-        if (count($entities) > 1) {
-            $i = 0;
-            /** @var Entity $newEntity */
-            foreach ($this->getRepository()->rawQuery()->whereRows(...$entities)->fetchChunked() as $newEntity) {
-                $this->entities[$i++]->internalData($newEntity, false);
-            }
-            return $result;
-        }
-        if ($result instanceof Entity) {
-            $this->entities[0]->internalData($result, false);
-            return $this->entities[0];
-        }
-        throw new LogicException('Insert query must return entity for single insert, returned ' . gettype($result));
     }
 }

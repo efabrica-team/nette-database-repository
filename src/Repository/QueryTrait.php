@@ -53,13 +53,16 @@ trait QueryTrait
         return (new InsertRepositoryEvent($this->repository, $data))->handle()->getReturn();
     }
 
-    public function update(iterable $data): int
+    public function update(iterable $data, ?array $entities = null): int
     {
+        if ($entities !== null) {
+            $this->whereRows(...$entities);
+        }
         if (!$this->doesEvents()) {
             return parent::update($data);
         }
         $data = $data instanceof Traversable ? iterator_to_array($data) : $data;
-        return (new UpdateQueryEvent($this))->handle($data);
+        return (new UpdateQueryEvent($this, $entities))->handle($data);
     }
 
     /**

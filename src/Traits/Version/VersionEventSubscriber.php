@@ -80,8 +80,10 @@ class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscr
     {
         $result = $event->handle();
         $versions = [];
+
+        $behavior = $event->getBehavior(VersionBehavior::class);
         foreach ($event->getEntities() as $entity) {
-            $versions[] = $this->createVersion($entity, $entity->toArray(), 'create');
+            $versions[] = $this->createVersion($behavior, $entity, $entity->toArray(), 'create');
         }
         $this->getVersionRepository()->insert($versions);
         return $result;
@@ -89,15 +91,19 @@ class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscr
 
     public function onUpdate(UpdateQueryEvent $event, array &$data): int
     {
-        $entities = new SplObjectStorage();
+        $originalEntities = new SplObjectStorage();
         foreach ($event->getEntities() as $entity) {
-            $entities[$entity] = clone $entity;
+            $originalEntities[$entity] = clone $entity;
         }
         $result = $event->handle($data);
         $versions = [];
-        foreach ($event->getEntities() as $newEntity) {
-            $oldEntity = $entities[$newEntity];
-            $versions[] = $this->createVersion($oldEntity, (clone $oldEntity)->fill($newEntity)->diff(), 'update');
+        $behavior = $event->getBehavior(VersionBehavior::class);
+        foreach ($event->getEntities() as $updatedEntity) {
+            $oldEntity = $originalEntities[$updatedEntity];
+            $diff = $this->createDiff($behavior, $oldEntity, $updatedEntity);
+            if ($diff !== []) {
+                $versions[] = $this->createVersion($behavior, $oldEntity, $diff, 'update');
+            }
         }
         $this->getVersionRepository()->insert($versions);
         return $result;
@@ -107,8 +113,9 @@ class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscr
     {
         $result = $event->handle();
         $versions = [];
+        $behavior = $event->getBehavior(VersionBehavior::class);
         foreach ($event->getEntities() as $entity) {
-            $versions[] = $this->createVersion($entity, [], 'delete');
+            $versions[] = $this->createVersion($behavior, $entity, $this->createDiff($behavior, $entity, $entity), 'delete');
         }
         $this->getVersionRepository()->insert($versions);
         return $result;
@@ -119,8 +126,9 @@ class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscr
         $entities = $event->getQuery()->fetchAll();
         $result = $event->handle($data);
         $versions = [];
+        $behavior = $event->getBehavior(VersionBehavior::class);
         foreach ($entities as $entity) {
-            $versions[] = $this->createVersion($entity, $data, 'soft-delete');
+            $versions[] = $this->createVersion($behavior, $entity, $data, 'soft-delete');
         }
         $this->getVersionRepository()->insert($versions);
         return $result;
@@ -130,21 +138,30 @@ class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscr
      * | Protected methods
      * \********************************************************************/
 
-    protected function createVersion(Entity $entity, array $newData, string $flag): Version
+    protected function createDiff(VersionBehavior $behavior, Entity $oldEntity, Entity $newEntity): array
+    {
+        $diff = (clone $oldEntity)->fill($newEntity)->diff();
+        foreach ($behavior->getIgnoreColumns() as $ignoreColumn) {
+            unset($diff[$ignoreColumn]);
+        }
+        foreach ($behavior->getForceColumns() as $forceColumn) {
+            $diff[$forceColumn] = $newEntity[$forceColumn];
+        }
+        return $diff;
+    }
+
+    protected function createVersion(VersionBehavior $behavior, Entity $entity, array $newData, string $flag): Version
     {
         $oldData = [];
         if ($flag === 'update') {
             foreach ($newData as $key => $value) {
                 $oldData[$key] = $entity[$key];
             }
-        } elseif ($flag === 'delete') {
-            $oldData = $entity->toArray();
-            $newData = [];
-        } elseif ($flag === 'soft-delete') {
+        } elseif ($flag === 'delete' || $flag === 'soft-delete') {
             $oldData = $entity->toArray();
         }
 
-        $recordToLink = $this->processLinkedEntries($entity);
+        $recordToLink = $this->processLinkedEntries($behavior, $entity);
         $primary = $entity->getPrimary();
         assert(is_scalar($primary));
 
@@ -180,11 +197,11 @@ class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscr
     /**
      * Create linked version entries for related tables
      */
-    private function processLinkedEntries(Entity $entity): ?Version
+    private function processLinkedEntries(VersionBehavior $behavior, Entity $entity): ?Version
     {
         $recordToLink = null;
 
-        foreach ($this->getRelatedTables($entity) as $table => $foreignId) {
+        foreach ($behavior->getRelatedTables($entity) as $table => $foreignId) {
             $recordToLink = $this->processLinkedEntry((string)$foreignId, $table, $recordToLink);
         }
 
