@@ -7,6 +7,7 @@ parameters:
             phinxlog: true
             # efabrica-specific, will be moved:
             versions: true
+        inheritance: {}
 
 services:
     repoCodeGen: Efabrica\NetteRepository\CodeGen\RepositoryCodeGenerationCommand(%appDir%, %netteRepository%)

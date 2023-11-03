@@ -7,6 +7,7 @@ use Nette\Database\Table\ActiveRow;
 
 /**
  * @mixin Repository
+ * @implements PublishInterface
  */
 trait PublishTrait
 {

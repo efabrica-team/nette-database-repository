@@ -10,9 +10,25 @@ class FileWriter
     private array $writtenFiles = [];
 
     private array $freshFiles = [];
+    private array $inheritance;
+
+    public function __construct(array $inheritance)
+    {
+        $this->inheritance = $inheritance;
+    }
 
     public function writeClass(ClassType $classType, string $dir): void
     {
+        $inheritance = $this->inheritance[$classType->getName()] ?? [];
+        if (isset($inheritance['extends'])) {
+            $classType->setExtends($inheritance['extends']);
+        }
+        if (isset($inheritance['implements'])) {
+            foreach ((array)$inheritance['implements'] as $interface) {
+                $classType->getNamespace()->addUse($interface);
+                $classType->addImplement($interface);
+            }
+        }
         $contents = "<?php\n\n" . $classType->getNamespace() . $classType;
         $contents = str_replace("\t", '    ', $contents);
         $contents = preg_replace('/\n{3,}/', "\n\n", $contents) ?? $contents;

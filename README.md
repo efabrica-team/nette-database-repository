@@ -236,6 +236,32 @@ parameters:
             phinxlog: true
 ```
 
+#### Custom Inheritance
+
+If you want to set different `extends` or `implements` for a generated class, you can do that by adding an entry into your config file:
+
+```neon
+parameters:
+    netteRepository:
+        inheritance:
+            AuthorRepositoryBase:
+                extends: 'App\Repository\PeopleRepositoryBase'
+                implements: ['App\Repository\PersonRepositoryInterface']
+            AuthorQuery:
+                extends: 'App\Repository\PeopleQueryBase'
+            Person:
+                implements: ['App\Repository\PersonInterface']
+```
+
+- Every generated class can be used for this. 
+- Key is the short class name (without namespace). 
+<small>Generated classes are made such that there are no namespace collisions, so this shouldn't prove a problem.</small>
+- `extends` must be string or null/not specified. 
+- `implements` must be string array or empty array or null/not specified. 
+- You cannot unimplement an interface.
+
+This config schema is a bit verbose, but very intuitive once you see it and easy to read.
+
 ## Behaviors and Traits
 
 #### DateBehavior

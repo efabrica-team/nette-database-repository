@@ -10,7 +10,7 @@ use Efabrica\NetteRepository\Repository\RepositoryBehaviors;
  */
 final class FullScope implements Scope
 {
-    public function apply(RepositoryBehaviors $behaviors, Repository $repository): void
+    public function apply(RepositoryBehaviors $behaviors): void
     {
     }
 }

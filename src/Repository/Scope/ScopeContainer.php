@@ -23,9 +23,9 @@ class ScopeContainer implements Scope
         $this->current = $this->full;
     }
 
-    public function apply(RepositoryBehaviors $behaviors, Repository $repository): void
+    public function apply(RepositoryBehaviors $behaviors): void
     {
-        $this->current->apply($behaviors, $repository);
+        $this->current->apply($behaviors);
     }
 
     public function withScope(Scope $scope): self

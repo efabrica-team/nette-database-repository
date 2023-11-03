@@ -15,7 +15,7 @@ class RepositoryBehaviors
 
     private ScopeContainer $scope;
 
-    private ?self $scoped = null;
+    private ?array $scoped = null;
 
     public function __construct(Repository $repository, ScopeContainer $scope)
     {
@@ -58,12 +58,12 @@ class RepositoryBehaviors
             return $this->allRaw();
         }
         if ($this->scoped === null) {
-            $this->scoped = clone $this;
-            $this->scoped->scope = $this->scope->full();
-            $this->scoped->scoped = null;
-            $this->scope->apply($this->scoped, $this->repository);
+            $scoped = new RepositoryBehaviors($this->repository, $this->scope->full());
+            $scoped->behaviors = $this->behaviors;
+            $this->scope->apply($scoped);
+            $this->scoped = $scoped->behaviors;
         }
-        return $this->scoped->all();
+        return $this->scoped;
     }
 
     public function allRaw(): array
@@ -179,5 +179,10 @@ class RepositoryBehaviors
             $scope = $scope->current();
         }
         return $scope instanceof $class;
+    }
+
+    public function getRepository(): Repository
+    {
+        return $this->repository;
     }
 }

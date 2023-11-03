@@ -113,7 +113,7 @@ class RepositoryCodeGenerationCommand extends Command
             throw new RuntimeException('No non-ignored database table found');
         }
 
-        $writer = new FileWriter();
+        $writer = new FileWriter($this->config['inheritance']);
         /** @var bool $migrate */
         $migrate = $input->getOption('migrate');
 

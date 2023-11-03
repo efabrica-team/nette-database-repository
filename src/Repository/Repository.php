@@ -67,7 +67,7 @@ abstract class Repository
      * @param Scope $scope
      * @return static cloned
      */
-    public function setScope(Scope $scope): self
+    public function withScope(Scope $scope): self
     {
         $clone = clone $this;
         $clone->behaviors->setScope($scope);
@@ -79,7 +79,7 @@ abstract class Repository
      */
     public function scopeRaw(): self
     {
-        return $this->setScope(new RawScope());
+        return $this->withScope(new RawScope());
     }
 
     /**
@@ -87,7 +87,7 @@ abstract class Repository
      */
     public function scopeFull(): self
     {
-        return $this->setScope(new FullScope());
+        return $this->withScope(new FullScope());
     }
 
     /********************************
@@ -102,7 +102,7 @@ abstract class Repository
         if ($id instanceof ActiveRow) {
             $id = $id->getPrimary();
         }
-        return $this->query()->wherePrimary($id)->first();
+        return $this->query()->wherePrimary($id)->limit(1)->fetch();
     }
 
     /**
@@ -111,7 +111,7 @@ abstract class Repository
     public function findOneBy(array $conditions = []): ?Entity
     {
         /** @var E|null $e */
-        $e = $this->findBy($conditions)->first();
+        $e = $this->findBy($conditions)->limit(1)->fetch();
         return $e;
     }
 
@@ -120,9 +120,7 @@ abstract class Repository
      */
     public function findBy(array $conditions): Query
     {
-        $q = $this->query();
-        $q->where($conditions);
-        return $q;
+        return $this->query()->where($conditions);
     }
 
     public function countBy(array $conditions): int
@@ -169,7 +167,7 @@ abstract class Repository
         if ($entity instanceof Entity) {
             return $entity;
         }
-        return $this->createRow($conditions + $newValues)->save();
+        return $this->createRow($newValues + $conditions)->save();
     }
 
     /**
@@ -504,6 +502,9 @@ abstract class Repository
      */
     final public function chunk(Query $query, ?int $chunkSize, callable $callback, ?int $count = null): void
     {
+        if ($count !== null) {
+            $query->limit($count, $query->getOffset());
+        }
         foreach ($query->chunks($chunkSize ?? Query::CHUNK_SIZE) as $chunk) {
             $callback($chunk);
         }

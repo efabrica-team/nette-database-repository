@@ -126,7 +126,7 @@ class EntityStructure
 
     public static function toClassCase(Inflector $inflector, string $string): string
     {
-        if (!Strings::endsWith($string, 'data')) {
+        if (!Strings::endsWith($string, 'ta')) {
             $string = $inflector->singularize($string);
         }
         return Strings::firstUpper($inflector->camelize($string));

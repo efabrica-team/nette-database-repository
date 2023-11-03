@@ -206,22 +206,13 @@ trait QueryTrait
     public function chunks(int $chunkSize = Query::CHUNK_SIZE): Generator
     {
         $limit = $this->sqlBuilder->getLimit();
-        if ($limit < 1) {
-            $limit = PHP_INT_MAX;
-        }
         $offset = $this->sqlBuilder->getOffset() ?? 0;
-        $chunk = (clone $this)->limit(min($chunkSize, $limit), $offset);
-        while (true) {
+        $maxOffset = ($limit === null) ? PHP_INT_MAX : ($offset + $limit);
+        do {
+            $chunk = (clone $this)->limit(min($chunkSize, $maxOffset - $offset), $offset);
             yield $chunk;
-            if (count($chunk->fetchAll()) < $chunkSize) {
-                break;
-            }
             $offset += $chunkSize;
-            if ($offset > $limit) {
-                break;
-            }
-            $chunk = (clone $this)->limit(min($chunkSize, $limit - $offset), $offset);
-        }
+        } while ($offset <= $maxOffset && count($chunk->fetchAll()) >= $chunkSize);
     }
 
     public function count(?string $column = null): int
@@ -259,15 +250,31 @@ trait QueryTrait
         return $this->repository->createRow($row, $this);
     }
 
+    public function getLimit(): ?int
+    {
+        return $this->getSqlBuilder()->getLimit();
+    }
+
+    public function getOffset(): ?int
+    {
+        return $this->getSqlBuilder()->getOffset();
+    }
+
     public function getScope(): Scope
     {
         return $this->behaviors->getScope();
     }
 
+    public function __clone()
+    {
+        parent::__clone();
+        $this->behaviors = clone $this->behaviors;
+    }
+
     public function withScope(Scope $scope): self
     {
         $clone = clone $this;
-        $clone->behaviors = $this->behaviors->withScope($scope);
+        $clone->behaviors->setScope($scope);
         return $clone;
     }
 
