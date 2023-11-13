@@ -16,15 +16,11 @@ use Efabrica\NetteRepository\Traits\RelatedThrough\SetRelatedThroughRepositoryEv
 use Nette\Database\Table\ActiveRow;
 use Nette\Database\Table\GroupedSelection;
 use Nette\Database\Table\Selection;
-use ReflectionProperty;
 
 abstract class Entity extends ActiveRow
 {
-    protected array $_modified = [];
-
+    private array $_unsavedChanges = [];
     private QueryInterface $_query;
-
-    private static ReflectionProperty $data;
 
     public function __construct(array $data, QueryInterface $query)
     {
@@ -41,7 +37,7 @@ abstract class Entity extends ActiveRow
         $newData = $merge ? (((array)$this)["\x00" . ActiveRow::class . "\x00data"] ?? []) : [];
         foreach ($data as $key => $value) {
             $newData[$key] = $value;
-            unset($this->_modified[$key]);
+            unset($this->_unsavedChanges[$key]);
         }
         if (!$merge || $data !== []) {
             array_walk($this, static fn(&$value, $key) => str_ends_with((string)$key, "\x00data") ? $value = $newData : null);
@@ -70,11 +66,11 @@ abstract class Entity extends ActiveRow
         $query = $this->_query->createSelectionInstance();
         // if entity is new, insert it
         if ($this->internalData() === []) {
-            $insert = $query->insert($this->_modified);
+            $insert = $query->insert($this->_unsavedChanges);
             if ($insert instanceof self) {
                 $this->internalData($insert->toArray(), false);
             }
-        } else {
+        } elseif ($this->_unsavedChanges !== []) {
             $this->update();
         }
         return $this;
@@ -87,8 +83,8 @@ abstract class Entity extends ActiveRow
     public function update(iterable $data = []): bool
     {
         $this->fill($data);
-        $result = $this->_query->createSelectionInstance()->update($this->_modified, [$this]);
-        $this->_modified = [];
+        $result = $this->_query->createSelectionInstance()->update($this->_unsavedChanges, [$this]);
+        $this->_unsavedChanges = [];
         return (bool)$result;
     }
 
@@ -102,13 +98,13 @@ abstract class Entity extends ActiveRow
      */
     public function __isset($key): bool
     {
-        return isset($this->_modified[$key]) || parent::__isset($key);
+        return isset($this->_unsavedChanges[$key]) || parent::__isset($key);
     }
 
     public function &__get(string $key)
     {
-        if (array_key_exists($key, $this->_modified)) {
-            return $this->_modified[$key];
+        if (array_key_exists($key, $this->_unsavedChanges)) {
+            return $this->_unsavedChanges[$key];
         }
         /** @var mixed $value */
         $value = parent::__get($key);
@@ -122,15 +118,15 @@ abstract class Entity extends ActiveRow
     public function __set($column, $value): void
     {
         if (parent::__isset($column)) {
-            if ($this->isSameValue(parent::__get($column), $value)) {
-                unset($this->_modified[$column]);
+            if (self::isSameValue(parent::__get($column), $value)) {
+                unset($this->_unsavedChanges[$column]);
             } else {
-                $this->_modified[$column] = $value;
+                $this->_unsavedChanges[$column] = $value;
             }
         } elseif ($value === null) {
-            unset($this->_modified[$column]);
+            unset($this->_unsavedChanges[$column]);
         } else {
-            $this->_modified[$column] = $value;
+            $this->_unsavedChanges[$column] = $value;
         }
     }
 
@@ -139,12 +135,12 @@ abstract class Entity extends ActiveRow
      */
     public function __unset($key)
     {
-        $this->_modified[$key] = null;
+        $this->$key = null;
     }
 
     public function toArray(): array
     {
-        return $this->_modified + parent::toArray();
+        return $this->_unsavedChanges + parent::toArray();
     }
 
     public function toOriginalArray(): array
@@ -152,9 +148,9 @@ abstract class Entity extends ActiveRow
         return parent::toArray();
     }
 
-    public function diff(): array
+    public function unsavedChanges(): array
     {
-        return $this->_modified;
+        return $this->_unsavedChanges;
     }
 
     /**
@@ -228,12 +224,12 @@ abstract class Entity extends ActiveRow
      * @param mixed $b
      * @return bool
      */
-    private function isSameValue($a, $b): bool
+    public static function isSameValue($a, $b): bool
     {
-        return $this->normalizeValue($a) === $this->normalizeValue($b);
+        return static::normalizeValue($a) === static::normalizeValue($b);
     }
 
-    private function normalizeValue($a)
+    protected static function normalizeValue($a)
     {
         if (is_bool($a)) {
             $a = $a ? 1 : 0;
@@ -250,6 +246,6 @@ abstract class Entity extends ActiveRow
 
     public function getIterator(): \Iterator
     {
-        return new ArrayIterator($this->_modified + parent::toArray());
+        return new ArrayIterator($this->toArray());
     }
 }

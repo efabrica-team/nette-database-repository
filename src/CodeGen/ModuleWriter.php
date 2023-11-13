@@ -9,9 +9,13 @@ class ModuleWriter
 {
     public static function writeConfigNeon(EntityStructure $structure, string $dbDir, FileWriter $writer): void
     {
-        $config = file($dbDir . '/config.neon', FILE_IGNORE_NEW_LINES);
+        $configPath = $dbDir . '/config.neon';
+        if (is_file($configPath) === false) {
+            $writer->writeFile($configPath, "services:\n");
+        }
+        $config = file($configPath, FILE_IGNORE_NEW_LINES);
         if ($config === false) {
-            throw new RuntimeException("Cannot read file {$dbDir}/config.neon");
+            throw new RuntimeException("Cannot read file $configPath");
         }
 
         $repoClass = $structure->repositoryNamespace->getName() . '\\' . $structure->getClassName() . 'Repository';

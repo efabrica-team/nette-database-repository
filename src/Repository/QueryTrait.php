@@ -62,6 +62,7 @@ trait QueryTrait
             return parent::update($data);
         }
         $data = $data instanceof Traversable ? iterator_to_array($data) : $data;
+
         return (new UpdateQueryEvent($this, $entities))->handle($data);
     }
 

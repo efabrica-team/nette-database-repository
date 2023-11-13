@@ -156,21 +156,6 @@ abstract class Repository
     }
 
     /**
-     * Get the first entity matching the attributes or create it.
-     * @param array $conditions Conditions to find by
-     * @param array $newValues New values to set if entity is needed to be created
-     * @return Entity inserted or found
-     */
-    public function findOrInsert(array $conditions, array $newValues = []): Entity
-    {
-        $entity = $this->findOneBy($conditions);
-        if ($entity instanceof Entity) {
-            return $entity;
-        }
-        return $this->createRow($newValues + $conditions)->save();
-    }
-
-    /**
      * Get the first entity matching the attributes or instantiate it.
      * @param array $conditions Conditions to find by
      * @param array $newValues New values to set if entity is needed to be created
@@ -182,7 +167,18 @@ abstract class Repository
         if ($entity instanceof Entity) {
             return $entity;
         }
-        return $this->createRow($conditions + $newValues);
+        return $this->createRow()->fill($newValues + $conditions);
+    }
+
+    /**
+     * Get the first entity matching the attributes or create it.
+     * @param array $conditions Conditions to find by
+     * @param array $newValues New values to set if entity is needed to be created
+     * @return Entity inserted or found
+     */
+    public function findOrInsert(array $conditions, array $newValues = []): Entity
+    {
+        return $this->findOrNew($conditions, $newValues)->save();
     }
 
     /********************************
@@ -244,7 +240,7 @@ abstract class Repository
         } else {
             $chunks = [];
             foreach ($entities as $entity) {
-                $diff = $entity->diff();
+                $diff = $entity->unsavedChanges();
                 ksort($diff);
                 $found = false;
                 foreach ($chunks as $chunk) {
@@ -262,7 +258,7 @@ abstract class Repository
         $count = 0;
         /** @var Entity[] $chunk */
         foreach ($chunks as $chunk) {
-            $count += $this->query()->whereRows(...$chunk)->update($chunk[0]->diff());
+            $count += $this->query()->whereRows(...$chunk)->update($chunk[0]->unsavedChanges());
         }
         return $count;
     }
@@ -373,11 +369,11 @@ abstract class Repository
     /**
      * @return E
      */
-    public function createRow(array $row = [], ?QueryInterface $query = null): Entity
+    public function createRow(array $existingData = [], ?QueryInterface $query = null): Entity
     {
         $class = $this->entityClass;
         $query ??= $this->query();
-        $entity = new $class($row, $query);
+        $entity = new $class($existingData, $query);
         foreach ($query->getEventSubscribers() as $event) {
             $event->onLoad($entity, $this);
         }

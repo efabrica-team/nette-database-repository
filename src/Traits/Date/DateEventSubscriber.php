@@ -2,6 +2,7 @@
 
 namespace Efabrica\NetteRepository\Traits\Date;
 
+use DateTimeImmutable;
 use Efabrica\NetteRepository\Event\InsertEventResponse;
 use Efabrica\NetteRepository\Event\InsertRepositoryEvent;
 use Efabrica\NetteRepository\Event\RepositoryEvent;
@@ -25,10 +26,10 @@ final class DateEventSubscriber extends EventSubscriber implements SoftDeleteSub
         $updatedAt = $behavior->getUpdatedAtField();
         foreach ($event->getEntities() as $entity) {
             if (isset($createdAt) && !isset($entity[$createdAt])) {
-                $entity[$createdAt] = $behavior->getNewValue();
+                $entity[$createdAt] = new DateTimeImmutable();
             }
             if (isset($updatedAt) && !isset($entity[$updatedAt])) {
-                $entity[$updatedAt] = $behavior->getNewValue();
+                $entity[$updatedAt] = new DateTimeImmutable();
             }
         }
         return $event->handle();
@@ -40,7 +41,7 @@ final class DateEventSubscriber extends EventSubscriber implements SoftDeleteSub
         $behavior = $event->getBehaviors()->get(DateBehavior::class);
         $updatedAt = $behavior->getUpdatedAtField();
         if (isset($updatedAt) && !isset($data[$updatedAt])) {
-            $data[$updatedAt] = $behavior->getNewValue();
+            $data[$updatedAt] = new DateTimeImmutable();
         }
         return $event->handle($data);
     }

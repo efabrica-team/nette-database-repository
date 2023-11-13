@@ -135,14 +135,14 @@ class EntityWriter
 
     public static function writeBody(EntityStructure $structure, FileWriter $writer): void
     {
-        if (!class_exists($structure->entityNamespace->getName() . '\\' . $structure->getClassName() . 'Body')) {
+        if (!trait_exists($structure->entityNamespace->getName() . '\\' . $structure->getClassName() . 'Body')) {
             $writer->writeClass(self::createBody($structure), $structure->entityDir);
         }
     }
 
     public static function writeEntity(EntityStructure $structure, array $structures, FileWriter $writer): void
     {
-        $entityClassName = "{$structure->entityNamespace->getName()}\\{$structure->getClassName()}";
+        $entityClassName = "{$structure->entityGenNamespace->getName()}\\{$structure->getClassName()}";
         if (!class_exists($entityClassName)) {
             $entity = self::createClass($structure, $structures);
             $writer->writeClass($entity, $structure->entityGenDir);

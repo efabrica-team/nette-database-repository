@@ -58,11 +58,14 @@ class RepositoryWriter
         $class->addConstant('TABLE_NAME', $structure->getTableName());
         $class->addComment('@generated Do Not Touch!');
         $class->addComment("@method {$structure->getClassName()}Query query()");
+        $class->addComment("@method {$structure->getClassName()}Query findBy(array \$conditions)");
+        $class->addComment("@method {$structure->getClassName()}Query search(array \$columns, string \$search)");
         $class->addComment("@method {$structure->getClassName()}[] fetchAll()");
         $class->addComment("@method {$structure->getClassName()}|null find($primaryType{$structure->getClassName()} \$$primaryName)");
-        $class->addComment("@method {$structure->getClassName()} findOrFail($primaryType{$structure->getClassName()} \$$primaryName)");
         $class->addComment("@method {$structure->getClassName()}|null findOneBy(array \$conditions)");
-        $class->addComment("@method {$structure->getClassName()}Query findBy(array \$conditions)");
+        $class->addComment("@method {$structure->getClassName()} findOrFail($primaryType{$structure->getClassName()} \$$primaryName)");
+        $class->addComment("@method {$structure->getClassName()} findOrNew(array \$conditions, array \$newValues = [])");
+        $class->addComment("@method {$structure->getClassName()} findOrInsert(array \$conditions, array \$newValues = [])");
         $class->addComment("@method {$structure->getClassName()}|int insert({$structure->getClassName()}|iterable ...\$entities)");
         $class->addComment("@method int update({$structure->getClassName()}|{$primaryType}array \$entity, iterable \$data)");
         $class->addComment("@method void updateEntities({$structure->getClassName()} ...\$entities)");

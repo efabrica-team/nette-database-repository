@@ -4,9 +4,7 @@ namespace Efabrica\NetteRepository\Event;
 
 use Efabrica\NetteRepository\Model\Entity;
 use Efabrica\NetteRepository\Repository\Repository;
-use LogicException;
 use Nette\Database\Table\ActiveRow;
-use Traversable;
 
 /**
  * @extends RepositoryEvent<Entity, InsertEventResponse>
@@ -40,12 +38,15 @@ class InsertRepositoryEvent extends RepositoryEvent
         }
         $query = $this->getRepository()->rawQuery();
         foreach ($this->entities as $entity) {
-            $result = $query->insert($entity);
-            if ($result instanceof ActiveRow) {
-                $entity->internalData($result->toArray(), false);
+            $newRow = $query->insert($entity);
+            if ($newRow instanceof ActiveRow) {
+                $entity->internalData($newRow->toArray(), false);
+                if (count($this->entities) === 1) {
+                    return $this->stopPropagation($entity);
+                }
             }
         }
-        return $this->stopPropagation(count($this->entities) === 1 ? $this->entities[0] : count($this->entities));
+        return $this->stopPropagation(count($this->entities));
     }
 
     /**

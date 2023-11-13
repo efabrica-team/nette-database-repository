@@ -1,0 +1,36 @@
+#!/usr/bin/env php
+<?php
+
+use Efabrica\NetteRepository\CodeGen\RepositoryCodeGenerationCommand;
+use Nette\DI\Container;
+use Symfony\Component\Console\Application;
+
+if (isset($_composer_autoload_path)) {
+    $_composer_autoload_path = realpath($_composer_autoload_path);
+    $index = strpos($_composer_autoload_path, '/vendor/');
+    $rootDir = substr($_composer_autoload_path, 0, $index);
+} else {
+    $dirs = [
+        __DIR__ . '/../../../../app',  // composer dependency
+        __DIR__ . '/../app', // stand-alone package
+    ];
+    foreach ($dirs as $dir) {
+        if (is_dir($dir)) {
+            $rootDir = $dir;
+            break;
+        }
+    }
+}
+
+/** @var Container $container */
+$container = require $rootDir . '/app/bootstrap.php';
+
+/** @var Application $console */
+$console = $container->getByType(Application::class);
+
+/** @var RepositoryCodeGenerationCommand $command */
+$command = $container->getByType(RepositoryCodeGenerationCommand::class);
+
+$console->add($command);
+$console->setDefaultCommand($command->getName(), true);
+$console->run();

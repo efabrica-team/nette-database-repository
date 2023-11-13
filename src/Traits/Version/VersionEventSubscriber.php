@@ -140,7 +140,7 @@ class VersionEventSubscriber extends EventSubscriber implements SoftDeleteSubscr
 
     protected function createDiff(VersionBehavior $behavior, Entity $oldEntity, Entity $newEntity): array
     {
-        $diff = (clone $oldEntity)->fill($newEntity)->diff();
+        $diff = (clone $oldEntity)->fill($newEntity)->unsavedChanges();
         foreach ($behavior->getIgnoreColumns() as $ignoreColumn) {
             unset($diff[$ignoreColumn]);
         }

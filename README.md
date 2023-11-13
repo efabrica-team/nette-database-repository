@@ -11,26 +11,17 @@ You can install this extension using [Composer](http://getcomposer.org/), the de
 composer require efabrica/nette-repository
 ```
 
-To enable the extension, you need to register its configuration file:
+To enable the extension, you need to register it in config:
 
 ```neon
-includes:
-    - %appDir%/../vendor/efabrica/nette-repository/core/config.neon
-    
-symfonyConsoleApp:
-    type: Symfony\Component\Console\Application
-    setup:
-        - add(@repoCodeGen)
+extensions:
+    netteRepo: Efabrica\NetteRepository\Bridge\EfabricaNetteRepositoryExtension
 ```
 
 Finally, you can run the repository code generation command to generate the necessary classes and files:
 
 ```sh
-$ php bin/console efabrica:nette-repo:code-gen
-```
-or for short:
-```sh
-$ php bin/console e:n:c
+$ php vendor/bin/enc
 ```
 
 ## Usage

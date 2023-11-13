@@ -30,9 +30,9 @@ class RepositoryCodeGenerationCommand extends Command
 
     private Structure $structure;
 
-    private array $config;
+    private object $config;
 
-    public function __construct(string $appDir, array $config, EntityStructureFactory $structureFactory, Structure $structure)
+    public function __construct(string $appDir, object $config, EntityStructureFactory $structureFactory, Structure $structure)
     {
         parent::__construct('efabrica:nette-repo:code-gen');
         $this->inflector = InflectorFactory::create()->build();
@@ -99,7 +99,7 @@ class RepositoryCodeGenerationCommand extends Command
 
         $structures = [];
         foreach ($tables as $table) {
-            if ($this->config['ignoreTables'][$table['name']] ?? false) {
+            if ($this->config->ignoreTables[$table['name']] ?? false) {
                 continue;
             }
             $namespace = $repoNamespaces[$table['name']] ?? $this->namespace;
@@ -113,7 +113,7 @@ class RepositoryCodeGenerationCommand extends Command
             throw new RuntimeException('No non-ignored database table found');
         }
 
-        $writer = new FileWriter($this->config['inheritance']);
+        $writer = new FileWriter($this->config->inheritance);
         /** @var bool $migrate */
         $migrate = $input->getOption('migrate');
 
