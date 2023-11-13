@@ -87,6 +87,6 @@ class EfabricaNetteRepositoryExtension extends CompilerExtension
         $builder->addDefinition($this->prefix('ownerEventSubscriber'))->setFactory(OwnerEventSubscriber::class);
         $builder->addDefinition($this->prefix('treeTraverseEventSubscriber'))->setFactory(TreeTraverseEventSubscriber::class);
         $builder->addDefinition($this->prefix('versionEventSubscriber'))->setFactory(VersionEventSubscriber::class);
-        $builder->addDefinition($this->prefix('versionRepository'))->setFactory(VersionRepository::class);
+        $builder->addDefinition('versionRepository')->setFactory(VersionRepository::class);
     }
 }
