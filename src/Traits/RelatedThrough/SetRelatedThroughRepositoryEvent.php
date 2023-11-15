@@ -89,7 +89,7 @@ class SetRelatedThroughRepositoryEvent extends RepositoryEvent
                 array_map(fn($idToInsert) => [
                     $this->ownerColumn => $ownerId,
                     $this->ownedColumn => $idToInsert,
-                ], $idsToInsert)
+                ], array_values($idsToInsert))
             );
         }
         return count($idsToInsert) + count($idsToDelete);
