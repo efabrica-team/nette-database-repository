@@ -129,7 +129,7 @@ trait QueryTrait
             }
             $where[] = implode(' AND ', $key);
         }
-        parent::where(implode(' OR ', $where), ...$values);
+        parent::where('(' . implode(') OR (', $where) . ')', ...$values);
         return $this;
     }
 

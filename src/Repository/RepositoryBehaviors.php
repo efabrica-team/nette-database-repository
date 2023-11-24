@@ -2,12 +2,14 @@
 
 namespace Efabrica\NetteRepository\Repository;
 
+use ArrayIterator;
 use Efabrica\NetteRepository\Repository\Scope\FullScope;
 use Efabrica\NetteRepository\Repository\Scope\Scope;
 use Efabrica\NetteRepository\Repository\Scope\ScopeContainer;
 use Efabrica\NetteRepository\Traits\RepositoryBehavior;
+use IteratorAggregate;
 
-class RepositoryBehaviors
+class RepositoryBehaviors implements IteratorAggregate
 {
     private array $behaviors = [];
 
@@ -184,5 +186,13 @@ class RepositoryBehaviors
     public function getRepository(): Repository
     {
         return $this->repository;
+    }
+
+    /**
+     * @return ArrayIterator<RepositoryBehavior>
+     */
+    public function getIterator(): ArrayIterator
+    {
+        return new ArrayIterator($this->all());
     }
 }

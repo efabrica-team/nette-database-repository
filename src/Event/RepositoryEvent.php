@@ -59,6 +59,11 @@ abstract class RepositoryEvent
     }
 
     /**
+     * @return iterable<Entity>
+     */
+    abstract public function getEntities(): iterable;
+
+    /**
      * @param class-string<RepositoryBehavior> $class
      * @return bool
      */

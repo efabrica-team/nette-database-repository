@@ -5,6 +5,7 @@ namespace Efabrica\NetteRepository\Traits\KeepDefault;
 use Efabrica\NetteRepository\Event\DeleteQueryEvent;
 use Efabrica\NetteRepository\Event\InsertEventResponse;
 use Efabrica\NetteRepository\Event\InsertRepositoryEvent;
+use Efabrica\NetteRepository\Event\QueryEvent;
 use Efabrica\NetteRepository\Event\RepositoryEvent;
 use Efabrica\NetteRepository\Event\UpdateQueryEvent;
 use Efabrica\NetteRepository\Model\Entity;
@@ -19,36 +20,62 @@ final class KeepDefaultEventSubscriber extends EventSubscriber implements SoftDe
         return $event->hasBehavior(KeepDefaultBehavior::class);
     }
 
-    private function ensureDefault(RepositoryEvent $event): void
+    private function ensureDefault(RepositoryEvent $event, ?array $data = null): void
     {
         $repository = $event->getRepository();
-        $behaviors = $event->getBehaviors();
+
+        $behaviors = [];
+        foreach ($repository->getBehaviors() as $behavior) {
+            if ($behavior instanceof KeepDefaultBehavior) {
+                $behaviors[] = $behavior;
+            }
+        }
+
         $batch = [];
         foreach ($behaviors as $behavior) {
-            if (!$behavior instanceof KeepDefaultBehavior) {
-                continue;
-            }
             $defaultField = $behavior->getField();
             $query = $behavior->getQuery() ?? $repository->query();
 
             $defaultTrueQuery = (clone $query)->where([$defaultField => true]);
             $count = $defaultTrueQuery->count('*');
             if ($count === 1) {
-                return;
+                continue;
             }
             if ($count === 0) {
+                if ($event instanceof QueryEvent) {
+                    // KeepDefault event supports only single primary column, PRs are welcome
+                    $primaryColumn = $repository->getPrimary()[0];
+                    $eventQuery = (clone $event->getQuery())->select($primaryColumn);
+                    $excludedEntity = (clone $query)->where("$primaryColumn NOT IN", $eventQuery)->first();
+                    if ($excludedEntity instanceof Entity) {
+                        $excludedEntity->$defaultField = true;
+                        $batch[] = $excludedEntity;
+                        continue;
+                    }
+                }
                 $entity = $query->first();
                 if ($entity instanceof Entity) {
                     $entity->$defaultField = true;
                     $batch[] = $entity;
                 }
-            } else {
-                // skip first record:
-                $defaultTrueQuery->fetch();
-                // set all other records to false:
-                while ($entity = $defaultTrueQuery->fetch()) {
-                    $entity->$defaultField = false;
-                    $batch[] = $entity;
+            } else { // $count > 1
+                $primaryColumn = $repository->getPrimary()[0];
+                $eventQuery = (clone $event->getQuery())->select($primaryColumn);
+                // if $data[$defaultField] is true, then find first entity that is in event query and set all other entities to false
+                if ($data[$defaultField] ?? false) {
+                    $entity = (clone $query)->where("$primaryColumn IN", $eventQuery)->first() ?? $query->first();
+                    $query->where(["$primaryColumn !=" => $entity->getPrimary()])->scopeRaw()->update([$defaultField => false]);
+                } else {
+                    if (is_array($data)) {
+                        // if $data[$defaultField] is false, then find first entity that is not in event query and set it to true
+                        $entity = (clone $query)->where("$primaryColumn NOT IN", $eventQuery)->first() ?? $query->first();
+                    } else {
+                        $entity = $query->first();
+                    }
+                    if ($entity instanceof Entity) {
+                        $entity->$defaultField = true;
+                        $batch[] = $entity;
+                    }
                 }
             }
         }
@@ -71,7 +98,7 @@ final class KeepDefaultEventSubscriber extends EventSubscriber implements SoftDe
         if (!isset($data[$behavior->getField()])) {
             return $result;
         }
-        $this->ensureDefault($event);
+        $this->ensureDefault($event, $data);
         return $result;
     }
 
