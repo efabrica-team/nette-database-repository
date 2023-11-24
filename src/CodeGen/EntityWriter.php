@@ -142,10 +142,7 @@ class EntityWriter
 
     public static function writeEntity(EntityStructure $structure, array $structures, FileWriter $writer): void
     {
-        $entityClassName = "{$structure->entityGenNamespace->getName()}\\{$structure->getClassName()}";
-        if (!class_exists($entityClassName)) {
-            $entity = self::createClass($structure, $structures);
-            $writer->writeClass($entity, $structure->entityGenDir);
-        }
+        $entity = self::createClass($structure, $structures);
+        $writer->writeClass($entity, $structure->entityGenDir);
     }
 }
