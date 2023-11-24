@@ -22,29 +22,37 @@ final class KeepDefaultEventSubscriber extends EventSubscriber implements SoftDe
     private function ensureDefault(RepositoryEvent $event): void
     {
         $repository = $event->getRepository();
-        /** @var KeepDefaultBehavior $behavior */
-        $behavior = $event->getBehavior(KeepDefaultBehavior::class);
-        $defaultField = $behavior->getField();
-        $query = $behavior->getQuery() ?? $repository->query();
+        $behaviors = $event->getBehaviors();
+        $batch = [];
+        foreach ($behaviors as $behavior) {
+            if (!$behavior instanceof KeepDefaultBehavior) {
+                continue;
+            }
+            $defaultField = $behavior->getField();
+            $query = $behavior->getQuery() ?? $repository->query();
 
-        $countQuery = (clone $query)->where([$defaultField => true]);
-        $count = $countQuery->count('*');
-        if ($count === 1) {
-            return;
-        }
-        if ($count === 0) {
-            $entity = $query->first();
-            if ($entity instanceof Entity) {
-                $entity->update([$defaultField => true]);
+            $defaultTrueQuery = (clone $query)->where([$defaultField => true]);
+            $count = $defaultTrueQuery->count('*');
+            if ($count === 1) {
+                return;
+            }
+            if ($count === 0) {
+                $entity = $query->first();
+                if ($entity instanceof Entity) {
+                    $entity->$defaultField = true;
+                    $batch[] = $entity;
+                }
+            } else {
+                // skip first record:
+                $defaultTrueQuery->fetch();
+                // set all other records to false:
+                while ($entity = $defaultTrueQuery->fetch()) {
+                    $entity->$defaultField = false;
+                    $batch[] = $entity;
+                }
             }
         }
-
-        // skip first record:
-        $countQuery->fetch();
-        // set all other records to false:
-        while ($entity = $countQuery->fetch()) {
-            $repository->update($entity, [$defaultField => false]);
-        }
+        $repository->updateEntities(...$batch);
     }
 
     public function onInsert(InsertRepositoryEvent $event): InsertEventResponse

@@ -243,8 +243,9 @@ abstract class Repository
                 $diff = $entity->unsavedChanges();
                 ksort($diff);
                 $found = false;
+                /** @var Entity[] $chunk */
                 foreach ($chunks as $chunk) {
-                    if ($chunk[0]->diff() === $diff) {
+                    if ($chunk[0]->unsavedChanges() === $diff) {
                         $chunk[] = $entity;
                         $found = true;
                         break;
