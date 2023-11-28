@@ -110,6 +110,13 @@ class SetRelatedThroughRepositoryEvent extends RepositoryEvent
         return $this->owned;
     }
 
+    public function getEntities(): iterable
+    {
+        return $this->throughRepo->findBy([
+            $this->ownerColumn => $this->owner[$this->ownerColumn],
+        ]);
+    }
+
     /**
      * @return (string|int)[]
      */

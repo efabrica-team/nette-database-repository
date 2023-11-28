@@ -8,6 +8,11 @@ namespace Efabrica\NetteRepository\Event;
  */
 final class InitialRepositoryEvent extends RepositoryEvent
 {
+    public function getEntities(): iterable
+    {
+        return [];
+    }
+
     public function stopPropagation(): void
     {
     }

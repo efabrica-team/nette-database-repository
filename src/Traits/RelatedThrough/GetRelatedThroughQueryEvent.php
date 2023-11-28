@@ -57,6 +57,11 @@ class GetRelatedThroughQueryEvent extends RepositoryEvent
         return $this->query;
     }
 
+    public function getEntities(): iterable
+    {
+        return $this->query;
+    }
+
     public function getThroughRepo(): Repository
     {
         return $this->throughRepo;
