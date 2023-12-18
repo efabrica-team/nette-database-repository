@@ -2,7 +2,6 @@
 
 namespace Efabrica\NetteRepository\Repository;
 
-use Efabrica\NetteRepository\Model\Entity;
 use Efabrica\NetteRepository\Repository\Scope\FullScope;
 use Efabrica\NetteRepository\Repository\Scope\RawScope;
 use Efabrica\NetteRepository\Repository\Scope\Scope;

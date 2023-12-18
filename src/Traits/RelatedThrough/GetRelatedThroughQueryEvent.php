@@ -3,7 +3,7 @@
 namespace Efabrica\NetteRepository\Traits\RelatedThrough;
 
 use Efabrica\NetteRepository\Event\RepositoryEvent;
-use Efabrica\NetteRepository\Model\Entity;
+use Efabrica\NetteRepository\Repository\Entity;
 use Efabrica\NetteRepository\Repository\Query;
 use Efabrica\NetteRepository\Repository\Repository;
 use Efabrica\NetteRepository\Subscriber\EventSubscriber;

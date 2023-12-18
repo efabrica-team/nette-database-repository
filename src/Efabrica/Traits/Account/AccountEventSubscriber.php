@@ -1,6 +1,6 @@
 <?php
 
-namespace Efabrica\NetteRepository\Traits\Account;
+namespace Efabrica\NetteRepository\Efabrica\Traits\Account;
 
 use Efabrica\IrisClient\IrisUser;
 use Efabrica\NetteRepository\Event\InsertEventResponse;

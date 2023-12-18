@@ -2,7 +2,6 @@
 
 namespace Efabrica\NetteRepository\Repository;
 
-use Efabrica\NetteRepository\Model\Entity;
 use Nette\Database\Table\Selection;
 
 /**

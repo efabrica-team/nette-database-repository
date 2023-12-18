@@ -7,9 +7,9 @@ use RuntimeException;
 
 class ModuleWriter
 {
-    public static function writeConfigNeon(EntityStructure $structure, string $dbDir, FileWriter $writer): void
+    public static function writeConfigNeon(EntityStructure $structure, FileWriter $writer, ?string $configPath): void
     {
-        $configPath = $dbDir . '/config.neon';
+        $configPath = str_replace('%DB_DIR%', $structure->dbDir, $configPath);
         if (is_file($configPath) === false) {
             $writer->writeFile($configPath, "services:\n");
         }
@@ -41,7 +41,7 @@ class ModuleWriter
             array_splice($config, $servicesLine + 1, 0, ['    ' . $serviceName . ': ' . $repoClass]);
         }
 
-        $writer->writeFile($structure->dbDir . '/config.neon', implode("\n", $config));
+        $writer->writeFile($configPath, implode("\n", $config));
     }
 
     public static function getRepoServiceName(EntityStructure $structure): string

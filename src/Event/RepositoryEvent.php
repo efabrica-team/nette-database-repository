@@ -2,7 +2,7 @@
 
 namespace Efabrica\NetteRepository\Event;
 
-use Efabrica\NetteRepository\Model\Entity;
+use Efabrica\NetteRepository\Repository\Entity;
 use Efabrica\NetteRepository\Repository\Query;
 use Efabrica\NetteRepository\Repository\Repository;
 use Efabrica\NetteRepository\Repository\RepositoryBehaviors;

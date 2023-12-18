@@ -136,7 +136,7 @@ class RepositoryCodeGenerationCommand extends Command
             $output->writeln("Generating {$structure->getClassName()} Repository");
             RepositoryWriter::writeRepository($structure, $migrate, $writer);
 
-            ModuleWriter::writeConfigNeon($structure, $dbDir, $writer);
+            ModuleWriter::writeConfigNeon($structure, $writer, $this->config->configNeonPath);
         }
         return 0;
     }

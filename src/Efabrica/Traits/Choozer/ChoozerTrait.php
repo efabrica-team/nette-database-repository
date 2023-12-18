@@ -1,8 +1,8 @@
 <?php
 
-namespace Efabrica\NetteRepository\Traits\Choozer;
+namespace Efabrica\NetteRepository\Efabrica\Traits\Choozer;
 
-use Efabrica\NetteRepository\Model\Entity;
+use Efabrica\NetteRepository\Repository\Entity;
 use Efabrica\NetteRepository\Repository\Query;
 use Efabrica\NetteRepository\Repository\Repository;
 

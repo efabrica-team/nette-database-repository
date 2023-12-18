@@ -11,14 +11,14 @@ final class FilterEventSubscriber extends EventSubscriber
 {
     public function supportsEvent(RepositoryEvent $event): bool
     {
-        return $event->hasBehavior(FilterBehavior::class);
+        return $event->hasBehavior(FilterBehaviorInterface::class);
     }
 
     public function onSelect(SelectQueryEvent $event): SelectQueryResponse
     {
         foreach ($event->getBehaviors()->all() as $behavior) {
-            if ($behavior instanceof FilterBehavior) {
-                $behavior->apply($event->getQuery());
+            if ($behavior instanceof FilterBehaviorInterface) {
+                $behavior->applyFilter($event->getQuery());
             }
         }
         return $event->handle();

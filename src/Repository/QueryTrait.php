@@ -6,7 +6,6 @@ use Efabrica\NetteRepository\Event\DeleteQueryEvent;
 use Efabrica\NetteRepository\Event\InsertRepositoryEvent;
 use Efabrica\NetteRepository\Event\SelectQueryEvent;
 use Efabrica\NetteRepository\Event\UpdateQueryEvent;
-use Efabrica\NetteRepository\Model\Entity;
 use Efabrica\NetteRepository\Repository\Scope\FullScope;
 use Efabrica\NetteRepository\Repository\Scope\RawScope;
 use Efabrica\NetteRepository\Repository\Scope\Scope;

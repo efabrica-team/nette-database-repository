@@ -8,7 +8,7 @@ use Efabrica\NetteRepository\Traits\RepositoryBehavior;
 /**
  * This behavior adds default where condition to every query.
  */
-class FilterBehavior extends RepositoryBehavior
+class FilterBehavior extends RepositoryBehavior implements FilterBehaviorInterface
 {
     private array $where;
 
@@ -17,7 +17,7 @@ class FilterBehavior extends RepositoryBehavior
         $this->where = $where;
     }
 
-    public function apply(QueryInterface $query): void
+    public function applyFilter(QueryInterface $query): void
     {
         $query->where($this->where);
     }

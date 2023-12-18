@@ -1,6 +1,6 @@
 <?php
 
-namespace Efabrica\NetteRepository\Traits\Version;
+namespace Efabrica\NetteRepository\Efabrica\Traits\Version;
 
 use Efabrica\NetteRepository\Repository\Query;
 use Efabrica\NetteRepository\Repository\Repository;

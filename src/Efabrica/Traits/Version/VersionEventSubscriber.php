@@ -1,20 +1,20 @@
 <?php
 
-namespace Efabrica\NetteRepository\Traits\Version;
+namespace Efabrica\NetteRepository\Efabrica\Traits\Version;
 
 use Efabrica\IrisClient\IrisUser;
+use Efabrica\NetteRepository\Efabrica\Traits\Owner\OwnerBehavior;
 use Efabrica\NetteRepository\Event\DeleteQueryEvent;
 use Efabrica\NetteRepository\Event\InsertEventResponse;
 use Efabrica\NetteRepository\Event\InsertRepositoryEvent;
 use Efabrica\NetteRepository\Event\RepositoryEvent;
 use Efabrica\NetteRepository\Event\UpdateQueryEvent;
-use Efabrica\NetteRepository\Model\Entity;
+use Efabrica\NetteRepository\Repository\Entity;
 use Efabrica\NetteRepository\Repository\Query;
 use Efabrica\NetteRepository\Repository\Repository;
 use Efabrica\NetteRepository\Repository\RepositoryManager;
 use Efabrica\NetteRepository\Subscriber\EventSubscriber;
 use Efabrica\NetteRepository\Traits\Date\DateBehavior;
-use Efabrica\NetteRepository\Traits\Owner\OwnerBehavior;
 use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteQueryEvent;
 use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteSubscriber;
 use Nette\Utils\Json;

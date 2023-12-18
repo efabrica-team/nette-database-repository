@@ -2,7 +2,7 @@
 
 namespace Efabrica\NetteRepository\Traits\Sorting;
 
-use Efabrica\NetteRepository\Model\Entity;
+use Efabrica\NetteRepository\Repository\Entity;
 use Efabrica\NetteRepository\Repository\Repository;
 
 /**

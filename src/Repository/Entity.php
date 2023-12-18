@@ -1,13 +1,9 @@
 <?php
 
-namespace Efabrica\NetteRepository\Model;
+namespace Efabrica\NetteRepository\Repository;
 
 use ArrayIterator;
 use DateTimeInterface;
-use Efabrica\NetteRepository\Repository\Query;
-use Efabrica\NetteRepository\Repository\QueryInterface;
-use Efabrica\NetteRepository\Repository\Repository;
-use Efabrica\NetteRepository\Repository\RepositoryManager;
 use Efabrica\NetteRepository\Repository\Scope\FullScope;
 use Efabrica\NetteRepository\Repository\Scope\RawScope;
 use Efabrica\NetteRepository\Repository\Scope\Scope;

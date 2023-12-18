@@ -1,9 +1,9 @@
 <?php
 
-namespace Efabrica\NetteRepository\Traits\Version;
+namespace Efabrica\NetteRepository\Efabrica\Traits\Version;
 
 use Closure;
-use Efabrica\NetteRepository\Model\Entity;
+use Efabrica\NetteRepository\Repository\Entity;
 use Efabrica\NetteRepository\Traits\RepositoryBehavior;
 
 class VersionBehavior extends RepositoryBehavior

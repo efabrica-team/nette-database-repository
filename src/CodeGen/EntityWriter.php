@@ -3,7 +3,7 @@
 namespace Efabrica\NetteRepository\CodeGen;
 
 use DateTimeInterface;
-use Efabrica\NetteRepository\Model\Entity;
+use Efabrica\NetteRepository\Repository\Entity;
 use Efabrica\NetteRepository\Repository\GroupedQuery;
 use Efabrica\NetteRepository\Repository\Query;
 use Nette\PhpGenerator\ClassType;

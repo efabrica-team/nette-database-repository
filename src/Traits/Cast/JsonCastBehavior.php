@@ -7,7 +7,7 @@ use Nette\Utils\JsonException;
 
 final class JsonCastBehavior extends CastBehavior
 {
-    public function getCastType(): string
+    public function getTypeOverride(): string
     {
         return 'array';
     }

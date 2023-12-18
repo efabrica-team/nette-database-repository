@@ -4,7 +4,6 @@ namespace Efabrica\NetteRepository\Repository;
 
 use ArrayAccess;
 use Countable;
-use Efabrica\NetteRepository\Model\Entity;
 use Efabrica\NetteRepository\Repository\Scope\Scope;
 use Efabrica\NetteRepository\Subscriber\RepositoryEventSubscribers;
 use Generator;

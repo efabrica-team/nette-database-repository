@@ -29,7 +29,7 @@ final class CustomCastBehavior extends CastBehavior
         $this->encode = $encodeForDB;
     }
 
-    public function getCastType(): string
+    public function getTypeOverride(): string
     {
         return $this->type;
     }

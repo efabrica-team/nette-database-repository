@@ -8,7 +8,7 @@ use Efabrica\NetteRepository\Traits\RepositoryBehavior;
  * This behavior will automatically cast field from database to entity and back.
  * There can be multiple CastBehaviors with same class in one repository.
  */
-abstract class CastBehavior extends RepositoryBehavior
+abstract class CastBehavior extends RepositoryBehavior implements TypeOverrideBehavior
 {
     private array $fields;
 
@@ -29,7 +29,7 @@ abstract class CastBehavior extends RepositoryBehavior
      * @return string used in generated entity PHPDoc
      * @example "array" or DateTimeInterface::class
      */
-    abstract public function getCastType(): string;
+    abstract public function getTypeOverride(): string;
 
     /**
      * @param mixed $encoded value from database

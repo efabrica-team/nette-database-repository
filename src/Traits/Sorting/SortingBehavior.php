@@ -3,11 +3,11 @@
 namespace Efabrica\NetteRepository\Traits\Sorting;
 
 use Efabrica\NetteRepository\Traits\DefaultOrder\DefaultOrderBehavior;
-use Efabrica\NetteRepository\Traits\RepositoryBehavior;
 
 class SortingBehavior extends DefaultOrderBehavior
 {
     public const DEFAULT_STEP = 100;
+    public const COLUMN = 'sorting';
 
     private string $column;
 
@@ -15,7 +15,7 @@ class SortingBehavior extends DefaultOrderBehavior
 
     private bool $ascending;
 
-    public function __construct(string $column = 'sorting', int $step = self::DEFAULT_STEP, bool $ascending = true)
+    public function __construct(string $column = self::COLUMN, int $step = self::DEFAULT_STEP, bool $ascending = true)
     {
         $this->column = $column;
         $this->step = $step;

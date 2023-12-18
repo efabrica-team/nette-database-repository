@@ -5,9 +5,8 @@ namespace Efabrica\NetteRepository\CodeGen;
 use DateTimeInterface;
 use Doctrine\Inflector\Inflector;
 use Doctrine\Inflector\InflectorFactory;
-use Efabrica\NetteRepository\CodeGen\EntityProperty;
 use Efabrica\NetteRepository\Repository\Repository;
-use Efabrica\NetteRepository\Traits\Cast\CastBehavior;
+use Efabrica\NetteRepository\Traits\Cast\TypeOverrideBehavior;
 use LogicException;
 use Nette\Database\Structure;
 use Nette\DI\Container;
@@ -100,31 +99,40 @@ class EntityStructureFactory
 
         $structure = new EntityStructure($properties, $table, $namespace, $dbDir, $this->inflector, $primaries, $this->structure);
 
-        $casts = [];
-        if ($this->container->hasService(ModuleWriter::getRepoServiceName($structure))) {
-            /** @var Repository $repo */
-            $repo = $this->container->getByName(ModuleWriter::getRepoServiceName($structure));
-            if ($repo instanceof Repository) {
-                foreach ($repo->getBehaviors()->all() as $behavior) {
-                    if ($behavior instanceof CastBehavior) {
-                        foreach ($behavior->getFields() as $field) {
-                            $casts[$field] = $behavior->getCastType();
-                        }
-                    }
-                }
+        $this->processTypeOverrides($structure);
 
-                foreach ($structure->getProperties() as $prop) {
-                    $propName = $casts[$prop->getName()] ?? null;
-                    if (isset($propName)) {
-                        if (str_contains($prop->getType(), '|null')) {
-                            $propName .= '|null';
-                        }
-                        $prop->setType($propName);
+        return $structure;
+    }
+
+    public function processTypeOverrides(EntityStructure $structure): void
+    {
+        if (!$this->container->hasService(ModuleWriter::getRepoServiceName($structure))) {
+            return;
+        }
+        $repo = $this->container->getByName(ModuleWriter::getRepoServiceName($structure));
+        if (!$repo instanceof Repository) {
+            return;
+        }
+
+        $casts = [];
+        foreach ($repo->getBehaviors()->all() as $behavior) {
+            if ($behavior instanceof TypeOverrideBehavior) {
+                foreach ($behavior->getFields() as $field) {
+                    if ($behavior->getTypeOverride() !== null) {
+                        $casts[$field] = $behavior->getTypeOverride();
                     }
                 }
             }
         }
 
-        return $structure;
+        foreach ($structure->getProperties() as $prop) {
+            $propName = $casts[$prop->getName()] ?? null;
+            if (isset($propName)) {
+                if (str_contains($prop->getType(), '|null')) {
+                    $propName .= '|null';
+                }
+                $prop->setType($propName);
+            }
+        }
     }
 }

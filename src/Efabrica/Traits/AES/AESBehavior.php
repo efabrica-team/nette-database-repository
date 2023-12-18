@@ -1,6 +1,6 @@
 <?php
 
-namespace Efabrica\NetteRepository\Traits\AES;
+namespace Efabrica\NetteRepository\Efabrica\Traits\AES;
 
 use Efabrica\NetteRepository\Traits\RepositoryBehavior;
 

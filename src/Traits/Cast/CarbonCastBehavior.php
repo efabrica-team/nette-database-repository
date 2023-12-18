@@ -8,7 +8,7 @@ use Throwable;
 
 final class CarbonCastBehavior extends CastBehavior
 {
-    public function getCastType(): string
+    public function getTypeOverride(): string
     {
         return CarbonImmutable::class;
     }
