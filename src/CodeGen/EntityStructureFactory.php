@@ -24,6 +24,11 @@ class EntityStructureFactory
         'smallint' => 'int',
         'mediumint' => 'int',
         'bigint' => 'int',
+        'tinyint unsigned' => 'int',
+        'int unsigned' => 'int',
+        'smallint unsigned' => 'int',
+        'mediumint unsigned' => 'int',
+        'bigint unsigned' => 'int',
         'timestamp' => 'int',
         'decimal' => 'string',
 
