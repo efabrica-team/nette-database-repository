@@ -10,9 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [0.2.0] - 2024-02-02
-
 ### Removed
-
 - efabrica internal extensions
 ### Fixed
 - unsigned types in entity code generator
