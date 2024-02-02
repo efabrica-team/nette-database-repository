@@ -28,12 +28,6 @@
             "email": "michal.lulco@gmail.com"
         }
     ],
-    "repositories": [
-        {
-            "type": "composer",
-            "url": "https://composer.efabrica.sk"
-        }
-    ],
     "require": {
         "php": "^7.4|^8.0",
         "ext-json": "*",
@@ -43,7 +37,7 @@
         "nette/database": "^3.1",
         "nette/di": "^3.1",
         "nette/php-generator": "^3.6",
-        "nikic/php-parser": "^4.16"
+        "nikic/php-parser": "^4.16",
         "symfony/console": "^5.4",
         "symfony/polyfill-php80": "^1.27"
     },
