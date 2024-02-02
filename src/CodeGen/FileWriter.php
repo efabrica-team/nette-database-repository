@@ -10,6 +10,7 @@ class FileWriter
     private array $writtenFiles = [];
 
     private array $freshFiles = [];
+
     private array $inheritance;
 
     public function __construct(array $inheritance)

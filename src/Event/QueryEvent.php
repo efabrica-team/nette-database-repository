@@ -38,16 +38,6 @@ abstract class QueryEvent extends RepositoryEvent
         return $this->entities ??= $this->query;
     }
 
-    private function findWhereRowsMatch(Entity $entity): Entity
-    {
-        foreach ($this->query->getWhereRows() as $row) {
-            if ($row instanceof Entity && $row->getPrimary() === $entity->getPrimary()) {
-                return $row->fill($entity);
-            }
-        }
-        return $entity;
-    }
-
     /**
      * @return RepositoryBehaviors Ensures behaviors that were removed after query() was called will still be available
      */

@@ -7,6 +7,7 @@ use Efabrica\NetteRepository\Repository\Entity;
 use Efabrica\NetteRepository\Repository\Query;
 use Efabrica\NetteRepository\Repository\Repository;
 use Efabrica\NetteRepository\Subscriber\EventSubscriber;
+use IteratorIterator;
 use LogicException;
 
 class GetRelatedThroughQueryEvent extends RepositoryEvent
@@ -59,7 +60,7 @@ class GetRelatedThroughQueryEvent extends RepositoryEvent
 
     public function getEntities(): iterable
     {
-        return $this->query;
+        return new IteratorIterator($this->query);
     }
 
     public function getThroughRepo(): Repository

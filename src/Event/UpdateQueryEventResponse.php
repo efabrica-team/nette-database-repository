@@ -11,6 +11,5 @@ class UpdateQueryEventResponse
         if (!$event->hasEnded()) {
             throw new LogicException('Event has not ended yet');
         }
-
     }
 }

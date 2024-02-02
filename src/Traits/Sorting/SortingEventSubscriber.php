@@ -5,8 +5,6 @@ namespace Efabrica\NetteRepository\Traits\Sorting;
 use Efabrica\NetteRepository\Event\InsertEventResponse;
 use Efabrica\NetteRepository\Event\InsertRepositoryEvent;
 use Efabrica\NetteRepository\Event\RepositoryEvent;
-use Efabrica\NetteRepository\Event\SelectQueryEvent;
-use Efabrica\NetteRepository\Event\SelectQueryResponse;
 use Efabrica\NetteRepository\Repository\Query;
 use Efabrica\NetteRepository\Subscriber\EventSubscriber;
 use Efabrica\NetteRepository\Traits\DefaultOrder\DefaultOrderBehavior;

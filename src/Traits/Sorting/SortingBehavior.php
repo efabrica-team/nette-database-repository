@@ -20,7 +20,7 @@ class SortingBehavior extends DefaultOrderBehavior
         $this->column = $column;
         $this->step = $step;
         $this->ascending = $ascending;
-        parent::__construct($column.' '.$this->getDirection());
+        parent::__construct($column . ' ' . $this->getDirection());
     }
 
     public function getColumn(): string

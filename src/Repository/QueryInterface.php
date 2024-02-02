@@ -100,7 +100,7 @@ interface QueryInterface extends Iterator, Countable, ArrayAccess
 
     /**
      * @param bool $throw
-     * @return scalar|array
+     * @return scalar|array|null
      */
     public function getPrimary(bool $throw = true);
 

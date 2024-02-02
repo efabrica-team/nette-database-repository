@@ -9,6 +9,7 @@ use Efabrica\NetteRepository\Repository\Scope\RawScope;
 use Efabrica\NetteRepository\Repository\Scope\Scope;
 use Efabrica\NetteRepository\Traits\RelatedThrough\GetRelatedThroughQueryEvent;
 use Efabrica\NetteRepository\Traits\RelatedThrough\SetRelatedThroughRepositoryEvent;
+use Iterator;
 use Nette\Database\Table\ActiveRow;
 use Nette\Database\Table\GroupedSelection;
 use Nette\Database\Table\Selection;
@@ -16,6 +17,7 @@ use Nette\Database\Table\Selection;
 abstract class Entity extends ActiveRow
 {
     private array $_unsavedChanges = [];
+
     private QueryInterface $_query;
 
     public function __construct(array $data, QueryInterface $query)
@@ -240,7 +242,7 @@ abstract class Entity extends ActiveRow
         return $a;
     }
 
-    public function getIterator(): \Iterator
+    public function getIterator(): Iterator
     {
         return new ArrayIterator($this->toArray());
     }

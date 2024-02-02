@@ -6,7 +6,7 @@ use Efabrica\NetteRepository\Repository\Entity;
 use Efabrica\NetteRepository\Repository\Repository;
 
 /**
- * @implements SortingInterface
+ * @implements SortingInterface<*>
  * @mixin Repository
  */
 trait SortingTrait

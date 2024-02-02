@@ -64,7 +64,7 @@ abstract class RepositoryEvent
     abstract public function getEntities(): iterable;
 
     /**
-     * @param class-string<RepositoryBehavior> $class
+     * @param class-string<RepositoryBehavior>|class-string $class
      * @return bool
      */
     public function hasBehavior(string $class): bool

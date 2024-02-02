@@ -6,6 +6,7 @@ use Efabrica\NetteRepository\Event\RepositoryEvent;
 use Efabrica\NetteRepository\Repository\Entity;
 use Efabrica\NetteRepository\Repository\Repository;
 use Efabrica\NetteRepository\Subscriber\EventSubscriber;
+use IteratorIterator;
 use LogicException;
 
 class SetRelatedThroughRepositoryEvent extends RepositoryEvent
@@ -112,9 +113,9 @@ class SetRelatedThroughRepositoryEvent extends RepositoryEvent
 
     public function getEntities(): iterable
     {
-        return $this->throughRepo->findBy([
+        return new IteratorIterator($this->throughRepo->findBy([
             $this->ownerColumn => $this->owner[$this->ownerColumn],
-        ]);
+        ]));
     }
 
     /**

@@ -60,7 +60,11 @@ final class KeepDefaultEventSubscriber extends EventSubscriber implements SoftDe
                 }
             } else { // $count > 1
                 $primaryColumn = $repository->getPrimary()[0];
-                $eventQuery = (clone $event->getQuery())->select($primaryColumn);
+                if ($event instanceof QueryEvent) {
+                    $eventQuery = (clone $event->getQuery())->select($primaryColumn);
+                } else {
+                    $eventQuery = $event->getRepository()->query()->select($primaryColumn);
+                }
                 // if $data[$defaultField] is true, then find first entity that is in event query and set all other entities to false
                 if ($data[$defaultField] ?? false) {
                     $entity = (clone $query)->where("$primaryColumn IN", $eventQuery)->first() ?? $query->first();

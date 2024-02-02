@@ -44,8 +44,10 @@ class EfabricaNetteRepositoryExtension extends CompilerExtension
     {
         $builder = $this->getContainerBuilder();
 
-        $builder->addDefinition($this->prefix('codeGenCommand'))->setFactory(RepositoryCodeGenerationCommand::class,
-            [$builder->parameters['appDir'], $this->config]);
+        $builder->addDefinition($this->prefix('codeGenCommand'))->setFactory(
+            RepositoryCodeGenerationCommand::class,
+            [$builder->parameters['appDir'], $this->config]
+        );
         $builder->addDefinition($this->prefix('entityStructureFactory'))->setFactory(EntityStructureFactory::class);
         $builder->addDefinition($this->prefix('repoDeps'))->setFactory(RepositoryDependencies::class);
         $builder->addDefinition($this->prefix('repoManager'))->setFactory(RepositoryManager::class);

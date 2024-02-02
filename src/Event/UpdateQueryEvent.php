@@ -77,7 +77,6 @@ class UpdateQueryEvent extends QueryEvent
         return $diff;
     }
 
-
     public function stopPropagation(): int
     {
         return 0;

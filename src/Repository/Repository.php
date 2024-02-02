@@ -200,6 +200,7 @@ abstract class Repository
      */
     public function update($where, iterable $data): int
     {
+        /** @var mixed $where */
         $query = $this->query();
         if (is_scalar($where)) {
             return $query->wherePrimary($where)->update($data);
