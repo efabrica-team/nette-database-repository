@@ -216,15 +216,14 @@ them, you have to delete them first.
 
 It is also possible to ignore some tables. To do that, you can modify the `ignoredTables` parameter in the config file:
 
-```neon
-parameters:
-    netteRepository:
-        ignoreTables:
-            # These are the defaultly ignored tables:
-            migrations: true
-            migration_log: true
-            phoenix_log: true
-            phinxlog: true
+```neon=
+netteRepo:
+    ignoreTables:
+        # These are the defaultly ignored tables:
+        migrations: true
+        migration_log: true
+        phoenix_log: true
+        phinxlog: true
 ```
 
 #### Custom Inheritance
@@ -232,16 +231,15 @@ parameters:
 If you want to set different `extends` or `implements` for a generated class, you can do that by adding an entry into your config file:
 
 ```neon
-parameters:
-    netteRepository:
-        inheritance:
-            AuthorRepositoryBase:
-                extends: 'App\Repository\PeopleRepositoryBase'
-                implements: ['App\Repository\PersonRepositoryInterface']
-            AuthorQuery:
-                extends: 'App\Repository\PeopleQueryBase'
-            Person:
-                implements: ['App\Repository\PersonInterface']
+netteRepo:
+    inheritance:
+        AuthorRepositoryBase:
+            extends: 'App\Repository\PeopleRepositoryBase'
+            implements: ['App\Repository\PersonRepositoryInterface']
+        AuthorQuery:
+            extends: 'App\Repository\PeopleQueryBase'
+        Person:
+            implements: ['App\Repository\PersonInterface']
 ```
 
 - Every generated class can be used for this. 
