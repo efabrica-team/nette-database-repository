@@ -254,17 +254,17 @@ trait QueryTrait
     {
         $entity = $this->repository->createRow($row, $this);
 
-        /** @var string|null $signature */
         $signature = $entity->getSignature(false);
+        if ($signature === '') {
+            return $entity;
+        }
 
-        if (isset($signature, $this->entityState[$signature])) {
+        if (isset($this->entityState[$signature])) {
             $oldEntity = $this->entityState[$signature];
             $oldEntity->internalData($entity->toArray(), false);
             return $oldEntity;
         }
-
-        $this->entityState[$signature] ??= $entity;
-        return $entity;
+        return $this->entityState[$signature] = $entity;
     }
 
     public function getLimit(): ?int
