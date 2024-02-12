@@ -37,6 +37,9 @@ class UpdateQueryEvent extends QueryEvent
             return;
         }
         $whereRows = $rawQuery->getWhereRows();
+        if ($whereRows === []) {
+            $whereRows = $this->getEntities();
+        }
         foreach ($rawQuery->where('1=1')->fetchAll() as $newRow) {
             foreach ($whereRows as $entity) {
                 if (!$entity instanceof Entity) {

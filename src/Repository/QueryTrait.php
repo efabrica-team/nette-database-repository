@@ -28,6 +28,8 @@ trait QueryTrait
 
     private array $whereRows = [];
 
+    private array $entityState = [];
+
     public function insert(iterable $data)
     {
         if ($data === []) {
@@ -42,9 +44,9 @@ trait QueryTrait
         if (is_array($data)) {
             if (Arrays::isList($data)) {
                 $data = array_map(fn($row) => $row instanceof Entity ? $row :
-                    $this->repository->createRow($row, $this), $data);
+                    $this->createRow($row), $data);
             } else {
-                $data = [$this->repository->createRow($data, $this)];
+                $data = [$this->createRow($data)];
             }
         } elseif ($data instanceof Entity) {
             $data = [$data];
@@ -245,9 +247,24 @@ trait QueryTrait
         return !$this->behaviors->isScope(RawScope::class);
     }
 
+    /**
+     * Ensure that the Query returns the same entity instance for the same primary key.
+     */
     protected function createRow(array $row = []): Entity
     {
-        return $this->repository->createRow($row, $this);
+        $entity = $this->repository->createRow($row, $this);
+
+        /** @var string|null $signature */
+        $signature = $entity->getSignature(false);
+
+        if (isset($signature, $this->entityState[$signature])) {
+            $oldEntity = $this->entityState[$signature];
+            $oldEntity->internalData($entity->toArray(), false);
+            return $oldEntity;
+        }
+
+        $this->entityState[$signature] ??= $entity;
+        return $entity;
     }
 
     public function getLimit(): ?int
@@ -269,6 +286,7 @@ trait QueryTrait
     {
         parent::__clone();
         $this->behaviors = clone $this->behaviors;
+        $this->entityState = [];
     }
 
     public function withScope(Scope $scope): self
