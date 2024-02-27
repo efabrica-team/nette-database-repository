@@ -13,6 +13,7 @@ use Iterator;
 use Nette\Database\Table\ActiveRow;
 use Nette\Database\Table\GroupedSelection;
 use Nette\Database\Table\Selection;
+use Nette\InvalidStateException;
 
 abstract class Entity extends ActiveRow
 {
@@ -245,5 +246,55 @@ abstract class Entity extends ActiveRow
     public function getIterator(): Iterator
     {
         return new ArrayIterator($this->toArray());
+    }
+
+    /**
+     * @param bool $throw true = throw exception if primary is not set, false = return null if primary is not set
+     * @param bool $original true = do not include unsaved changes, false = include unsaved primary key changes
+     * @return int|string|(int|string)[]|DateTimeInterface|null primary key value
+     */
+    public function getPrimary(bool $throw = true, bool $original = true)
+    {
+        $primary = $this->_query->getPrimary($throw);
+        if ($primary === null) {
+            return null;
+        }
+        $self = $this;
+        if ($original) {
+            $self = $this->toOriginalArray();
+        }
+        if (!is_array($primary)) {
+            if (isset($self[$primary])) {
+                return $self[$primary];
+            }
+            if ($throw) {
+                throw new InvalidStateException("Row does not contain primary $primary column data.");
+            }
+            return null;
+        }
+
+        $primaryVal = [];
+        foreach ($primary as $key) {
+            if (isset($self[$key])) {
+                $primaryVal[$key] = $self[$key];
+            } else {
+                if ($throw) {
+                    throw new InvalidStateException("Row does not contain primary $key column data.");
+                }
+                return null;
+            }
+        }
+
+        return $primaryVal;
+    }
+
+    /**
+     * @param bool $throw true = throw exception if primary is not set, false = return null if primary is not set
+     * @param bool $original true = do not include unsaved changes, false = include unsaved primary key changes
+     * @return string of primary key values joined by |
+     */
+    public function getSignature(bool $throw = true, bool $original = true): string
+    {
+        return implode('|', (array)$this->getPrimary($throw, $original));
     }
 }

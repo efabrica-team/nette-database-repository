@@ -44,10 +44,11 @@ interface QueryInterface extends Iterator, Countable, ArrayAccess
     public function where($condition, ...$params): self;
 
     /**
-     * @param ActiveRow|array|scalar ...$entities primary value, ActiveRow or associative array of primary values
+     * @param Entity[] $entities
+     * @param bool     $original true = do not use unsaved changes
      * @return self&$this
      */
-    public function whereRows(...$entities): self;
+    public function whereEntities(array $entities, bool $original = true): self;
 
     /**
      * @return self&$this
@@ -241,8 +242,6 @@ interface QueryInterface extends Iterator, Countable, ArrayAccess
      * @param int|string $active
      */
     public function getReferencingTable(string $table, ?string $column = null, $active = null): ?GroupedSelection;
-
-    public function getWhereRows(): array;
 
     /**
      * @return E

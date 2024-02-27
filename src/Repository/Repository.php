@@ -11,9 +11,9 @@ use LogicException;
 use Nette\Application\BadRequestException;
 use Nette\Database\Explorer;
 use Nette\Database\Table\ActiveRow;
-use Nette\Utils\Arrays;
 use PDOException;
 use Throwable;
+use Traversable;
 
 /**
  * @template E of Entity
@@ -185,8 +185,8 @@ abstract class Repository
      ******************************/
 
     /**
-     * @param E[]|array[]|E|array $entities
-     * @return bool|int|ActiveRow
+     * @param E[]|array[]|E|array $entities Entity or array of entities to insert
+     * @return bool|int|ActiveRow Number of affected rows or inserted entity
      */
     public function insert(iterable $entities)
     {
@@ -202,15 +202,16 @@ abstract class Repository
     {
         /** @var mixed $where */
         $query = $this->query();
+        if ($where instanceof Entity) {
+            return $query->update($data, [$where]);
+        }
         if (is_scalar($where)) {
             return $query->wherePrimary($where)->update($data);
         }
-        if ($where instanceof ActiveRow) {
-            return $query->update($data, [$where]);
-        }
         if (is_array($where)) {
-            if (Arrays::isList($where)) {
-                return $query->update($data, $where);
+            $entityArray = self::toEntityArray($where);
+            if ($entityArray !== null) {
+                return $query->update($data, $entityArray);
             }
             return $query->where($where)->update($data);
         }
@@ -218,6 +219,11 @@ abstract class Repository
         throw new LogicException('Invalid where to update');
     }
 
+    /**
+     * @param array $where Conditions to find by
+     * @param array $newValues New values to set if entity is needed to be created
+     * @return Entity inserted or found
+     */
     public function updateOrCreate(array $where, array $newValues = []): Entity
     {
         $entity = $this->findOneBy($where);
@@ -259,11 +265,18 @@ abstract class Repository
         $count = 0;
         /** @var Entity[] $chunk */
         foreach ($chunks as $chunk) {
-            $count += $this->query()->whereRows(...$chunk)->update($chunk[0]->unsavedChanges());
+            $count += $this->query()->update($chunk[0]->unsavedChanges(), $chunk);
         }
         return $count;
     }
 
+    /**
+     * @param Entity $owner Entity owning the relation (ex.: Group)
+     * @param array  $owned Entities to be related to the owner (ex.: User[])
+     * @param string $ownerColumn Column in the through table that references the owner (ex.: "group_id")
+     * @param string $ownedColumn Column in the through table that references the owned (ex.: "user_id")
+     * @return int
+     */
     public function updateManyToMany(Entity $owner, array $owned, string $ownerColumn, string $ownedColumn): int
     {
         $event = new SetRelatedThroughRepositoryEvent($this, $owner, $owned, $ownerColumn, $ownedColumn);
@@ -271,18 +284,29 @@ abstract class Repository
     }
 
     /**
-     * @param ActiveRow|array|scalar ...$entities
+     * @param ActiveRow|array|scalar $entities
      * @return int
      */
-    public function delete(...$entities): int
+    public function delete($entities): int
     {
+        $entityArray = self::toEntityArray($entities);
+        if ($entityArray !== null) {
+            return $this->query()->delete($entityArray);
+        }
+        return $this->query()->where($entities)->delete();
+    }
+
+    private static function toEntityArray($entities): ?array
+    {
+        if (!is_iterable($entities)) {
+            return null;
+        }
         foreach ($entities as $entity) {
             if (!$entity instanceof Entity) {
-                return $this->query()->whereRows(...$entities)->delete();
+                return null;
             }
         }
-        /** @var Entity[] $entities */
-        return $this->query()->delete($entities);
+        return $entities instanceof Traversable ? iterator_to_array($entities) : $entities;
     }
 
     /********************************

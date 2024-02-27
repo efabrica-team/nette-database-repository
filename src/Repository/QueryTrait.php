@@ -26,8 +26,6 @@ trait QueryTrait
 
     protected RepositoryBehaviors $behaviors;
 
-    private array $whereRows = [];
-
     private array $entityState = [];
 
     public function insert(iterable $data)
@@ -54,16 +52,25 @@ trait QueryTrait
         return (new InsertRepositoryEvent($this->repository, $data))->handle()->getReturn();
     }
 
+    /**
+     * @param iterable   $data Data to update
+     * @param array|null $entities Entities passed by reference to be updated
+     * @return int
+     */
     public function update(iterable $data, ?array $entities = null): int
     {
         if ($entities !== null) {
-            $this->whereRows(...$entities);
+            $this->whereEntities($entities);
         }
         if (!$this->doesEvents()) {
             return parent::update($data);
         }
         $data = $data instanceof Traversable ? iterator_to_array($data) : $data;
-
+        foreach (($entities ?? []) as $entity) {
+            if ($entity instanceof Entity) {
+                $entity->fill($data);
+            }
+        }
         return (new UpdateQueryEvent($this, $entities))->handle($data);
     }
 
@@ -76,7 +83,7 @@ trait QueryTrait
             return parent::delete();
         }
         if ($entities !== null) {
-            $this->whereRows(...$entities);
+            $this->whereEntities($entities);
         }
         return (new DeleteQueryEvent($this, $entities))->handle();
     }
@@ -89,11 +96,6 @@ trait QueryTrait
         parent::execute();
     }
 
-    /**
-     * @param array|string|ActiveRow $condition
-     * @param mixed                  ...$params
-     * @return self&$this
-     */
     public function where($condition, ...$params): self
     {
         if ($condition instanceof ActiveRow) {
@@ -104,9 +106,8 @@ trait QueryTrait
         return $this;
     }
 
-    public function whereRows(...$entities): self
+    public function whereEntities(array $entities, bool $original = true): self
     {
-        $this->whereRows = $entities;
         $where = $values = [];
         $primary = $this->getPrimary();
         if ($primary === null) {
@@ -114,32 +115,24 @@ trait QueryTrait
         }
         if (is_string($primary)) {
             foreach ($entities as $entity) {
-                $values[] = is_scalar($entity) ? $entity : $entity[$primary];
+                $entity = $original ? $entity->toOriginalArray() : $entity;
+                $values[] = $entity[$primary];
             }
-            return $this->where($primary, $values);
+            $this->where($primary, $values);
+            return $this;
         }
-        foreach ($entities as $row) {
+
+        foreach ($entities as $entity) {
             $key = [];
-            foreach ($primary as $i => $primaryKey) {
+            foreach ($primary as $primaryKey) {
                 $key[] = $primaryKey . ' = ?';
-                $value = $row[$primaryKey] ?? $row[$i] ?? null;
-                if ($value === null) {
-                    throw new LogicException("Primary key value for $primaryKey is not set");
-                }
-                $values[] = $value;
+                $entity = $original ? $entity->toOriginalArray() : $entity;
+                $values[] = $entity[$primaryKey];
             }
             $where[] = implode(' AND ', $key);
         }
         parent::where('(' . implode(') OR (', $where) . ')', ...$values);
         return $this;
-    }
-
-    /**
-     * @internal
-     */
-    public function getWhereRows(): array
-    {
-        return $this->whereRows;
     }
 
     public function getOrder(): array

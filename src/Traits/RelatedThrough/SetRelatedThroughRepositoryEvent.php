@@ -26,7 +26,10 @@ class SetRelatedThroughRepositoryEvent extends RepositoryEvent
 
     /**
      * @param Repository $throughRepo Many to many repository
-     * @param iterable   $owned Entities or IDs
+     * @param Entity   $owner Owner entity (ex.: Group)
+     * @param iterable $owned Entities or IDs that should be related to the owner (ex.: User[])
+     * @param string   $ownerColumn Column in the through table that references the owner (ex.: "group_id")
+     * @param string   $ownedColumn Column in the through table that references the owned (ex.: "user_id")
      */
     public function __construct(Repository $throughRepo, Entity $owner, iterable $owned, string $ownerColumn, string $ownedColumn)
     {

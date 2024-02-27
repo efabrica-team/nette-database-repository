@@ -27,28 +27,25 @@ class UpdateQueryEvent extends QueryEvent
         }
         $rawQuery = $this->query->scopeRaw();
         $update = $rawQuery->update($data);
-        $this->updateInternalData($rawQuery);
+        $this->refreshEntities($data, $rawQuery);
         return $update;
     }
 
-    private function updateInternalData(QueryInterface $rawQuery): void
+    private function refreshEntities(array $data, QueryInterface $rawQuery): void
     {
-        if ($rawQuery->getPrimary(false) === null) {
+        $entities = $this->getEntities();
+        if (!is_array($entities) || $this->getQuery()->getPrimary(false) === null) {
             return;
         }
-        $whereRows = $rawQuery->getWhereRows();
-        if ($whereRows === []) {
-            $whereRows = $this->getEntities();
-        }
-        foreach ($rawQuery->where('1=1')->fetchAll() as $newRow) {
-            foreach ($whereRows as $entity) {
-                if (!$entity instanceof Entity) {
-                    continue;
+
+        $newEntities = $this->fetchNewEntities($data, $entities, $rawQuery);
+        foreach ($entities as $entity) {
+            $signature = $entity->getSignature(true, false);
+            if ($signature !== '') {
+                if (!isset($newEntities[$signature])) {
+                    throw new LogicException('Entity was not found after update. This is internal error of the library. Please report it.');
                 }
-                if ($entity->getPrimary() === $newRow->getPrimary()) {
-                    $entity->internalData($newRow->toArray(), false);
-                    break;
-                }
+                $entity->internalData($newEntities[$signature]->toArray(), false);
             }
         }
     }
@@ -83,5 +80,27 @@ class UpdateQueryEvent extends QueryEvent
     public function stopPropagation(): int
     {
         return 0;
+    }
+
+    /**
+     * @param array          $updateData
+     * @param array          $entities
+     * @param QueryInterface $rawQuery
+     * @return Entity[]
+     */
+    private function fetchNewEntities(array $updateData, array $entities, QueryInterface $rawQuery): array
+    {
+        $primaryKeys = $this->getRepository()->getPrimary();
+        $newEntities = [];
+        if (array_intersect_key($updateData, array_flip($primaryKeys)) !== []) {
+            $newEntityQuery = $this->getRepository()->query()->whereEntities($entities, false);
+        } else {
+            $newEntityQuery = $rawQuery->where('1=1')->fetchAll();
+        }
+        /** @var Entity $entity */
+        foreach ($newEntityQuery as $entity) {
+            $newEntities[$entity->getSignature()] = $entity;
+        }
+        return $newEntities;
     }
 }
