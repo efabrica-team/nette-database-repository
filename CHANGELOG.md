@@ -6,17 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-
 ### Added
-
 - Entity->getPrimary() and Entity->getSignature() was reimplemented and has a new optional $original parameter now
-### Fixed
 
+### Fixed
 - updating internal data of entities (sometimes they were not updated)
 - fixed event subscribers getting old entities in onUpdate when using update directly on findBy query
 
 ### Changed
-
 - Query->whereRows() now has different use case and because of that was renamed to whereEntities()
 
 ## [0.2.1] - 2024-02-02
