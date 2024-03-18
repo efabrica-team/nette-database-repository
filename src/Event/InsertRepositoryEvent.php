@@ -36,6 +36,7 @@ class InsertRepositoryEvent extends RepositoryEvent
                 return $subscriber->onInsert($this);
             }
         }
+        $this->ended = true;
         $query = $this->getRepository()->rawQuery();
         foreach ($this->entities as $entity) {
             $newRow = $query->insert($entity);

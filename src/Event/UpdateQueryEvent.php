@@ -23,6 +23,7 @@ class UpdateQueryEvent extends QueryEvent
                 return $subscriber->onUpdate($this, $data);
             }
         }
+        $this->ended = true;
 
         $this->diff = new SplObjectStorage();
         foreach ($this->getEntities() as $entity) {

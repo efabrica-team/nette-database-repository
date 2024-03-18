@@ -12,6 +12,7 @@ class DeleteQueryEvent extends QueryEvent
                 return $subscriber->onDelete($this);
             }
         }
+        $this->ended = true;
         return new DeleteEventResponse($this, $this->query->scopeRaw()->delete());
     }
 
