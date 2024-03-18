@@ -6,8 +6,10 @@ use DateTimeImmutable;
 use Efabrica\NetteRepository\Event\InsertEventResponse;
 use Efabrica\NetteRepository\Event\InsertRepositoryEvent;
 use Efabrica\NetteRepository\Event\RepositoryEvent;
+use Efabrica\NetteRepository\Event\UpdateEventResponse;
 use Efabrica\NetteRepository\Event\UpdateQueryEvent;
 use Efabrica\NetteRepository\Subscriber\EventSubscriber;
+use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteEventResponse;
 use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteQueryEvent;
 use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteSubscriber;
 
@@ -35,7 +37,7 @@ final class DateEventSubscriber extends EventSubscriber implements SoftDeleteSub
         return $event->handle();
     }
 
-    public function onUpdate(UpdateQueryEvent $event, array &$data): int
+    public function onUpdate(UpdateQueryEvent $event, array &$data): UpdateEventResponse
     {
         /** @var DateBehavior $behavior */
         $behavior = $event->getBehaviors()->get(DateBehavior::class);
@@ -46,8 +48,8 @@ final class DateEventSubscriber extends EventSubscriber implements SoftDeleteSub
         return $event->handle($data);
     }
 
-    public function onSoftDelete(SoftDeleteQueryEvent $event, array &$data): int
+    public function onSoftDelete(SoftDeleteQueryEvent $event, array &$data): SoftDeleteEventResponse
     {
-        return $this->onUpdate($event, $data);
+        return SoftDeleteEventResponse::fromUpdate($event, $this->onUpdate($event, $data));
     }
 }

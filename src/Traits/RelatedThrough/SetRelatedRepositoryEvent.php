@@ -3,13 +3,14 @@
 namespace Efabrica\NetteRepository\Traits\RelatedThrough;
 
 use Efabrica\NetteRepository\Event\RepositoryEvent;
+use Efabrica\NetteRepository\Event\RepositoryEventResponse;
 use Efabrica\NetteRepository\Repository\Entity;
 use Efabrica\NetteRepository\Repository\Repository;
 use Efabrica\NetteRepository\Subscriber\EventSubscriber;
 use IteratorIterator;
 use LogicException;
 
-class SetRelatedThroughRepositoryEvent extends RepositoryEvent
+class SetRelatedRepositoryEvent extends RepositoryEvent
 {
     private Repository $throughRepo;
 
@@ -26,10 +27,10 @@ class SetRelatedThroughRepositoryEvent extends RepositoryEvent
 
     /**
      * @param Repository $throughRepo Many to many repository
-     * @param Entity   $owner Owner entity (ex.: Group)
-     * @param iterable $owned Entities or IDs that should be related to the owner (ex.: User[])
-     * @param string   $ownerColumn Column in the through table that references the owner (ex.: "group_id")
-     * @param string   $ownedColumn Column in the through table that references the owned (ex.: "user_id")
+     * @param Entity $owner Owner entity (ex.: Group)
+     * @param iterable<Entity|int|string> $owned Entities or IDs that should be related to the owner (ex.: User[])
+     * @param string $ownerColumn Column in the through table that references the owner (ex.: "group_id")
+     * @param string $ownedColumn Column in the through table that references the owned (ex.: "user_id")
      */
     public function __construct(Repository $throughRepo, Entity $owner, iterable $owned, string $ownerColumn, string $ownedColumn)
     {
@@ -42,16 +43,17 @@ class SetRelatedThroughRepositoryEvent extends RepositoryEvent
         $this->ownedColumn = $ownedColumn;
     }
 
-    public function handle(): int
+    public function handle(): SetRelatedEventResponse
     {
         while ($subscriber = current($this->subscribers)) {
             /** @var EventSubscriber $subscriber */
             next($this->subscribers);
-            if ($subscriber instanceof RelatedThroughEventSubscriber && $subscriber->supportsEvent($this)) {
+            if ($subscriber instanceof RelatedEventSubscriber && $subscriber->supportsEvent($this)) {
                 return $subscriber->onSetRelated($this);
             }
         }
-        return $this->execute();
+        $this->ended = true;
+        return new SetRelatedEventResponse($this, $this->execute());
     }
 
     public function mapOwnedToIds(iterable $owned): array
@@ -139,7 +141,9 @@ class SetRelatedThroughRepositoryEvent extends RepositoryEvent
         return $this->ownedColumn;
     }
 
-    public function stopPropagation(): void
+    public function stopPropagation(): RepositoryEventResponse
     {
+        $this->ended = true;
+        return new SetRelatedEventResponse($this, 0);
     }
 }

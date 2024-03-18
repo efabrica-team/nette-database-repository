@@ -2,6 +2,7 @@
 
 namespace Efabrica\NetteRepository\Subscriber\Inline;
 
+use Efabrica\NetteRepository\Event\DeleteEventResponse;
 use Efabrica\NetteRepository\Event\DeleteQueryEvent;
 
 /**
@@ -9,5 +10,5 @@ use Efabrica\NetteRepository\Event\DeleteQueryEvent;
  */
 interface DeleteEventSubscriber
 {
-    public function onDelete(DeleteQueryEvent $event): int;
+    public function onDelete(DeleteQueryEvent $event): DeleteEventResponse;
 }

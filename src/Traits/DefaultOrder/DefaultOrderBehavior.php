@@ -11,6 +11,9 @@ class DefaultOrderBehavior extends RepositoryBehavior
 
     private array $params;
 
+    /**
+     * @param mixed ...$params
+     */
     public function __construct(string $columns, ...$params)
     {
         $this->columns = $columns;

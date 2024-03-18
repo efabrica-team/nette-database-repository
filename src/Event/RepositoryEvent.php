@@ -21,6 +21,8 @@ abstract class RepositoryEvent
      */
     protected array $subscribers = [];
 
+    protected bool $ended = false;
+
     /**
      * @var Repository<E, Query<E>>
      */
@@ -33,11 +35,6 @@ abstract class RepositoryEvent
     {
         $this->repository = $repository;
         $this->subscribers = $repository->getEventSubscribers()->toArray();
-    }
-
-    public function hasEnded(): bool
-    {
-        return $this->subscribers === [];
     }
 
     /**
@@ -64,7 +61,7 @@ abstract class RepositoryEvent
     abstract public function getEntities(): iterable;
 
     /**
-     * @param class-string<RepositoryBehavior>|class-string $class
+     * @param class-string $class
      * @return bool
      */
     public function hasBehavior(string $class): bool
@@ -88,7 +85,11 @@ abstract class RepositoryEvent
 
     /**
      * Stop the execution of the event chain.
-     * @return mixed
      */
-    abstract public function stopPropagation();
+    abstract public function stopPropagation(): RepositoryEventResponse;
+
+    public function hasEnded(): bool
+    {
+        return $this->ended;
+    }
 }

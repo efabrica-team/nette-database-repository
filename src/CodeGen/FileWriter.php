@@ -26,7 +26,9 @@ class FileWriter
         }
         if (isset($inheritance['implements'])) {
             foreach ((array)$inheritance['implements'] as $interface) {
-                $classType->getNamespace()->addUse($interface);
+                $namespace = $classType->getNamespace();
+                assert($namespace !== null);
+                $namespace->addUse($interface);
                 $classType->addImplement($interface);
             }
         }

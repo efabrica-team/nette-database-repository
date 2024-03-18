@@ -29,6 +29,6 @@ class KeepDefaultBehavior extends RepositoryBehavior
 
     public function getQuery(): ?Query
     {
-        return clone $this->query;
+        return $this->query ? clone $this->query : null;
     }
 }

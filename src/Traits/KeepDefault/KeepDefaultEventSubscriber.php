@@ -2,14 +2,17 @@
 
 namespace Efabrica\NetteRepository\Traits\KeepDefault;
 
+use Efabrica\NetteRepository\Event\DeleteEventResponse;
 use Efabrica\NetteRepository\Event\DeleteQueryEvent;
 use Efabrica\NetteRepository\Event\InsertEventResponse;
 use Efabrica\NetteRepository\Event\InsertRepositoryEvent;
 use Efabrica\NetteRepository\Event\QueryEvent;
 use Efabrica\NetteRepository\Event\RepositoryEvent;
+use Efabrica\NetteRepository\Event\UpdateEventResponse;
 use Efabrica\NetteRepository\Event\UpdateQueryEvent;
 use Efabrica\NetteRepository\Repository\Entity;
 use Efabrica\NetteRepository\Subscriber\EventSubscriber;
+use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteEventResponse;
 use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteQueryEvent;
 use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteSubscriber;
 
@@ -68,7 +71,9 @@ final class KeepDefaultEventSubscriber extends EventSubscriber implements SoftDe
                 // if $data[$defaultField] is true, then find first entity that is in event query and set all other entities to false
                 if ($data[$defaultField] ?? false) {
                     $entity = (clone $query)->where("$primaryColumn IN", $eventQuery)->first() ?? $query->first();
-                    $query->where(["$primaryColumn !=" => $entity->getPrimary()])->scopeRaw()->update([$defaultField => false]);
+                    if ($entity instanceof Entity) {
+                        $query->where(["$primaryColumn !=" => $entity->getPrimary()])->scopeRaw()->update([$defaultField => false]);
+                    }
                 } else {
                     if (is_array($data)) {
                         // if $data[$defaultField] is false, then find first entity that is not in event query and set it to true
@@ -93,7 +98,7 @@ final class KeepDefaultEventSubscriber extends EventSubscriber implements SoftDe
         return $result;
     }
 
-    public function onUpdate(UpdateQueryEvent $event, array &$data): int
+    public function onUpdate(UpdateQueryEvent $event, array &$data): UpdateEventResponse
     {
         $result = $event->handle($data);
         $repository = $event->getRepository();
@@ -106,15 +111,15 @@ final class KeepDefaultEventSubscriber extends EventSubscriber implements SoftDe
         return $result;
     }
 
-    public function onDelete(DeleteQueryEvent $event): int
+    public function onDelete(DeleteQueryEvent $event): DeleteEventResponse
     {
         $result = $event->handle();
         $this->ensureDefault($event);
         return $result;
     }
 
-    public function onSoftDelete(SoftDeleteQueryEvent $event, array &$data): int
+    public function onSoftDelete(SoftDeleteQueryEvent $event, array &$data): SoftDeleteEventResponse
     {
-        return $this->onUpdate($event, $data);
+        return SoftDeleteEventResponse::fromUpdate($event, $this->onUpdate($event, $data));
     }
 }

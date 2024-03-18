@@ -2,6 +2,7 @@
 
 namespace Efabrica\NetteRepository\Subscriber\Inline;
 
+use Efabrica\NetteRepository\Event\UpdateEventResponse;
 use Efabrica\NetteRepository\Event\UpdateQueryEvent;
 
 /**
@@ -9,5 +10,5 @@ use Efabrica\NetteRepository\Event\UpdateQueryEvent;
  */
 interface UpdateEventSubscriber
 {
-    public function onUpdate(UpdateQueryEvent $event, array &$data): int;
+    public function onUpdate(UpdateQueryEvent $event, array &$data): UpdateEventResponse;
 }

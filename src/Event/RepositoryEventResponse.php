@@ -4,7 +4,7 @@ namespace Efabrica\NetteRepository\Event;
 
 use LogicException;
 
-abstract class RepositoryEventResponse
+class RepositoryEventResponse
 {
     public function __construct(RepositoryEvent $event)
     {

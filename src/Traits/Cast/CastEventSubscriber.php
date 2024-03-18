@@ -5,6 +5,7 @@ namespace Efabrica\NetteRepository\Traits\Cast;
 use Efabrica\NetteRepository\Event\InsertEventResponse;
 use Efabrica\NetteRepository\Event\InsertRepositoryEvent;
 use Efabrica\NetteRepository\Event\RepositoryEvent;
+use Efabrica\NetteRepository\Event\UpdateEventResponse;
 use Efabrica\NetteRepository\Event\UpdateQueryEvent;
 use Efabrica\NetteRepository\Repository\Entity;
 use Efabrica\NetteRepository\Repository\Repository;
@@ -46,7 +47,7 @@ final class CastEventSubscriber extends EventSubscriber
         return $event->handle();
     }
 
-    public function onUpdate(UpdateQueryEvent $event, array &$data): int
+    public function onUpdate(UpdateQueryEvent $event, array &$data): UpdateEventResponse
     {
         foreach ($event->getBehaviors()->all() as $behavior) {
             if ($behavior instanceof CastBehavior) {

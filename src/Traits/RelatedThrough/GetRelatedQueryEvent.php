@@ -10,7 +10,7 @@ use Efabrica\NetteRepository\Subscriber\EventSubscriber;
 use IteratorIterator;
 use LogicException;
 
-class GetRelatedThroughQueryEvent extends RepositoryEvent
+class GetRelatedQueryEvent extends RepositoryEvent
 {
     public const PIVOT = 'pivot';
 
@@ -41,12 +41,12 @@ class GetRelatedThroughQueryEvent extends RepositoryEvent
         $this->ownedColumn = $ownedColumn;
     }
 
-    public function handle(): Query
+    public function handle(): GetRelatedEventResponse
     {
         while ($subscriber = current($this->subscribers)) {
             /** @var EventSubscriber $subscriber */
             next($this->subscribers);
-            if ($subscriber instanceof RelatedThroughEventSubscriber && $subscriber->supportsEvent($this)) {
+            if ($subscriber instanceof RelatedEventSubscriber && $subscriber->supportsEvent($this)) {
                 return $subscriber->onGetRelated($this);
             }
         }
@@ -83,9 +83,10 @@ class GetRelatedThroughQueryEvent extends RepositoryEvent
         return $this->ownedColumn;
     }
 
-    public function stopPropagation(): Query
+    public function stopPropagation(): GetRelatedEventResponse
     {
         assert($this->query instanceof Query);
-        return $this->query;
+        $this->ended = true;
+        return new GetRelatedEventResponse($this, $this->query);
     }
 }

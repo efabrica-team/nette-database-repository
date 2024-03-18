@@ -6,7 +6,7 @@ use Efabrica\NetteRepository\Event\UpdateQueryEvent;
 
 class SoftDeleteQueryEvent extends UpdateQueryEvent
 {
-    public function handle(array &$data): int
+    public function handle(array &$data): SoftDeleteEventResponse
     {
         while ($subscriber = current($this->subscribers)) {
             next($this->subscribers);
@@ -14,6 +14,7 @@ class SoftDeleteQueryEvent extends UpdateQueryEvent
                 return $subscriber->onSoftDelete($this, $data);
             }
         }
-        return $this->query->scopeRaw()->update($data);
+        $this->ended = true;
+        return new SoftDeleteEventResponse($this, $this->query->scopeRaw()->update($data));
     }
 }

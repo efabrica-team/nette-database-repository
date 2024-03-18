@@ -7,8 +7,11 @@ use RuntimeException;
 
 class ModuleWriter
 {
-    public static function writeConfigNeon(EntityStructure $structure, FileWriter $writer, ?string $configPath): void
+    public static function writeConfigNeon(EntityStructure $structure, FileWriter $writer, string $configPath): void
     {
+        if (!str_ends_with($configPath, '.neon')) {
+            throw new RuntimeException('Config path must end with .neon');
+        }
         $configPath = str_replace('%DB_DIR%', $structure->dbDir, $configPath);
         if (is_file($configPath) === false) {
             $writer->writeFile($configPath, "services:\n");

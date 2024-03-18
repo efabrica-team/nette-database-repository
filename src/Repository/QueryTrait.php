@@ -55,7 +55,7 @@ trait QueryTrait
     /**
      * @param iterable   $data Data to update
      * @param array|null $entities Entities passed by reference to be updated
-     * @return int
+     * @return int Affected rows
      */
     public function update(iterable $data, ?array $entities = null): int
     {
@@ -71,13 +71,13 @@ trait QueryTrait
                 $entity->fill($data);
             }
         }
-        return (new UpdateQueryEvent($this, $entities))->handle($data);
+        return (new UpdateQueryEvent($this, $entities))->handle($data)->getAffectedRows();
     }
 
     /**
-     * @param iterable<Entity>|null $entities
+     * @param Entity[]|null $entities
      */
-    public function delete(?iterable $entities = null): int
+    public function delete(?array $entities = null): int
     {
         if (!$this->doesEvents()) {
             return parent::delete();
@@ -85,7 +85,7 @@ trait QueryTrait
         if ($entities !== null) {
             $this->whereEntities($entities);
         }
-        return (new DeleteQueryEvent($this, $entities))->handle();
+        return (new DeleteQueryEvent($this, $entities))->handle()->getAffectedRows();
     }
 
     protected function execute(): void
@@ -96,6 +96,9 @@ trait QueryTrait
         parent::execute();
     }
 
+    /**
+     * @param array|string|ActiveRow $condition
+     */
     public function where($condition, ...$params): self
     {
         if ($condition instanceof ActiveRow) {
@@ -106,6 +109,9 @@ trait QueryTrait
         return $this;
     }
 
+    /**
+     * @param Entity[] $entities
+     */
     public function whereEntities(array $entities, bool $original = true): self
     {
         $where = $values = [];
@@ -126,6 +132,7 @@ trait QueryTrait
             $key = [];
             foreach ($primary as $primaryKey) {
                 $key[] = $primaryKey . ' = ?';
+                /** @var Entity $entity */
                 $entity = $original ? $entity->toOriginalArray() : $entity;
                 $values[] = $entity[$primaryKey];
             }

@@ -13,7 +13,9 @@ final class InitialRepositoryEvent extends RepositoryEvent
         return [];
     }
 
-    public function stopPropagation(): void
+    public function stopPropagation(): RepositoryEventResponse
     {
+        $this->ended = true;
+        return new RepositoryEventResponse($this);
     }
 }

@@ -2,17 +2,20 @@
 
 namespace Efabrica\NetteRepository\Subscriber;
 
+use Efabrica\NetteRepository\Event\DeleteEventResponse;
 use Efabrica\NetteRepository\Event\DeleteQueryEvent;
 use Efabrica\NetteRepository\Event\InsertEventResponse;
 use Efabrica\NetteRepository\Event\InsertRepositoryEvent;
 use Efabrica\NetteRepository\Event\RepositoryEvent;
+use Efabrica\NetteRepository\Event\SelectEventResponse;
 use Efabrica\NetteRepository\Event\SelectQueryEvent;
-use Efabrica\NetteRepository\Event\SelectQueryResponse;
+use Efabrica\NetteRepository\Event\UpdateEventResponse;
 use Efabrica\NetteRepository\Event\UpdateQueryEvent;
 use Efabrica\NetteRepository\Subscriber\Inline\DeleteEventSubscriber;
 use Efabrica\NetteRepository\Subscriber\Inline\InsertEventSubscriber;
 use Efabrica\NetteRepository\Subscriber\Inline\SelectEventSubscriber;
 use Efabrica\NetteRepository\Subscriber\Inline\UpdateEventSubscriber;
+use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteEventResponse;
 use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteQueryEvent;
 use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteSubscriber;
 
@@ -37,7 +40,7 @@ class RepositoryEventSubscriber extends EventSubscriber implements SoftDeleteSub
         return $event->handle();
     }
 
-    public function onUpdate(UpdateQueryEvent $event, array &$data): int
+    public function onUpdate(UpdateQueryEvent $event, array &$data): UpdateEventResponse
     {
         $repository = $event->getRepository();
         if ($repository instanceof UpdateEventSubscriber) {
@@ -46,7 +49,7 @@ class RepositoryEventSubscriber extends EventSubscriber implements SoftDeleteSub
         return $event->handle($data);
     }
 
-    public function onDelete(DeleteQueryEvent $event): int
+    public function onDelete(DeleteQueryEvent $event): DeleteEventResponse
     {
         $repository = $event->getRepository();
         if ($repository instanceof DeleteEventSubscriber) {
@@ -55,7 +58,7 @@ class RepositoryEventSubscriber extends EventSubscriber implements SoftDeleteSub
         return $event->handle();
     }
 
-    public function onSelect(SelectQueryEvent $event): SelectQueryResponse
+    public function onSelect(SelectQueryEvent $event): SelectEventResponse
     {
         $repository = $event->getRepository();
         if ($repository instanceof SelectEventSubscriber) {
@@ -64,7 +67,7 @@ class RepositoryEventSubscriber extends EventSubscriber implements SoftDeleteSub
         return $event->handle();
     }
 
-    public function onSoftDelete(SoftDeleteQueryEvent $event, array &$data): int
+    public function onSoftDelete(SoftDeleteQueryEvent $event, array &$data): SoftDeleteEventResponse
     {
         $repository = $event->getRepository();
         if ($repository instanceof SoftDeleteSubscriber) {

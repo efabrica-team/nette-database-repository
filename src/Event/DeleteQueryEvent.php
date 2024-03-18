@@ -4,7 +4,7 @@ namespace Efabrica\NetteRepository\Event;
 
 class DeleteQueryEvent extends QueryEvent
 {
-    public function handle(): int
+    public function handle(): DeleteEventResponse
     {
         while ($subscriber = current($this->subscribers)) {
             next($this->subscribers);
@@ -12,11 +12,12 @@ class DeleteQueryEvent extends QueryEvent
                 return $subscriber->onDelete($this);
             }
         }
-        return $this->query->scopeRaw()->delete();
+        return new DeleteEventResponse($this, $this->query->scopeRaw()->delete());
     }
 
-    public function stopPropagation(): int
+    public function stopPropagation(): DeleteEventResponse
     {
-        return 0;
+        $this->ended = true;
+        return new DeleteEventResponse($this, 0);
     }
 }

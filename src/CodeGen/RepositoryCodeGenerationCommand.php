@@ -30,8 +30,14 @@ class RepositoryCodeGenerationCommand extends Command
 
     private Structure $structure;
 
+    /**
+     * @var object{ignoreTables: array, configNeonPath: string, inheritance: array{extends: string, implements: array<string>}[]}
+     */
     private object $config;
 
+    /**
+     * @param object{ignoreTables: array, configNeonPath: string, inheritance: array{extends: string, implements: array<string>}[]} $config
+     */
     public function __construct(string $appDir, object $config, EntityStructureFactory $structureFactory, Structure $structure)
     {
         parent::__construct('efabrica:nette-repo:code-gen');

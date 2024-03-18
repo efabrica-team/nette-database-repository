@@ -34,7 +34,7 @@ interface QueryInterface extends Iterator, Countable, ArrayAccess
      */
     public function update(iterable $data): int;
 
-    public function delete(?iterable $entities = null): int;
+    public function delete(?array $entities = null): int;
 
     /**
      * @param array|string|ActiveRow $condition

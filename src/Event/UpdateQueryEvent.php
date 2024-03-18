@@ -10,9 +10,12 @@ use SplObjectStorage;
 
 class UpdateQueryEvent extends QueryEvent
 {
+    /**
+     * @var SplObjectStorage<Entity, array>
+     */
     private ?SplObjectStorage $diff = null;
 
-    public function handle(array &$data): int
+    public function handle(array &$data): UpdateEventResponse
     {
         while ($subscriber = current($this->subscribers)) {
             next($this->subscribers);
@@ -28,7 +31,7 @@ class UpdateQueryEvent extends QueryEvent
         $rawQuery = $this->query->scopeRaw();
         $update = $rawQuery->update($data);
         $this->refreshEntities($data, $rawQuery);
-        return $update;
+        return new UpdateEventResponse($this, $update);
     }
 
     private function refreshEntities(array $data, QueryInterface $rawQuery): void
@@ -77,9 +80,10 @@ class UpdateQueryEvent extends QueryEvent
         return $diff;
     }
 
-    public function stopPropagation(): int
+    public function stopPropagation(): UpdateEventResponse
     {
-        return 0;
+        $this->ended = true;
+        return new UpdateEventResponse($this, 0);
     }
 
     /**

@@ -2,12 +2,14 @@
 
 namespace Efabrica\NetteRepository\Subscriber;
 
+use Efabrica\NetteRepository\Event\DeleteEventResponse;
 use Efabrica\NetteRepository\Event\DeleteQueryEvent;
 use Efabrica\NetteRepository\Event\InsertEventResponse;
 use Efabrica\NetteRepository\Event\InsertRepositoryEvent;
 use Efabrica\NetteRepository\Event\RepositoryEvent;
+use Efabrica\NetteRepository\Event\SelectEventResponse;
 use Efabrica\NetteRepository\Event\SelectQueryEvent;
-use Efabrica\NetteRepository\Event\SelectQueryResponse;
+use Efabrica\NetteRepository\Event\UpdateEventResponse;
 use Efabrica\NetteRepository\Event\UpdateQueryEvent;
 use Efabrica\NetteRepository\Repository\Entity;
 use Efabrica\NetteRepository\Repository\Repository;
@@ -29,25 +31,25 @@ abstract class EventSubscriber implements InsertEventSubscriber, UpdateEventSubs
     }
 
     /**
-     * @return int number of affected rows. returned by $event->handle($event->getData())
+     * @return UpdateEventResponse returned by $event->handle() or $event->stopPropagation()
      */
-    public function onUpdate(UpdateQueryEvent $event, array &$data): int
+    public function onUpdate(UpdateQueryEvent $event, array &$data): UpdateEventResponse
     {
         return $event->handle($data);
     }
 
     /**
-     * @return int number of affected rows. returned by $event->handle()
+     * @return DeleteEventResponse returned by $event->handle() or $event->stopPropagation()
      */
-    public function onDelete(DeleteQueryEvent $event): int
+    public function onDelete(DeleteQueryEvent $event): DeleteEventResponse
     {
         return $event->handle();
     }
 
     /**
-     * @return SelectQueryResponse returned by $event->handle() or $event->stopPropagation()
+     * @return SelectEventResponse returned by $event->handle() or $event->stopPropagation()
      */
-    public function onSelect(SelectQueryEvent $event): SelectQueryResponse
+    public function onSelect(SelectQueryEvent $event): SelectEventResponse
     {
         return $event->handle();
     }

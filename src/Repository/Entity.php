@@ -7,8 +7,8 @@ use DateTimeInterface;
 use Efabrica\NetteRepository\Repository\Scope\FullScope;
 use Efabrica\NetteRepository\Repository\Scope\RawScope;
 use Efabrica\NetteRepository\Repository\Scope\Scope;
-use Efabrica\NetteRepository\Traits\RelatedThrough\GetRelatedThroughQueryEvent;
-use Efabrica\NetteRepository\Traits\RelatedThrough\SetRelatedThroughRepositoryEvent;
+use Efabrica\NetteRepository\Traits\RelatedThrough\GetRelatedQueryEvent;
+use Efabrica\NetteRepository\Traits\RelatedThrough\SetRelatedRepositoryEvent;
 use Iterator;
 use Nette\Database\Table\ActiveRow;
 use Nette\Database\Table\GroupedSelection;
@@ -168,17 +168,31 @@ abstract class Entity extends ActiveRow
         return parent::related($key, $throughColumn);
     }
 
+    /**
+     * @param class-string<Repository> $throughRepoClass
+     * @param class-string<Repository> $otherRepoClass
+     * @param literal-string $selfColumn
+     * @param literal-string $otherColumn
+     * @return Query
+     */
     public function relatedThrough(string $throughRepoClass, string $otherRepoClass, string $selfColumn, string $otherColumn): Query
     {
         $throughRepo = $this->getManager()->byClass($throughRepoClass);
         $otherRepo = $this->getManager()->byClass($otherRepoClass);
-        return (new GetRelatedThroughQueryEvent($this, $throughRepo, $otherRepo, $selfColumn, $otherColumn))->handle();
+        return (new GetRelatedQueryEvent($this, $throughRepo, $otherRepo, $selfColumn, $otherColumn))->handle()->getQuery();
     }
 
+    /**
+     * @param class-string<Repository> $throughRepoClass
+     * @param literal-string $selfColumn
+     * @param literal-string $otherColumn
+     * @param iterable<Entity|int|string> $owned
+     * @return $this
+     */
     public function setRelatedThrough(string $throughRepoClass, string $selfColumn, string $otherColumn, iterable $owned): self
     {
         $throughRepo = $this->getManager()->byClass($throughRepoClass);
-        $event = new SetRelatedThroughRepositoryEvent($throughRepo, $this, $owned, $selfColumn, $otherColumn);
+        $event = new SetRelatedRepositoryEvent($throughRepo, $this, $owned, $selfColumn, $otherColumn);
         $event->handle();
         return $this;
     }
@@ -228,6 +242,10 @@ abstract class Entity extends ActiveRow
         return static::normalizeValue($a) === static::normalizeValue($b);
     }
 
+    /**
+     * @param mixed $a
+     * @return mixed
+     */
     protected static function normalizeValue($a)
     {
         if (is_bool($a)) {

@@ -42,11 +42,11 @@ class InsertRepositoryEvent extends RepositoryEvent
             if ($newRow instanceof ActiveRow) {
                 $entity->internalData($newRow->toArray(), false);
                 if (count($this->entities) === 1) {
-                    return $this->stopPropagation($entity);
+                    return new InsertEventResponse($this, $entity);
                 }
             }
         }
-        return $this->stopPropagation(count($this->entities));
+        return new InsertEventResponse($this, count($this->entities));
     }
 
     /**
@@ -72,12 +72,9 @@ class InsertRepositoryEvent extends RepositoryEvent
         }
     }
 
-    /**
-     * @param bool|int|ActiveRow $response
-     */
-    public function stopPropagation($response = false): InsertEventResponse
+    public function stopPropagation(): InsertEventResponse
     {
-        $this->subscribers = [];
-        return new InsertEventResponse($this, $response);
+        $this->ended = true;
+        return new InsertEventResponse($this, false);
     }
 }

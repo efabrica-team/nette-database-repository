@@ -2,10 +2,11 @@
 
 namespace Efabrica\NetteRepository\Traits\SoftDelete;
 
+use Efabrica\NetteRepository\Event\DeleteEventResponse;
 use Efabrica\NetteRepository\Event\DeleteQueryEvent;
 use Efabrica\NetteRepository\Event\RepositoryEvent;
+use Efabrica\NetteRepository\Event\SelectEventResponse;
 use Efabrica\NetteRepository\Event\SelectQueryEvent;
-use Efabrica\NetteRepository\Event\SelectQueryResponse;
 use Efabrica\NetteRepository\Subscriber\EventSubscriber;
 
 class SoftDeleteEventSubscriber extends EventSubscriber
@@ -15,7 +16,7 @@ class SoftDeleteEventSubscriber extends EventSubscriber
         return $event->hasBehavior(SoftDeleteBehavior::class);
     }
 
-    public function onSelect(SelectQueryEvent $event): SelectQueryResponse
+    public function onSelect(SelectQueryEvent $event): SelectEventResponse
     {
         /** @var SoftDeleteBehavior $behavior */
         $behavior = $event->getRepository()->getBehaviors()->get(SoftDeleteBehavior::class);
@@ -25,10 +26,11 @@ class SoftDeleteEventSubscriber extends EventSubscriber
         return $event->handle();
     }
 
-    public function onDelete(DeleteQueryEvent $event): int
+    public function onDelete(DeleteQueryEvent $event): DeleteEventResponse
     {
         $behavior = $event->getBehavior(SoftDeleteBehavior::class);
         $data = [$behavior->getColumn() => $behavior->getNewValue()];
-        return (new SoftDeleteQueryEvent($event->getQuery()))->handle($data);
+        (new SoftDeleteQueryEvent($event->getQuery()))->handle($data);
+        return $event->stopPropagation();
     }
 }

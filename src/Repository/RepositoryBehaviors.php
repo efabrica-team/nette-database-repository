@@ -74,9 +74,9 @@ class RepositoryBehaviors implements IteratorAggregate
     }
 
     /**
-     * @template T of RepositoryBehavior
+     * @template T
      * @param class-string<T> $behaviorClass
-     * @return T
+     * @return T&RepositoryBehavior
      */
     public function get(string $behaviorClass, bool $ignoreScope = false): ?RepositoryBehavior
     {
@@ -93,7 +93,7 @@ class RepositoryBehaviors implements IteratorAggregate
     }
 
     /**
-     * @param class-string<RepositoryBehavior> $behaviorClass
+     * @param class-string $behaviorClass
      * @return bool
      */
     public function has(string $behaviorClass): bool
@@ -102,7 +102,7 @@ class RepositoryBehaviors implements IteratorAggregate
     }
 
     /**
-     * @param class-string<RepositoryBehavior> $behaviorClass
+     * @param class-string $behaviorClass
      * @return $this
      */
     public function remove(string $behaviorClass): self

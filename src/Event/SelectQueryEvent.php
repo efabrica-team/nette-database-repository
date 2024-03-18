@@ -4,7 +4,7 @@ namespace Efabrica\NetteRepository\Event;
 
 class SelectQueryEvent extends QueryEvent
 {
-    public function handle(): SelectQueryResponse
+    public function handle(): SelectEventResponse
     {
         while ($subscriber = current($this->subscribers)) {
             next($this->subscribers);
@@ -15,9 +15,9 @@ class SelectQueryEvent extends QueryEvent
         return $this->stopPropagation();
     }
 
-    public function stopPropagation(): SelectQueryResponse
+    public function stopPropagation(): SelectEventResponse
     {
-        $this->subscribers = [];
-        return new SelectQueryResponse($this);
+        $this->ended = true;
+        return new SelectEventResponse($this);
     }
 }

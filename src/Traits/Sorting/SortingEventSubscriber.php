@@ -5,14 +5,15 @@ namespace Efabrica\NetteRepository\Traits\Sorting;
 use Efabrica\NetteRepository\Event\InsertEventResponse;
 use Efabrica\NetteRepository\Event\InsertRepositoryEvent;
 use Efabrica\NetteRepository\Event\RepositoryEvent;
-use Efabrica\NetteRepository\Repository\Query;
 use Efabrica\NetteRepository\Subscriber\EventSubscriber;
 use Efabrica\NetteRepository\Traits\DefaultOrder\DefaultOrderBehavior;
-use Efabrica\NetteRepository\Traits\RelatedThrough\GetRelatedThroughQueryEvent;
-use Efabrica\NetteRepository\Traits\RelatedThrough\RelatedThroughEventSubscriber;
-use Efabrica\NetteRepository\Traits\RelatedThrough\SetRelatedThroughRepositoryEvent;
+use Efabrica\NetteRepository\Traits\RelatedThrough\GetRelatedEventResponse;
+use Efabrica\NetteRepository\Traits\RelatedThrough\GetRelatedQueryEvent;
+use Efabrica\NetteRepository\Traits\RelatedThrough\RelatedEventSubscriber;
+use Efabrica\NetteRepository\Traits\RelatedThrough\SetRelatedEventResponse;
+use Efabrica\NetteRepository\Traits\RelatedThrough\SetRelatedRepositoryEvent;
 
-class SortingEventSubscriber extends EventSubscriber implements RelatedThroughEventSubscriber
+class SortingEventSubscriber extends EventSubscriber implements RelatedEventSubscriber
 {
     public function supportsEvent(RepositoryEvent $event): bool
     {
@@ -33,14 +34,14 @@ class SortingEventSubscriber extends EventSubscriber implements RelatedThroughEv
         return $event->handle();
     }
 
-    public function onGetRelated(GetRelatedThroughQueryEvent $event): Query
+    public function onGetRelated(GetRelatedQueryEvent $event): GetRelatedEventResponse
     {
         $behavior = $event->getBehavior(SortingBehavior::class);
         $event->getQuery()->getBehaviors()->add(new DefaultOrderBehavior($behavior->getColumn(), $behavior->getDirection()));
         return $event->handle();
     }
 
-    public function onSetRelated(SetRelatedThroughRepositoryEvent $event): int
+    public function onSetRelated(SetRelatedRepositoryEvent $event): SetRelatedEventResponse
     {
         $result = $event->handle();
         $behavior = $event->getBehavior(SortingBehavior::class);

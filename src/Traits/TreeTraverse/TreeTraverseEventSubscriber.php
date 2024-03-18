@@ -2,13 +2,16 @@
 
 namespace Efabrica\NetteRepository\Traits\TreeTraverse;
 
+use Efabrica\NetteRepository\Event\DeleteEventResponse;
 use Efabrica\NetteRepository\Event\DeleteQueryEvent;
 use Efabrica\NetteRepository\Event\InsertEventResponse;
 use Efabrica\NetteRepository\Event\InsertRepositoryEvent;
 use Efabrica\NetteRepository\Event\RepositoryEvent;
+use Efabrica\NetteRepository\Event\UpdateEventResponse;
 use Efabrica\NetteRepository\Event\UpdateQueryEvent;
 use Efabrica\NetteRepository\Repository\Repository;
 use Efabrica\NetteRepository\Subscriber\EventSubscriber;
+use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteEventResponse;
 use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteQueryEvent;
 use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteSubscriber;
 
@@ -26,23 +29,25 @@ class TreeTraverseEventSubscriber extends EventSubscriber implements SoftDeleteS
         return $response;
     }
 
-    public function onUpdate(UpdateQueryEvent $event, array &$data): int
+    public function onUpdate(UpdateQueryEvent $event, array &$data): UpdateEventResponse
     {
         $response = $event->handle($data);
         $this->onTreeStructure($event->getRepository());
         return $response;
     }
 
-    public function onDelete(DeleteQueryEvent $event): int
+    public function onDelete(DeleteQueryEvent $event): DeleteEventResponse
     {
         $response = $event->handle();
         $this->onTreeStructure($event->getRepository());
         return $response;
     }
 
-    public function onSoftDelete(SoftDeleteQueryEvent $event, array &$data): int
+    public function onSoftDelete(SoftDeleteQueryEvent $event, array &$data): SoftDeleteEventResponse
     {
-        return $this->onUpdate($event, $data);
+        $response = $event->handle($data);
+        $this->onTreeStructure($event->getRepository());
+        return $response;
     }
 
     protected function onTreeStructure(Repository $repository): void

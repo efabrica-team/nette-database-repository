@@ -6,7 +6,7 @@ use Efabrica\NetteRepository\Repository\Scope\FullScope;
 use Efabrica\NetteRepository\Repository\Scope\RawScope;
 use Efabrica\NetteRepository\Repository\Scope\Scope;
 use Efabrica\NetteRepository\Subscriber\RepositoryEventSubscribers;
-use Efabrica\NetteRepository\Traits\RelatedThrough\SetRelatedThroughRepositoryEvent;
+use Efabrica\NetteRepository\Traits\RelatedThrough\SetRelatedRepositoryEvent;
 use LogicException;
 use Nette\Application\BadRequestException;
 use Nette\Database\Explorer;
@@ -185,7 +185,7 @@ abstract class Repository
      ******************************/
 
     /**
-     * @param E[]|array[]|E|array $entities Entity or array of entities to insert
+     * @param E[]|array[]|E|array $entities Entity or Entity array or array of arrays to insert
      * @return bool|int|ActiveRow Number of affected rows or inserted entity
      */
     public function insert(iterable $entities)
@@ -194,7 +194,7 @@ abstract class Repository
     }
 
     /**
-     * @param E|ActiveRow|array|string|int $where Entity, primary value (ID), or array where conditions
+     * @param E|Entity|array|string|int $where Entity, primary value (ID), Entity array or array where conditions
      * @param iterable                     $data Data to update
      * @return int Number of affected rows
      */
@@ -220,18 +220,18 @@ abstract class Repository
     }
 
     /**
-     * @param array $where Conditions to find by
+     * @param array $conditions array where conditions
      * @param array $newValues New values to set if entity is needed to be created
      * @return Entity inserted or found
      */
-    public function updateOrCreate(array $where, array $newValues = []): Entity
+    public function updateOrCreate($conditions, array $newValues = []): Entity
     {
-        $entity = $this->findOneBy($where);
+        $entity = $this->findOneBy($conditions);
         if ($entity instanceof Entity) {
             $entity->update($newValues);
             return $entity;
         }
-        return $this->createRow($where + $newValues)->save();
+        return $this->createRow($newValues + $conditions)->save();
     }
 
     /**
@@ -279,34 +279,47 @@ abstract class Repository
      */
     public function updateManyToMany(Entity $owner, array $owned, string $ownerColumn, string $ownedColumn): int
     {
-        $event = new SetRelatedThroughRepositoryEvent($this, $owner, $owned, $ownerColumn, $ownedColumn);
-        return $event->handle();
+        $event = new SetRelatedRepositoryEvent($this, $owner, $owned, $ownerColumn, $ownedColumn);
+        return $event->handle()->getAffectedRows();
     }
 
     /**
-     * @param ActiveRow|array|scalar $entities
+     * @param E|Entity|array|string|int $where Entity, primary value (ID), Entity array or array where conditions
      * @return int
      */
-    public function delete($entities): int
+    public function delete($where): int
     {
-        $entityArray = self::toEntityArray($entities);
+        $entityArray = self::toEntityArray($where);
+        if (is_scalar($where)) {
+            return $this->query()->wherePrimary($where)->delete();
+        }
         if ($entityArray !== null) {
             return $this->query()->delete($entityArray);
         }
-        return $this->query()->where($entities)->delete();
+        return $this->query()->where($where)->delete();
     }
 
+    /**
+     * @param mixed $entities
+     * @return Entity[]|null
+     */
     private static function toEntityArray($entities): ?array
     {
         if (!is_iterable($entities)) {
             return null;
+        }
+        if ($entities instanceof Entity) {
+            return [$entities];
+        }
+        if ($entities instanceof Traversable) {
+            $entities = iterator_to_array($entities);
         }
         foreach ($entities as $entity) {
             if (!$entity instanceof Entity) {
                 return null;
             }
         }
-        return $entities instanceof Traversable ? iterator_to_array($entities) : $entities;
+        return $entities;
     }
 
     /********************************
@@ -392,6 +405,7 @@ abstract class Repository
     }
 
     /**
+     * @param array $existingData Data that is already persisted in the database
      * @return E
      */
     public function createRow(array $existingData = [], ?QueryInterface $query = null): Entity

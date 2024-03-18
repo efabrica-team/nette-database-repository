@@ -2,9 +2,11 @@
 
 namespace Efabrica\NetteRepository\Traits\LastManStanding;
 
+use Efabrica\NetteRepository\Event\DeleteEventResponse;
 use Efabrica\NetteRepository\Event\DeleteQueryEvent;
 use Efabrica\NetteRepository\Event\RepositoryEvent;
 use Efabrica\NetteRepository\Subscriber\EventSubscriber;
+use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteEventResponse;
 use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteQueryEvent;
 use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteSubscriber;
 use LogicException;
@@ -24,13 +26,13 @@ final class LastManStandingEventSubscriber extends EventSubscriber implements So
         }
     }
 
-    public function onDelete(DeleteQueryEvent $event): int
+    public function onDelete(DeleteQueryEvent $event): DeleteEventResponse
     {
         $this->ensureLastMan($event);
         return $event->handle();
     }
 
-    public function onSoftDelete(SoftDeleteQueryEvent $event, array &$data): int
+    public function onSoftDelete(SoftDeleteQueryEvent $event, array &$data): SoftDeleteEventResponse
     {
         $this->ensureLastMan($event);
         return $event->handle($data);
