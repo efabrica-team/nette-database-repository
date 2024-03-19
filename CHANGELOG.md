@@ -7,10 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+
+## [0.4.1] - 2024-03-19
 ### Fixed
-
 - Repository->create() did not work with PHP7.4
-
 
 ## [0.4.0] - 2024-03-19
 ### Added
@@ -45,7 +46,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial version
 
-[Unreleased]: https://github.com/efabrica-team/nette-database-repository/compare/0.4.0...main
+[Unreleased]: https://github.com/efabrica-team/nette-database-repository/compare/0.4.1...main
+[0.4.1]: https://github.com/efabrica-team/nette-database-repository/compare/0.4.0...0.4.1
 [0.4.0]: https://github.com/efabrica-team/nette-database-repository/compare/0.3.0...0.4.0
 [0.3.0]: https://github.com/efabrica-team/nette-database-repository/compare/0.2.1...0.3.0
 [0.2.1]: https://github.com/efabrica-team/nette-database-repository/compare/0.2.0...0.2.1
