@@ -66,7 +66,8 @@ class UpdateQueryEvent extends QueryEvent
         }
         $repository = $this->getRepository();
         foreach ($this->diff as $entity) {
-            yield $repository->createRow($this->diff[$entity]) => $entity;
+            $oldEntity = $repository->createRow($this->diff[$entity]);
+            yield $oldEntity => $entity;
         }
     }
 

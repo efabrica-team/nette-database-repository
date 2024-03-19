@@ -166,7 +166,7 @@ abstract class Repository
         if ($entity instanceof Entity) {
             return $entity;
         }
-        return $this->createRow()->fill($newValues + $conditions);
+        return $this->create()->fill($newValues + $conditions);
     }
 
     /**
@@ -185,7 +185,7 @@ abstract class Repository
      ******************************/
 
     /**
-     * @param E[]|array[]|E|array $entities Entity or Entity array or array of arrays to insert
+     * @param E|iterable|list<E> $entities Entity or Entity array or array of arrays to insert
      * @return bool|int|ActiveRow Number of affected rows or inserted entity
      */
     public function insert(iterable $entities)
@@ -194,8 +194,17 @@ abstract class Repository
     }
 
     /**
+     * @param array<string, mixed> $data
+     * @return Entity
+     */
+    public function insertOne(array $data): Entity
+    {
+        return $this->create()->fill($data)->save();
+    }
+
+    /**
      * @param E|Entity|array|string|int $where Entity, primary value (ID), Entity array or array where conditions
-     * @param iterable                     $data Data to update
+     * @param iterable $data Data to update
      * @return int Number of affected rows
      */
     public function update($where, iterable $data): int
@@ -272,7 +281,7 @@ abstract class Repository
 
     /**
      * @param Entity $owner Entity owning the relation (ex.: Group)
-     * @param array  $owned Entities to be related to the owner (ex.: User[])
+     * @param array $owned Entities to be related to the owner (ex.: User[])
      * @param string $ownerColumn Column in the through table that references the owner (ex.: "group_id")
      * @param string $ownedColumn Column in the through table that references the owned (ex.: "user_id")
      * @return int
@@ -405,8 +414,18 @@ abstract class Repository
     }
 
     /**
+     * Create new unpersisted blank entity instance
+     * @return Entity
+     */
+    public function create(): Entity
+    {
+        return new ($this->entityClass)([], $this->query());
+    }
+
+    /**
      * @param array $existingData Data that is already persisted in the database
      * @return E
+     *@internal Use create() instead.
      */
     public function createRow(array $existingData = [], ?QueryInterface $query = null): Entity
     {
@@ -457,8 +476,8 @@ abstract class Repository
     /**
      * @template T
      * @param callable(Repository): T $callback
-     * @param int                     $retryTimes
-     * @param bool                    $reconnect
+     * @param int $retryTimes
+     * @param bool $reconnect
      * @return T
      * @throws Throwable
      */
@@ -521,7 +540,7 @@ abstract class Repository
 
     /**
      * @param callable(): T $callback
-     * @param int           $retryTimes
+     * @param int $retryTimes
      * @return T
      * @throws Throwable
      * @deprecated use ensure() instead

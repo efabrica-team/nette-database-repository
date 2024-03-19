@@ -6,12 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-### Fixed
+
+### Added
 - Repository code gen updated
 - added event responses to all events, not just some
 - renamed GetRelatedThrough to GetRelated, etc.
 - fixed typehints in Repository, Query and Entity
-
+- insertOne
+- createRow() is internal now, switch to create()
 
 ## [0.3.0] - 2024-02-27
 ### Added

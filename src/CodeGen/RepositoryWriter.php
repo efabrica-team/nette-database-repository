@@ -67,11 +67,12 @@ class RepositoryWriter
         $class->addComment("@method {$structure->getClassName()} findOrNew(array \$conditions, array \$newValues = [])");
         $class->addComment("@method {$structure->getClassName()} findOrInsert(array \$conditions, array \$newValues = [])");
         $class->addComment("@method {$structure->getClassName()}|int insert({$structure->getClassName()}|iterable \$entities)");
+        $class->addComment("@method {$structure->getClassName()} insertOne(array \$data)");
         $class->addComment("@method int update({$structure->getClassName()}|{$primaryType}array \$entity, iterable \$data)");
         $class->addComment("@method void updateEntities({$structure->getClassName()} ...\$entities)");
         $class->addComment("@method int delete({$structure->getClassName()}|{$primaryType}array \$entities)");
         $class->addComment("@method class-string<{$structure->getClassName()}> getEntityClass()");
-        $class->addComment("@method {$structure->getClassName()} createRow(array \$row = [])");
+        $class->addComment("@method {$structure->getClassName()} create()");
 
         $class->addMethod('__construct')
             ->setParameters([
