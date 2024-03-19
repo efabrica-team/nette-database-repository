@@ -7,10 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Repository->create() did not work with PHP7.4
 
 
 ## [0.4.0] - 2024-03-19
-
 ### Added
 - Repository code gen updated
 - added event responses to all events, not just some

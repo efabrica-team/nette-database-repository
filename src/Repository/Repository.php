@@ -419,7 +419,8 @@ abstract class Repository
      */
     public function create(): Entity
     {
-        return new ($this->entityClass)([], $this->query());
+        $class = $this->entityClass;
+        return new $class([], $this->query());
     }
 
     /**
