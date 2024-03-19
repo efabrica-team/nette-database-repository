@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - fixed typehints in Repository, Query and Entity
 - insertOne
 - createRow() is internal now, switch to create()
+- Entity save() accepts $data now (optional)
 
 ## [0.3.0] - 2024-02-27
 ### Added

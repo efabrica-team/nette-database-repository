@@ -58,10 +58,12 @@ abstract class Entity extends ActiveRow
 
     /**
      * Sync state of entity into database
+     * @param iterable|null $data Additional data to fill the entity with before saving
      * @return $this
      */
-    public function save(): self
+    public function save(iterable $data = []): self
     {
+        $this->fill($data);
         $query = $this->_query->createSelectionInstance();
         // if entity is new, insert it
         if ($this->internalData() === []) {
@@ -112,7 +114,7 @@ abstract class Entity extends ActiveRow
 
     /**
      * @param string $column
-     * @param mixed  $value
+     * @param mixed $value
      */
     public function __set($column, $value): void
     {
