@@ -199,7 +199,7 @@ abstract class Repository
      */
     public function insertOne(array $data): Entity
     {
-        return $this->create()->fill($data)->save();
+        return $this->create()->save($data);
     }
 
     /**

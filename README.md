@@ -36,10 +36,29 @@ You can either use our code generation tool to create it automatically or write 
 ```php
 assert($repository instanceof PersonRepository);
 assert($entity instanceof Person);
-$entity = $repository->createRow();
+$entity = $repository->create();
 $entity->name = 'John';
 $entity->surname = 'Doe';
 $entity->age = 42;
+$entity->save();
+```
+
+Save array:
+
+```php
+$entity = $repository->insertOne([
+    Person::NAME => 'John',
+    Person::SURNAME => 'Doe',
+    Person::AGE => 42,
+]); // always returns entity
+
+// More verbose approach:
+$entity = $repository->create();
+$entity->fill([
+    Person::NAME => 'John',
+    Person::SURNAME => 'Doe',
+    Person::AGE => 42,
+]);
 $entity->save();
 ```
 
@@ -47,10 +66,10 @@ Classic:
 
 ```php
 $person = $repository->insert([
-    Person::name => 'John',
-    Person::surname => 'Doe',
-    Person::age => 42,
-]);
+    Person::NAME => 'John',
+    Person::SURNAME => 'Doe',
+    Person::AGE => 42,
+]); // always returns Entity
 ```
 
 Multi-insert:
@@ -59,12 +78,12 @@ Multi-insert:
 $persons = [];
 foreach (range(30, 40) as $age) {
     $person = $repository->createRow();
-    $person->name = 'John';
-    $person->surname = 'Doe';
-    $person->age = $age;
+    Person::NAME => 'John',
+    Person::SURNAME => 'Doe',
+    Person::AGE => $age,
     $persons[] = $person;
 }
-$repository->insert($persons);
+$repository->insertMany($persons); // always returns int
 ```
 
 #### Updating an entity
@@ -72,28 +91,26 @@ $repository->insert($persons);
 ```php
 $entity = $repository->find($id);
 $entity->name = 'Jake';
-$entity->save();
+$entity->update(); // or $entity->save();
 ```
 
 Classic:
 
 ```php
-$repository->update($id, [
-    Person::name => 'Jake',
-]);
+$repository->update($id, [Person::name => 'Jake']);
 ```
 
 #### Deleting an entity
 
 ```php
-$entity = $repository->find($id);
-$entity->delete();
+$repository->delete($id);
 ```
 
-Or:
+Or, if you already have the entity available:
 
 ```php
-$repository->delete($id);
+$entity = $repository->find($id);
+$entity->delete();
 ```
 
 ### Scopes
@@ -191,6 +208,10 @@ Code generation is fully optional, but it is recommended to use it.
 >To run the code generation, use this command:
 >```sh
 >$ php bin/console efabrica:nette-repo:code-gen
+># OR
+>$ php bin/console e:n:c
+># OR 
+>$ php vendor/bin/enc
 >```
 
 For every table in the database, it will generate these classes in the `/Generated/` namespace: (Example: `person` table)
