@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- count() now defaults to '*' only if no limit or offset is set
+- Repository->fetchChunked() is now typehinted too
 
 
 ## [0.4.1] - 2024-03-19

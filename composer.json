@@ -29,14 +29,14 @@
         }
     ],
     "require": {
-        "php": "^7.4|^8.0",
+        "php": "^8.2",
         "ext-json": "*",
         "ext-pdo": "*",
         "doctrine/inflector": "^2.0",
         "nette/caching": "^3.1",
         "nette/database": "^3.1",
         "nette/di": "^3.1",
-        "nette/php-generator": "^3.6",
+        "nette/php-generator": "^4.1.4",
         "nikic/php-parser": "^4.16",
         "symfony/console": "^5.4",
         "symfony/polyfill-php80": "^1.27"
@@ -47,7 +47,7 @@
         "nette/http": "^3.2",
         "phpunit/phpunit": "^9.6",
         "nette/application": "^3.1",
-        "nesbot/carbon": "^2.68",
+        "nesbot/carbon": "^3.1",
         "ramsey/uuid": "^4.2"
     },
     "autoload": {

@@ -61,6 +61,7 @@ class RepositoryWriter
         $class->addComment("@method {$structure->getClassName()}Query findBy(array \$conditions)");
         $class->addComment("@method {$structure->getClassName()}Query search(array \$columns, string \$search)");
         $class->addComment("@method {$structure->getClassName()}[] fetchAll()");
+        $class->addComment("@method \Generator<{$structure->getClassName()}> fetchChunked()");
         $class->addComment("@method {$structure->getClassName()}|null find($primaryType{$structure->getClassName()} \$$primaryName)");
         $class->addComment("@method {$structure->getClassName()}|null findOneBy(array \$conditions)");
         $class->addComment("@method {$structure->getClassName()} findOrFail($primaryType{$structure->getClassName()} \$$primaryName)");

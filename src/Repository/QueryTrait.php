@@ -219,7 +219,7 @@ trait QueryTrait
 
     public function count(?string $column = null): int
     {
-        if ($column === null && $this->rows === null) {
+        if ($column === null && $this->rows === null && $this->getLimit() === null && $this->getOffset() < 1) {
             $column = '*';
         }
         return parent::count($column);

@@ -6,7 +6,6 @@ use Doctrine\Inflector\Inflector;
 use Doctrine\Inflector\InflectorFactory;
 use Nette\Database\Structure;
 use Nette\PhpGenerator\ClassType;
-use Nette\PhpGenerator\PhpNamespace;
 use Nette\Utils\Strings;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -67,7 +66,6 @@ class RepositoryCodeGenerationCommand extends Command
                     }
                     $c = ClassType::fromCode($code);
                     $repoDirs[$table['name']] = Strings::before($file->getPathname(), '/Repositor') ?? dirname($file->getPathname(), 2);
-                    /** @var PhpNamespace $phpNamespace */
                     $phpNamespace = $c->getNamespace();
                     $repoNamespaces[$table['name']] = Strings::before($phpNamespace->getName(), '\\Repositor') ?? $phpNamespace->getName();
                 }
