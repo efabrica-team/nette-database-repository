@@ -29,7 +29,7 @@
         }
     ],
     "require": {
-        "php": "^8.2",
+        "php": "^8.1",
         "ext-json": "*",
         "ext-pdo": "*",
         "doctrine/inflector": "^2.0",
