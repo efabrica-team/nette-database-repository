@@ -42,6 +42,7 @@ class InsertRepositoryEvent extends RepositoryEvent
             $newRow = $query->insert($entity);
             if ($newRow instanceof ActiveRow) {
                 $entity->internalData($newRow->toArray(), false);
+                $entity->setTable($newRow->getTable());
                 if (count($this->entities) === 1) {
                     return new InsertEventResponse($this, $entity);
                 }

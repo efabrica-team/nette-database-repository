@@ -7,17 +7,17 @@ use Efabrica\NetteRepository\Repository\Entity;
 use Efabrica\NetteRepository\Repository\GroupedQuery;
 use Efabrica\NetteRepository\Repository\Query;
 use Nette\PhpGenerator\ClassType;
+use Nette\PhpGenerator\TraitType;
 use Nette\Utils\Strings;
 use function str_contains;
 
 class EntityWriter
 {
-    private static function createBody(EntityStructure $structure): ClassType
+    private static function createBody(EntityStructure $structure): TraitType
     {
         $structure->entityNamespace->addUse($structure->entityGenNamespace->getName() . '\\' . $structure->getClassName());
 
-        $class = new ClassType($structure->getClassName() . 'Body', $structure->entityNamespace);
-        $class->setTrait();
+        $class = new TraitType($structure->getClassName() . 'Body', $structure->entityNamespace);
         $class->addComment("@mixin {$structure->getClassName()}");
 
         return $class;

@@ -58,7 +58,7 @@ abstract class Entity extends ActiveRow
 
     /**
      * Sync state of entity into database
-     * @param iterable|null $data Additional data to fill the entity with before saving
+     * @param iterable $data Additional data to fill the entity with before saving
      * @return $this
      */
     public function save(iterable $data = []): self

@@ -2,6 +2,7 @@
 
 namespace Efabrica\NetteRepository\CodeGen;
 
+use Nette\PhpGenerator\ClassLike;
 use Nette\PhpGenerator\ClassType;
 use RuntimeException;
 
@@ -18,21 +19,23 @@ class FileWriter
         $this->inheritance = $inheritance;
     }
 
-    public function writeClass(ClassType $classType, string $dir): void
+    public function writeClass(ClassLike $classType, string $dir): void
     {
         $inheritance = $this->inheritance[$classType->getName()] ?? [];
-        if (isset($inheritance['extends'])) {
+        if (isset($inheritance['extends']) && $classType instanceof ClassType) {
             $classType->setExtends($inheritance['extends']);
         }
+        $namespace = $classType->getNamespace();
+        assert($namespace !== null);
         if (isset($inheritance['implements'])) {
             foreach ((array)$inheritance['implements'] as $interface) {
-                $namespace = $classType->getNamespace();
-                assert($namespace !== null);
                 $namespace->addUse($interface);
-                $classType->addImplement($interface);
+                if ($classType instanceof ClassType) {
+                    $classType->addImplement($interface);
+                }
             }
         }
-        $contents = "<?php\n\n" . $classType->getNamespace() . $classType;
+        $contents = "<?php\n\n" . $namespace . $classType;
         $contents = str_replace("\t", '    ', $contents);
         $contents = preg_replace('/\n{3,}/', "\n\n", $contents) ?? $contents;
         $this->writeFile($dir . '/' . $classType->getName() . '.php', $contents);

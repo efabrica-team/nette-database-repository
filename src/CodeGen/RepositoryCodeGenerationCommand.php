@@ -67,6 +67,7 @@ class RepositoryCodeGenerationCommand extends Command
                     $c = ClassType::fromCode($code);
                     $repoDirs[$table['name']] = Strings::before($file->getPathname(), '/Repositor') ?? dirname($file->getPathname(), 2);
                     $phpNamespace = $c->getNamespace();
+                    assert($phpNamespace !== null);
                     $repoNamespaces[$table['name']] = Strings::before($phpNamespace->getName(), '\\Repositor') ?? $phpNamespace->getName();
                 }
             }
