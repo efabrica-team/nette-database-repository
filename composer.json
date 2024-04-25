@@ -38,8 +38,8 @@
         "nette/di": "^3.1",
         "nette/php-generator": "^4.1.4",
         "nikic/php-parser": "^4.16",
-        "symfony/console": "^5.4",
-        "symfony/polyfill-php80": "^1.27"
+        "symfony/console": "^5.4|^6.0|^7.0",
+        "symfony/polyfill-php80": "^1.29"
     },
     "require-dev": {
         "nette/bootstrap": "^3.1",
