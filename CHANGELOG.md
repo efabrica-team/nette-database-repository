@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+
+## [0.4.4] - 2024-07-22
+
 ### Fixed
 
 - nikic/php-parser 5 support
@@ -59,7 +63,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial version
 
-[Unreleased]: https://github.com/efabrica-team/nette-database-repository/compare/0.4.3...main
+[Unreleased]: https://github.com/efabrica-team/nette-database-repository/compare/0.4.4...main
+[0.4.4]: https://github.com/efabrica-team/nette-database-repository/compare/0.4.3...0.4.4
 [0.4.3]: https://github.com/efabrica-team/nette-database-repository/compare/0.4.2...0.4.3
 [0.4.2]: https://github.com/efabrica-team/nette-database-repository/compare/0.4.1...0.4.2
 [0.4.1]: https://github.com/efabrica-team/nette-database-repository/compare/0.4.0...0.4.1
