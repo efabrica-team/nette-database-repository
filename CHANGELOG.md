@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - nikic/php-parser 5 support
+- Fix repository connection ensure (if callback throw)  
 
 ## [0.4.3] - 2024-04-25
 ### Fixed
