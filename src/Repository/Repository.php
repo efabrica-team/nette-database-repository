@@ -496,8 +496,6 @@ abstract class Repository
                 if ($reconnect) {
                     $this->getExplorer()->getConnection()->reconnect();
                 }
-            } catch (Throwable $e) {
-                throw $e;
             }
         }
         throw new LogicException('Unreachable');
