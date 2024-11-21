@@ -8,6 +8,7 @@ use Efabrica\NetteRepository\Repository\Scope\Scope;
 use Efabrica\NetteRepository\Subscriber\RepositoryEventSubscribers;
 use Efabrica\NetteRepository\Traits\RelatedThrough\SetRelatedRepositoryEvent;
 use LogicException;
+use MongoDB\Driver\Exception\ConnectionException;
 use Nette\Application\BadRequestException;
 use Nette\Database\Explorer;
 use Nette\Database\Table\ActiveRow;
@@ -488,7 +489,7 @@ abstract class Repository
         while ($attempts < $retryTimes) {
             try {
                 return $callback($this);
-            } catch (Throwable $e) {
+            } catch (ConnectionException $e) {
                 if ($attempts++ === $retryTimes) {
                     throw $e;
                 }
