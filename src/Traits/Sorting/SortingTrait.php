@@ -49,7 +49,7 @@ trait SortingTrait
      * @param ActiveRow $record
      * @return bool
      */
-    public function moveTop($record, array $where = [], bool $up = true)
+    public function moveTop($record, array $where = [], bool $up = true): bool
     {
         $record = $this->getRecordForShifting($record, $where);
         if (!$record instanceof ActiveRow) {
@@ -80,7 +80,7 @@ trait SortingTrait
      * @param ActiveRow $record
      * @return bool
      */
-    public function moveBottom($record, array $where = [])
+    public function moveBottom($record, array $where = []): bool
     {
         return $this->moveTop($record, $where, false);
     }
