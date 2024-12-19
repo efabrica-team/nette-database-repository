@@ -4,6 +4,7 @@ namespace Efabrica\NetteRepository\Traits\Sorting;
 
 use Efabrica\NetteRepository\Repository\Entity;
 use Efabrica\NetteRepository\Repository\Repository;
+use Nette\Database\Table\ActiveRow;
 
 /**
  * @implements SortingInterface<*>
@@ -44,12 +45,53 @@ trait SortingTrait
         return $this->moveUp($record, $where, false);
     }
 
+    /**
+     * @param ActiveRow $record
+     * @return bool
+     */
+    public function moveTop($record, array $where = [], bool $up = true): bool
+    {
+        $record = $this->getRecordForShifting($record, $where);
+        if (!$record instanceof ActiveRow) {
+            return false;
+        }
+
+        $behavior = $this->getSorting();
+        $sortField = $this->getTableName() . '.' . $behavior->getColumn();
+        $where[$sortField . ($up ? ' < ?' : ' > ?')] = $record[$behavior->getColumn()];
+
+        $topRecord = $this->findBy($where)->order($sortField . ($up ? ' ASC' : ' DESC'))->limit(1)->fetch();
+        if (!$topRecord) {
+            return false;
+        }
+
+        $topRecordSorting = $topRecord[$behavior->getColumn()];
+        if ($up) {
+            $this->insertBefore($topRecord[$behavior->getColumn()], $where);
+        } else {
+            $this->insertAfter($topRecord[$behavior->getColumn()], $where);
+        }
+        $this->update($record, [$behavior->getColumn() => $topRecordSorting]);
+
+        return true;
+    }
+
+    /**
+     * @param ActiveRow $record
+     * @return bool
+     */
+    public function moveBottom($record, array $where = []): bool
+    {
+        return $this->moveTop($record, $where, false);
+    }
+
+
     public function insertAfter(int $sorting, array $where): void
     {
         $behavior = $this->getSorting();
         $sortField = $this->getTableName() . '.' . $behavior->getColumn();
         $where[$sortField . ' <= ?'] = $sorting;
-        $this->findBy($where)->update([$behavior->getColumn() . '-=' => $behavior->getStep()]);
+        $this->scopeRaw()->update($where, [$behavior->getColumn() . '-=' => $behavior->getStep()]);
     }
 
     public function insertBefore(int $sorting, array $where): void
@@ -57,7 +99,7 @@ trait SortingTrait
         $behavior = $this->getSorting();
         $sortField = $this->getTableName() . '.' . $behavior->getColumn();
         $where[$sortField . ' >= ?'] = $sorting;
-        $this->findBy($where)->update([$behavior->getColumn() . '+=' => $behavior->getStep()]);
+        $this->scopeRaw()->update($where, [$behavior->getColumn() . '+=' => $behavior->getStep()]);
     }
 
     private function getRecordForShifting($record, array $where = []): ?Entity
