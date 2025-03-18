@@ -3,6 +3,7 @@
 namespace Efabrica\NetteRepository\Repository;
 
 use ArrayAccess;
+use Closure;
 use Countable;
 use Efabrica\NetteRepository\Repository\Scope\Scope;
 use Efabrica\NetteRepository\Subscriber\RepositoryEventSubscribers;
@@ -127,27 +128,27 @@ interface QueryInterface extends Iterator, Countable, ArrayAccess
 
     /**
      * Fetches all rows as associative array.
-     * @param string|int $key column name used for an array key or null for numeric index
-     * @param string|int $value column name used for an array value or null for the whole row
+     * @param Closure|int|string|null $keyOrCallback column name used for an array key or null for numeric index
+     * @param int|string|null $value column name used for an array value or null for the whole row
      */
-    public function fetchPairs($key = null, $value = null): array;
+    public function fetchPairs(Closure|string|int|null $keyOrCallback = null, string|int|null $value = null): array;
 
     public function fetchAssoc(string $path): array;
 
     /**
      * Adds select clause, more calls appends to the end.
-     * @param string|string[] $columns for example "column, MD5(column) AS column_md5"
+     * @param string $columns for example "column, MD5(column) AS column_md5"
      * @param mixed           ...$params
      * @return self&$this
      */
-    public function select($columns, ...$params);
+    public function select(string $columns, ...$params): static;
 
     /**
      * Adds condition for primary key.
      * @param mixed $key
      * @return self&$this
      */
-    public function wherePrimary($key);
+    public function wherePrimary($key): static;
 
     /**
      * Adds ON condition when joining specified table, more calls appends with AND.
@@ -156,13 +157,13 @@ interface QueryInterface extends Iterator, Countable, ArrayAccess
      * @param mixed  ...$params
      * @return self&$this
      */
-    public function joinWhere(string $tableChain, string $condition, ...$params);
+    public function joinWhere(string $tableChain, string $condition, ...$params): static;
 
     /**
      * @param array $parameters
      * @return self&$this
      */
-    public function whereOr(array $parameters);
+    public function whereOr(array $parameters): static;
 
     /**
      * Adds order clause, more calls appends to the end.
@@ -170,7 +171,7 @@ interface QueryInterface extends Iterator, Countable, ArrayAccess
      * @param mixed  ...$params
      * @return self&$this
      */
-    public function order(string $columns, ...$params);
+    public function order(string $columns, ...$params): static;
 
     public function getOrder(): array;
 
@@ -178,14 +179,14 @@ interface QueryInterface extends Iterator, Countable, ArrayAccess
      * Sets limit clause, more calls rewrite old values.
      * @return self&$this
      */
-    public function limit(?int $limit, ?int $offset = null);
+    public function limit(?int $limit, ?int $offset = null): static;
 
     /**
      * Sets offset using page number, more calls rewrite old values.
      * @param int|null $numOfPages number of pages
      * @return self&$this
      */
-    public function page(int $page, int $itemsPerPage, &$numOfPages = null);
+    public function page(int $page, int $itemsPerPage, &$numOfPages = null): static;
 
     /**
      * Sets group clause, more calls rewrite old value.
@@ -193,19 +194,19 @@ interface QueryInterface extends Iterator, Countable, ArrayAccess
      * @param mixed  ...$params
      * @return self&$this
      */
-    public function group(string $columns, ...$params);
+    public function group(string $columns, ...$params): static;
 
     /**
      * @param string $having
      * @param mixed  ...$params
      * @return self&$this
      */
-    public function having(string $having, ...$params);
+    public function having(string $having, ...$params): static;
 
     /**
      * @return self&$this
      */
-    public function alias(string $tableChain, string $alias);
+    public function alias(string $tableChain, string $alias): static;
 
     /**
      * @return mixed
@@ -238,10 +239,7 @@ interface QueryInterface extends Iterator, Countable, ArrayAccess
      */
     public function getReferencedTable(ActiveRow $row, ?string $table, ?string $column = null);
 
-    /**
-     * @param int|string $active
-     */
-    public function getReferencingTable(string $table, ?string $column = null, $active = null): ?GroupedSelection;
+    public function getReferencingTable(string $table, ?string $column = null, string|int|null $active = null): ?GroupedSelection;
 
     /**
      * @return E
@@ -263,29 +261,4 @@ interface QueryInterface extends Iterator, Countable, ArrayAccess
     public function offsetExists($key): bool;
 
     public function offsetUnset($key): void;
-
-    /**
-     * @return mixed
-     */
-    public function __call(string $name, array $args);
-
-    /**
-     * @return mixed
-     */
-    public static function __callStatic(string $name, array $args);
-
-    /**
-     * @return mixed
-     */
-    public function __get(string $name);
-
-    /**
-     * @param string $name
-     * @param mixed  $value
-     */
-    public function __set(string $name, $value);
-
-    public function __unset(string $name);
-
-    public function __isset(string $name): bool;
 }

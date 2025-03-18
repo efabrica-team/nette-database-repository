@@ -28,7 +28,7 @@ trait QueryTrait
 
     private array $entityState = [];
 
-    public function insert(iterable $data)
+    public function insert(iterable $data): Entity|array|int|bool
     {
         if ($data === []) {
             return 0;
@@ -99,7 +99,7 @@ trait QueryTrait
     /**
      * @param array|string|ActiveRow $condition
      */
-    public function where($condition, ...$params): self
+    public function where($condition, ...$params): static
     {
         if ($condition instanceof ActiveRow) {
             $this->wherePrimary($condition->getPrimary());
@@ -112,7 +112,7 @@ trait QueryTrait
     /**
      * @param Entity[] $entities
      */
-    public function whereEntities(array $entities, bool $original = true): self
+    public function whereEntities(array $entities, bool $original = true): static
     {
         $where = $values = [];
         $primary = $this->getPrimary();
@@ -147,7 +147,7 @@ trait QueryTrait
         return $this->sqlBuilder->getOrder();
     }
 
-    public function search(array $columns, string $search): self
+    public function search(array $columns, string $search): static
     {
         $where = [];
         $values = [];
@@ -289,7 +289,7 @@ trait QueryTrait
         $this->entityState = [];
     }
 
-    public function withScope(Scope $scope): self
+    public function withScope(Scope $scope): static
     {
         $clone = clone $this;
         $clone->behaviors->setScope($scope);

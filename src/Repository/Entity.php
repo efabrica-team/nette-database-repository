@@ -102,7 +102,7 @@ abstract class Entity extends ActiveRow
         return isset($this->_unsavedChanges[$key]) || parent::__isset($key);
     }
 
-    public function &__get(string $key)
+    public function &__get(string $key): mixed
     {
         if (array_key_exists($key, $this->_unsavedChanges)) {
             return $this->_unsavedChanges[$key];
@@ -134,7 +134,7 @@ abstract class Entity extends ActiveRow
     /**
      * @param string $key
      */
-    public function __unset($key)
+    public function __unset($key): void
     {
         $this->$key = null;
     }
@@ -273,7 +273,7 @@ abstract class Entity extends ActiveRow
      * @param bool $original true = do not include unsaved changes, false = include unsaved primary key changes
      * @return int|string|(int|string)[]|DateTimeInterface|null primary key value
      */
-    public function getPrimary(bool $throw = true, bool $original = true)
+    public function getPrimary(bool $throw = true, bool $original = true): mixed
     {
         $primary = $this->_query->getPrimary($throw);
         if ($primary === null) {

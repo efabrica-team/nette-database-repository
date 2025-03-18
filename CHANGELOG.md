@@ -7,12 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
 
+- nette/database 3.2 support
+- PHP8.3 required
 
 ## [0.4.4] - 2024-07-22
-
 ### Fixed
-
 - nikic/php-parser 5 support
 
 ## [0.4.3] - 2024-04-25
