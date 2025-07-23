@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+
+
+## [0.5.1] - 2025-07-23
 ### Fixed
 - wrong diff behavior when updating entities (unsavedDiff())
 
@@ -69,7 +73,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial version
 
-[Unreleased]: https://github.com/efabrica-team/nette-database-repository/compare/0.5.0...main
+[Unreleased]: https://github.com/efabrica-team/nette-database-repository/compare/0.5.1...main
+[0.5.1]: https://github.com/efabrica-team/nette-database-repository/compare/0.5.0...0.5.1
 [0.5.0]: https://github.com/efabrica-team/nette-database-repository/compare/0.4.4...0.5.0
 [0.4.4]: https://github.com/efabrica-team/nette-database-repository/compare/0.4.3...0.4.4
 [0.4.3]: https://github.com/efabrica-team/nette-database-repository/compare/0.4.2...0.4.3
