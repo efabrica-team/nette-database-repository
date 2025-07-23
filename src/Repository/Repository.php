@@ -256,12 +256,12 @@ abstract class Repository
         } else {
             $chunks = [];
             foreach ($entities as $entity) {
-                $diff = $entity->unsavedChanges();
+                $diff = $entity->unsavedDiff();
                 ksort($diff);
                 $found = false;
                 /** @var Entity[] $chunk */
                 foreach ($chunks as $chunk) {
-                    if ($chunk[0]->unsavedChanges() === $diff) {
+                    if ($chunk[0]->unsavedDiff() === $diff) {
                         $chunk[] = $entity;
                         $found = true;
                         break;
@@ -275,7 +275,7 @@ abstract class Repository
         $count = 0;
         /** @var Entity[] $chunk */
         foreach ($chunks as $chunk) {
-            $count += $this->query()->update($chunk[0]->unsavedChanges(), $chunk);
+            $count += $this->query()->update($chunk[0]->unsavedDiff(), $chunk);
         }
         return $count;
     }
