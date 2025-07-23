@@ -85,7 +85,6 @@ trait SortingTrait
         return $this->moveTop($record, $where, false);
     }
 
-
     public function insertAfter(int $sorting, array $where): void
     {
         $behavior = $this->getSorting();

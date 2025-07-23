@@ -66,12 +66,16 @@ abstract class Entity extends ActiveRow
         $this->fill($data);
         $query = $this->_query->createSelectionInstance();
         // if entity is new, insert it
+        $diff = $this->unsavedDiff();
         if ($this->internalData() === []) {
-            $insert = $query->insert($this->_unsavedChanges);
-            if ($insert instanceof self) {
-                $this->internalData($insert->toArray(), false);
+            if ($diff !== []) {
+                $insert = $query->insert($diff);
+                if ($insert instanceof self) {
+                    $this->internalData($insert->toArray(), false);
+                }
             }
-        } elseif ($this->_unsavedChanges !== []) {
+        } elseif ($diff !== []) {
+            $this->_unsavedChanges = $diff;
             $this->update();
         }
         return $this;
@@ -84,7 +88,12 @@ abstract class Entity extends ActiveRow
     public function update(iterable $data = []): bool
     {
         $this->fill($data);
-        $result = $this->_query->createSelectionInstance()->update($this->_unsavedChanges, [$this]);
+        $diff = $this->unsavedDiff();
+        if ($diff === []) {
+            $this->_unsavedChanges = [];
+            return false;
+        }
+        $result = $this->_query->createSelectionInstance()->update($diff, [$this]);
         $this->_unsavedChanges = [];
         return (bool)$result;
     }
@@ -119,7 +128,7 @@ abstract class Entity extends ActiveRow
     public function __set($column, $value): void
     {
         if (parent::__isset($column)) {
-            if (self::isSameValue(parent::__get($column), $value)) {
+            if ($value === null && parent::__get($column) === null) {
                 unset($this->_unsavedChanges[$column]);
             } else {
                 $this->_unsavedChanges[$column] = $value;
@@ -152,6 +161,18 @@ abstract class Entity extends ActiveRow
     public function unsavedChanges(): array
     {
         return $this->_unsavedChanges;
+    }
+
+    public function unsavedDiff(): array
+    {
+        $diff = [];
+        $original = $this->internalData();
+        foreach ($this->_unsavedChanges as $key => $value) {
+            if (!array_key_exists($key, $original) || !self::isSameValue($original[$key], $value)) {
+                $diff[$key] = $value;
+            }
+        }
+        return $diff;
     }
 
     /**
