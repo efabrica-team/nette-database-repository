@@ -30,6 +30,9 @@ class SoftDeleteEventSubscriber extends EventSubscriber
     {
         $behavior = $event->getBehavior(SoftDeleteBehavior::class);
         $data = [$behavior->getColumn() => $behavior->getNewValue()];
+        foreach ($behavior->getUniqueColumns() as $uniqueColumn => $newValue) {
+            $data[$uniqueColumn] = $newValue;
+        }
         (new SoftDeleteQueryEvent($event->getQuery()))->handle($data);
         return $event->stopPropagation();
     }

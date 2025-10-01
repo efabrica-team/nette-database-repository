@@ -5,6 +5,7 @@ namespace Efabrica\NetteRepository\Traits\SoftDelete;
 use DateTimeImmutable;
 use DateTimeInterface;
 use Efabrica\NetteRepository\Traits\RepositoryBehavior;
+use Nette\Database\SqlLiteral;
 
 /**
  * This behavior will change deletedAt field when entity is deleted and cancel the delete.
@@ -20,14 +21,19 @@ class SoftDeleteBehavior extends RepositoryBehavior
 
     private bool $filterDeletedRows;
 
+    /** @var array<literal-string, null|string|SqlLiteral> */
+    private array $uniqueColumns;
+
     /**
      * @param bool|DateTimeInterface $newValue use true if column is bool, null for DateTimeImmutable
+     * @param array<literal-string, null|string|SqlLiteral> $uniqueColumns key is column name, value is new unique value (never usable)
      */
-    public function __construct(string $column, $newValue = null, bool $filterDeletedRows = true)
+    public function __construct(string $column, $newValue = null, bool $filterDeletedRows = true, array $uniqueColumns = [])
     {
         $this->column = $column;
         $this->newValue = $newValue ?? new DateTimeImmutable();
         $this->filterDeletedRows = $filterDeletedRows;
+        $this->uniqueColumns = $uniqueColumns;
     }
 
     public function shouldFilterDeleted(): bool
@@ -46,6 +52,14 @@ class SoftDeleteBehavior extends RepositoryBehavior
     public function getNewValue()
     {
         return $this->newValue;
+    }
+
+    /**
+     * @return array<literal-string, null|string|SqlLiteral>
+     */
+    public function getUniqueColumns(): array
+    {
+        return $this->uniqueColumns;
     }
 
     public function withoutFilter(): self
