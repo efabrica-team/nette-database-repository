@@ -21,12 +21,12 @@ class SoftDeleteBehavior extends RepositoryBehavior
 
     private bool $filterDeletedRows;
 
-    /** @var array<literal-string, null|string|SqlLiteral> */
+    /** @var array<literal-string, mixed> */
     private array $uniqueColumns;
 
     /**
      * @param bool|DateTimeInterface $newValue use true if column is bool, null for DateTimeImmutable
-     * @param array<literal-string, null|string|SqlLiteral> $uniqueColumns key is column name, value is new unique value (never usable)
+     * @param array<literal-string, mixed> $uniqueColumns key is column name, value is new unique value (never usable)
      */
     public function __construct(string $column, $newValue = null, bool $filterDeletedRows = true, array $uniqueColumns = [])
     {
@@ -55,7 +55,7 @@ class SoftDeleteBehavior extends RepositoryBehavior
     }
 
     /**
-     * @return array<literal-string, null|string|SqlLiteral>
+     * @return array<literal-string, mixed>
      */
     public function getUniqueColumns(): array
     {
