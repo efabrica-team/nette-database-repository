@@ -290,7 +290,7 @@ This behavior ensures that there is always at least one row with a truthy value 
 
 This behavior marks a row as deleted by setting the `deleted_at` column to the current date and time instead of removing it from the table.
 
-You can replace value in column with unique key for allow insert new record with same unique value. For example: 
+You can replace the value in the column with a unique key to allow inserting a new record with the same unique value. For example:
 ```php
 $behaviors
     ->add(

@@ -5,7 +5,6 @@ namespace Efabrica\NetteRepository\Traits\SoftDelete;
 use DateTimeImmutable;
 use DateTimeInterface;
 use Efabrica\NetteRepository\Traits\RepositoryBehavior;
-use Nette\Database\SqlLiteral;
 
 /**
  * This behavior will change deletedAt field when entity is deleted and cancel the delete.
