@@ -79,11 +79,11 @@ trait QueryTrait
      */
     public function delete(?array $entities = null): int
     {
-        if (!$this->doesEvents()) {
-            return parent::delete();
-        }
         if ($entities !== null) {
             $this->whereEntities($entities);
+        }
+        if (!$this->doesEvents()) {
+            return parent::delete();
         }
         return (new DeleteQueryEvent($this, $entities))->handle()->getAffectedRows();
     }
