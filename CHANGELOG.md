@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+
+
+## [0.5.2] - 2025-10-15
 ### Fixed
 - fixed delete() operation to work with entities in non-event mode
 
@@ -73,7 +77,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial version
 
-[Unreleased]: https://github.com/efabrica-team/nette-database-repository/compare/0.5.1...main
+[Unreleased]: https://github.com/efabrica-team/nette-database-repository/compare/0.5.2...main
+[0.5.2]: https://github.com/efabrica-team/nette-database-repository/compare/0.5.1...0.5.2
 [0.5.1]: https://github.com/efabrica-team/nette-database-repository/compare/0.5.0...0.5.1
 [0.5.0]: https://github.com/efabrica-team/nette-database-repository/compare/0.4.4...0.5.0
 [0.4.4]: https://github.com/efabrica-team/nette-database-repository/compare/0.4.3...0.4.4
