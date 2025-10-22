@@ -421,7 +421,14 @@ abstract class Repository
     public function create(): Entity
     {
         $class = $this->entityClass;
-        return new $class([], $this->query());
+
+        $columns = $this->explorer->getStructure()->getColumns($this->getTableName());
+        $data = [];
+        foreach ($columns as $column) {
+            $data[$column['name']] = null;
+        }
+
+        return new $class($data, $this->query());
     }
 
     /**
@@ -433,6 +440,12 @@ abstract class Repository
     {
         $class = $this->entityClass;
         $query ??= $this->query();
+
+        $columns = $this->explorer->getStructure()->getColumns($this->getTableName());
+        foreach ($columns as $column) {
+            $existingData[$column['name']] ??= null;
+        }
+
         $entity = new $class($existingData, $query);
         foreach ($query->getEventSubscribers() as $event) {
             $event->onLoad($entity, $this);

@@ -17,31 +17,46 @@ use Nette\InvalidStateException;
 
 abstract class Entity extends ActiveRow
 {
-    private array $_unsavedChanges = [];
+    private array $unsavedChanges = [];
 
-    private QueryInterface $_query;
+    private QueryInterface $query;
 
     public function __construct(array $data, QueryInterface $query)
     {
         /** @var QueryInterface&Selection $query */
         parent::__construct($data, $query);
-        $this->_query = $query;
+        $this->query = $query;
     }
 
     /**
-     * @internal
+     * @internal do not use, signature may change
      */
-    public function internalData(iterable $data = [], bool $merge = true): array
+    public function getInternalData(): array
     {
-        $newData = $merge ? (((array)$this)["\x00" . ActiveRow::class . "\x00data"] ?? []) : [];
+        return ((array)$this)["\x00" . ActiveRow::class . "\x00data"] ?? [];
+    }
+
+    /**
+     * @internal do not use, signature may change
+     */
+    public function setInternalData(iterable $data = []): void
+    {
+        if ($data === []) {
+            return;
+        }
+
+        $newData = [];
         foreach ($data as $key => $value) {
             $newData[$key] = $value;
-            unset($this->_unsavedChanges[$key]);
+            unset($this->unsavedChanges[$key]);
         }
-        if (!$merge || $data !== []) {
-            array_walk($this, static fn(&$value, $key) => str_ends_with((string)$key, "\x00data") ? $value = $newData : null);
-        }
-        return $newData;
+
+        array_walk(
+            $this,
+            static fn(&$value, $key) => str_ends_with((string)$key, "\x00data")
+                ? $value = $newData
+                : null
+        );
     }
 
     /**
@@ -56,6 +71,16 @@ abstract class Entity extends ActiveRow
         return $this;
     }
 
+    public function isPristine(): bool
+    {
+        foreach ($this->getInternalData() as $value) {
+            if ($value !== null) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /**
      * Sync state of entity into database
      * @param iterable $data Additional data to fill the entity with before saving
@@ -64,18 +89,18 @@ abstract class Entity extends ActiveRow
     public function save(iterable $data = []): self
     {
         $this->fill($data);
-        $query = $this->_query->createSelectionInstance();
+        $query = $this->query->createSelectionInstance();
         // if entity is new, insert it
         $diff = $this->unsavedDiff();
-        if ($this->internalData() === []) {
+        if ($this->isPristine()) {
             if ($diff !== []) {
                 $insert = $query->insert($diff);
                 if ($insert instanceof self) {
-                    $this->internalData($insert->toArray(), false);
+                    $this->setInternalData($insert->toArray());
                 }
             }
         } elseif ($diff !== []) {
-            $this->_unsavedChanges = $diff;
+            $this->unsavedChanges = $diff;
             $this->update();
         }
         return $this;
@@ -90,17 +115,17 @@ abstract class Entity extends ActiveRow
         $this->fill($data);
         $diff = $this->unsavedDiff();
         if ($diff === []) {
-            $this->_unsavedChanges = [];
+            $this->unsavedChanges = [];
             return false;
         }
-        $result = $this->_query->createSelectionInstance()->update($diff, [$this]);
-        $this->_unsavedChanges = [];
+        $result = $this->query->createSelectionInstance()->update($diff, [$this]);
+        $this->unsavedChanges = [];
         return (bool)$result;
     }
 
     public function delete(): int
     {
-        return $this->_query->createSelectionInstance()->delete([$this]);
+        return $this->query->createSelectionInstance()->delete([$this]);
     }
 
     /**
@@ -108,13 +133,13 @@ abstract class Entity extends ActiveRow
      */
     public function __isset($key): bool
     {
-        return isset($this->_unsavedChanges[$key]) || parent::__isset($key);
+        return isset($this->unsavedChanges[$key]) || parent::__isset($key);
     }
 
     public function &__get(string $key): mixed
     {
-        if (array_key_exists($key, $this->_unsavedChanges)) {
-            return $this->_unsavedChanges[$key];
+        if (array_key_exists($key, $this->unsavedChanges)) {
+            return $this->unsavedChanges[$key];
         }
         /** @var mixed $value */
         $value = parent::__get($key);
@@ -129,14 +154,14 @@ abstract class Entity extends ActiveRow
     {
         if (parent::__isset($column)) {
             if ($value === null && parent::__get($column) === null) {
-                unset($this->_unsavedChanges[$column]);
+                unset($this->unsavedChanges[$column]);
             } else {
-                $this->_unsavedChanges[$column] = $value;
+                $this->unsavedChanges[$column] = $value;
             }
         } elseif ($value === null) {
-            unset($this->_unsavedChanges[$column]);
+            unset($this->unsavedChanges[$column]);
         } else {
-            $this->_unsavedChanges[$column] = $value;
+            $this->unsavedChanges[$column] = $value;
         }
     }
 
@@ -150,7 +175,7 @@ abstract class Entity extends ActiveRow
 
     public function toArray(): array
     {
-        return $this->_unsavedChanges + parent::toArray();
+        return $this->unsavedChanges + parent::toArray();
     }
 
     public function toOriginalArray(): array
@@ -160,15 +185,15 @@ abstract class Entity extends ActiveRow
 
     public function unsavedChanges(): array
     {
-        return $this->_unsavedChanges;
+        return $this->unsavedChanges;
     }
 
     public function unsavedDiff(): array
     {
         $diff = [];
-        $original = $this->internalData();
-        foreach ($this->_unsavedChanges as $key => $value) {
-            if (!array_key_exists($key, $original) || !self::isSameValue($original[$key], $value)) {
+        $original = $this->getInternalData();
+        foreach ($this->unsavedChanges as $key => $value) {
+            if (!self::isSameValue($original[$key] ?? null, $value)) {
                 $diff[$key] = $value;
             }
         }
@@ -230,18 +255,18 @@ abstract class Entity extends ActiveRow
 
     protected function getManager(): RepositoryManager
     {
-        return $this->_query->getRepository()->getManager();
+        return $this->query->getRepository()->getManager();
     }
 
     public function getTableName(): string
     {
-        return $this->_query->getName();
+        return $this->query->getName();
     }
 
     public function setScope(Scope $scope): self
     {
         $clone = clone $this;
-        $clone->_query = (clone $clone->_query)->withScope($scope);
+        $clone->query = (clone $clone->query)->withScope($scope);
         return $clone;
     }
 
@@ -296,7 +321,7 @@ abstract class Entity extends ActiveRow
      */
     public function getPrimary(bool $throw = true, bool $original = true): mixed
     {
-        $primary = $this->_query->getPrimary($throw);
+        $primary = $this->query->getPrimary($throw);
         if ($primary === null) {
             return null;
         }

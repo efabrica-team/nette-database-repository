@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- repository create() now correctly creates null values for empty columns
+- internalData() get/set split (@internal method)
 
 
 ## [0.5.2] - 2025-10-15
