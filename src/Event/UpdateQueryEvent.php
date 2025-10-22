@@ -49,7 +49,7 @@ class UpdateQueryEvent extends QueryEvent
                 if (!isset($newEntities[$signature])) {
                     throw new LogicException('Entity was not found after update. This is internal error of the library. Please report it.');
                 }
-                $entity->internalData($newEntities[$signature]->toArray(), false);
+                $entity->setInternalData($newEntities[$signature]->toArray());
             }
         }
     }
