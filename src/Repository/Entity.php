@@ -175,7 +175,7 @@ abstract class Entity extends ActiveRow
 
     public function toArray(): array
     {
-        return $this->unsavedChanges + parent::toArray();
+        return $this->unsavedChanges + $this->getInternalData();
     }
 
     public function toOriginalArray(): array
@@ -311,7 +311,7 @@ abstract class Entity extends ActiveRow
 
     public function getIterator(): Iterator
     {
-        return new ArrayIterator($this->toArray());
+        return new ArrayIterator(array_filter($this->toArray(), fn($value) => $value !== null));
     }
 
     /**

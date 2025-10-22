@@ -7,12 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- 0.5.3 create() null behavior related fixes (iterator aggregate)
 
 
 ## [0.5.3] - 2025-10-22
-
 ### Fixed
-
 - repository create() now correctly creates null values for empty columns
 - internalData() get/set split (@internal method)
 
