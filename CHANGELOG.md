@@ -7,10 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+
+## [0.5.5] - 2025-10-27
+
 ### Fixed
 
 - UuidBehavior is no longer placeholder code
-
 
 ## [0.5.4] - 2025-10-22
 ### Fixed
@@ -89,7 +92,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial version
 
-[Unreleased]: https://github.com/efabrica-team/nette-database-repository/compare/0.5.4...main
+[Unreleased]: https://github.com/efabrica-team/nette-database-repository/compare/0.5.5...main
+[0.5.5]: https://github.com/efabrica-team/nette-database-repository/compare/0.5.4...0.5.5
 [0.5.4]: https://github.com/efabrica-team/nette-database-repository/compare/0.5.3...0.5.4
 [0.5.3]: https://github.com/efabrica-team/nette-database-repository/compare/0.5.2...0.5.3
 [0.5.2]: https://github.com/efabrica-team/nette-database-repository/compare/0.5.1...0.5.2
