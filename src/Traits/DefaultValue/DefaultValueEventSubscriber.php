@@ -19,10 +19,9 @@ final class DefaultValueEventSubscriber extends EventSubscriber
         foreach ($event->getBehaviors()->all() as $behavior) {
             if ($behavior instanceof DefaultValueBehavior) {
                 $field = $behavior->getField();
-                $value = $behavior->getValue();
                 foreach ($event->getEntities() as $entity) {
                     if (!isset($entity[$field])) {
-                        $entity[$field] = $value;
+                        $entity[$field] = $behavior->getValue();
                     }
                 }
             }

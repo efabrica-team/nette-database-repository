@@ -7,12 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-
-
-## [0.5.5] - 2025-10-27
-
 ### Fixed
 
+- fix DefaultValueEventSubscriber
+
+## [0.5.5] - 2025-10-27
+### Fixed
 - UuidBehavior is no longer placeholder code
 
 ## [0.5.4] - 2025-10-22
