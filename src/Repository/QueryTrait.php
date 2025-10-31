@@ -260,8 +260,9 @@ trait QueryTrait
         }
 
         if (isset($this->entityState[$signature])) {
+            /** @var Entity $oldEntity */
             $oldEntity = $this->entityState[$signature];
-            $oldEntity->internalData($entity->toArray(), false);
+            $oldEntity->setInternalData($entity->toArray());
             return $oldEntity;
         }
         return $this->entityState[$signature] = $entity;
