@@ -7,12 +7,9 @@ use Efabrica\NetteRepository\Event\RepositoryEventResponse;
 
 class SetRelatedEventResponse extends RepositoryEventResponse
 {
-    private int $affectedRows;
-
-    public function __construct(RepositoryEvent $event, int $affectedRows)
+    public function __construct(RepositoryEvent $event, private readonly int $affectedRows)
     {
         parent::__construct($event);
-        $this->affectedRows = $affectedRows;
     }
 
     public function getAffectedRows(): int

@@ -4,12 +4,9 @@ namespace Efabrica\NetteRepository\Event;
 
 class UpdateEventResponse extends RepositoryEventResponse
 {
-    private int $affectedRows;
-
-    public function __construct(UpdateQueryEvent $event, int $affectedRows)
+    public function __construct(UpdateQueryEvent $event, private readonly int $affectedRows)
     {
         parent::__construct($event);
-        $this->affectedRows = $affectedRows;
     }
 
     public function getAffectedRows(): int

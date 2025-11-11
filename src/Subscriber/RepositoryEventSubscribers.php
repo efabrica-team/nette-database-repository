@@ -22,7 +22,7 @@ final class RepositoryEventSubscribers implements IteratorAggregate
     public function __construct(EventSubscriber ...$subscribers)
     {
         foreach ($subscribers as $subscriber) {
-            $this->subscribers[get_class($subscriber)] = $subscriber;
+            $this->subscribers[$subscriber::class] = $subscriber;
         }
     }
 

@@ -14,6 +14,7 @@ final class DefaultValueEventSubscriber extends EventSubscriber
         return $event->hasBehavior(DefaultValueBehavior::class);
     }
 
+    #[\Override]
     public function onInsert(InsertRepositoryEvent $event): InsertEventResponse
     {
         foreach ($event->getBehaviors()->all() as $behavior) {

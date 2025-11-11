@@ -12,13 +12,10 @@ class RepositoryManager
 {
     private array $repositories = [];
 
-    private Container $container;
+    private readonly Inflector $inflector;
 
-    private Inflector $inflector;
-
-    public function __construct(Container $container)
+    public function __construct(private readonly Container $container)
     {
-        $this->container = $container;
         $this->inflector = InflectorFactory::create()->build();
     }
 
@@ -37,7 +34,7 @@ class RepositoryManager
         $repo = $this->container->getByName(ModuleWriter::toRepoServiceName($table, $this->inflector));
         assert($repo instanceof Repository);
         if ($repo->getTableName() !== $table) {
-            throw new RuntimeException("When looking for repository for table $table, found repository for table {$repo->getTableName()} (" . get_class($repo) . ')');
+            throw new RuntimeException("When looking for repository for table $table, found repository for table {$repo->getTableName()} (" . $repo::class . ')');
         }
         return $this->repositories[$table] ??= $repo;
     }
@@ -49,11 +46,6 @@ class RepositoryManager
      */
     public static function hasTrait($repository, string $trait): bool
     {
-        foreach ([-1 => $repository] + class_parents($repository) as $parent) {
-            if (in_array($trait, class_uses($parent) ?: [], true)) {
-                return true;
-            }
-        }
-        return false;
+        return array_any([-1 => $repository] + class_parents($repository), fn($parent) => in_array($trait, class_uses($parent) ?: [], true));
     }
 }

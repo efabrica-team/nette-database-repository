@@ -25,6 +25,7 @@ class DummyRepository extends Repository
     {
     }
 
+    #[\Override]
     public function query(): Query
     {
         return $this->q ??= new DummyQuery($this);
@@ -40,12 +41,14 @@ class DummyQuery extends Query
     public array $inserted = [];
     public array $updated = [];
 
+    #[\Override]
     public function insert(iterable $data): Entity|array|int|bool
     {
         $this->inserted = (array)$data;
         return 1;
     }
 
+    #[\Override]
     public function update(iterable $data, ?array $entities = null): int
     {
         $this->updated = (array)$data;

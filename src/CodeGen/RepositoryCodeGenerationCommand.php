@@ -17,36 +17,21 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class RepositoryCodeGenerationCommand extends Command
 {
-    private string $appDir;
-
-    private Inflector $inflector;
+    private readonly Inflector $inflector;
 
     private string $repoDir;
 
     private string $namespace;
 
-    private EntityStructureFactory $structureFactory;
-
-    private Structure $structure;
-
-    /**
-     * @var object{ignoreTables: array, configNeonPath: string, inheritance: array{extends: string, implements: array<string>}[]}
-     */
-    private object $config;
-
     /**
      * @param object{ignoreTables: array, configNeonPath: string, inheritance: array{extends: string, implements: array<string>}[]} $config
      */
-    public function __construct(string $appDir, object $config, EntityStructureFactory $structureFactory, Structure $structure)
+    public function __construct(private readonly string $appDir, private readonly object $config, private readonly EntityStructureFactory $structureFactory, private readonly Structure $structure)
     {
         parent::__construct('efabrica:nette-repo:code-gen');
         $this->inflector = InflectorFactory::create()->build();
-        $this->appDir = $appDir;
         $this->repoDir = 'modules/Core';
         $this->namespace = 'App\\Core';
-        $this->structureFactory = $structureFactory;
-        $this->structure = $structure;
-        $this->config = $config;
     }
 
     public function findRepoDirs(array $tables, array &$repoDirs, array &$repoNamespaces): void

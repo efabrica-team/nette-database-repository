@@ -12,11 +12,8 @@ class FileWriter
 
     private array $freshFiles = [];
 
-    private array $inheritance;
-
-    public function __construct(array $inheritance)
+    public function __construct(private array $inheritance)
     {
-        $this->inheritance = $inheritance;
     }
 
     public function writeClass(ClassLike $classType, string $dir): void

@@ -10,14 +10,8 @@ use Efabrica\NetteRepository\Traits\RepositoryBehavior;
  */
 class DateBehavior extends RepositoryBehavior
 {
-    private ?string $createdAtField;
-
-    private ?string $updatedAtField;
-
-    public function __construct(?string $createdAtField, ?string $updatedAtField)
+    public function __construct(private readonly ?string $createdAtField, private readonly ?string $updatedAtField)
     {
-        $this->createdAtField = $createdAtField;
-        $this->updatedAtField = $updatedAtField;
     }
 
     public function getCreatedAtField(): ?string

@@ -20,6 +20,7 @@ class SortingEventSubscriber extends EventSubscriber implements RelatedEventSubs
         return $event->hasBehavior(SortingBehavior::class);
     }
 
+    #[\Override]
     public function onInsert(InsertRepositoryEvent $event): InsertEventResponse
     {
         $behavior = $event->getBehavior(SortingBehavior::class);

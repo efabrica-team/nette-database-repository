@@ -9,7 +9,7 @@ use Efabrica\NetteRepository\Traits\Filter\FilterBehavior;
  */
 class PublishBehavior extends FilterBehavior
 {
-    private string $publishedField;
+    private readonly string $publishedField;
 
     public function __construct(string $publishedField)
     {

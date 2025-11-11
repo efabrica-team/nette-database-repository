@@ -11,23 +11,17 @@ use Efabrica\NetteRepository\Traits\RepositoryBehavior;
  */
 class SoftDeleteBehavior extends RepositoryBehavior
 {
-    private string $column;
-
     /**
      * @var bool|DateTimeInterface
      */
     private $newValue;
 
-    private bool $filterDeletedRows;
-
     /**
      * @param bool|DateTimeInterface $newValue use true if column is bool, null for DateTimeImmutable
      */
-    public function __construct(string $column, $newValue = null, bool $filterDeletedRows = true)
+    public function __construct(private string $column, $newValue = null, private bool $filterDeletedRows = true)
     {
-        $this->column = $column;
         $this->newValue = $newValue ?? new DateTimeImmutable();
-        $this->filterDeletedRows = $filterDeletedRows;
     }
 
     public function shouldFilterDeleted(): bool

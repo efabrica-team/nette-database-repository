@@ -31,6 +31,7 @@ class RepositoryEventSubscriber extends EventSubscriber implements SoftDeleteSub
             || $repository instanceof SoftDeleteSubscriber;
     }
 
+    #[\Override]
     public function onInsert(InsertRepositoryEvent $event): InsertEventResponse
     {
         $repository = $event->getRepository();
@@ -40,6 +41,7 @@ class RepositoryEventSubscriber extends EventSubscriber implements SoftDeleteSub
         return $event->handle();
     }
 
+    #[\Override]
     public function onUpdate(UpdateQueryEvent $event, array &$data): UpdateEventResponse
     {
         $repository = $event->getRepository();
@@ -49,6 +51,7 @@ class RepositoryEventSubscriber extends EventSubscriber implements SoftDeleteSub
         return $event->handle($data);
     }
 
+    #[\Override]
     public function onDelete(DeleteQueryEvent $event): DeleteEventResponse
     {
         $repository = $event->getRepository();
@@ -58,6 +61,7 @@ class RepositoryEventSubscriber extends EventSubscriber implements SoftDeleteSub
         return $event->handle();
     }
 
+    #[\Override]
     public function onSelect(SelectQueryEvent $event): SelectEventResponse
     {
         $repository = $event->getRepository();

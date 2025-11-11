@@ -8,12 +8,9 @@ use Efabrica\NetteRepository\Repository\Query;
 
 class GetRelatedEventResponse extends RepositoryEventResponse
 {
-    private Query $query;
-
-    public function __construct(RepositoryEvent $event, Query $query)
+    public function __construct(RepositoryEvent $event, private Query $query)
     {
         parent::__construct($event);
-        $this->query = $query;
     }
 
     public function getQuery(): Query

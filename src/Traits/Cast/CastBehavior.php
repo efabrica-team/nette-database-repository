@@ -10,7 +10,7 @@ use Efabrica\NetteRepository\Traits\RepositoryBehavior;
  */
 abstract class CastBehavior extends RepositoryBehavior implements TypeOverrideBehavior
 {
-    private array $fields;
+    private readonly array $fields;
 
     public function __construct(string ...$fields)
     {

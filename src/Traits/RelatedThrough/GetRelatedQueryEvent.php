@@ -14,15 +14,15 @@ class GetRelatedQueryEvent extends RepositoryEvent
 {
     public const PIVOT = 'pivot';
 
-    private Query $query;
+    private readonly Query $query;
 
-    private Repository $throughRepo;
+    private readonly Repository $throughRepo;
 
-    private Entity $owner;
+    private readonly Entity $owner;
 
-    private string $ownerColumn;
+    private readonly string $ownerColumn;
 
-    private string $ownedColumn;
+    private readonly string $ownedColumn;
 
     public function __construct(Entity $owner, Repository $throughRepo, Repository $otherRepo, string $ownerColumn, string $ownedColumn)
     {

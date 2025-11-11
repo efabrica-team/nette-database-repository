@@ -15,12 +15,9 @@ use RuntimeException;
  */
 class EntityStructure
 {
-    /** @var EntityProperty[] */
-    private array $properties;
+    private const int TWO = 2;
 
-    private string $tableName;
-
-    private string $className;
+    private readonly string $className;
 
     public PhpNamespace $repositoryNamespace;
 
@@ -34,8 +31,6 @@ class EntityStructure
 
     public PhpNamespace $entityGenNamespace;
 
-    public string $dbDir;
-
     public string $repositoryDir;
 
     public string $entityDir;
@@ -48,10 +43,6 @@ class EntityStructure
 
     public string $entityGenDir;
 
-    private Inflector $inflector;
-
-    private array $primaries;
-
     public array $toMany;
 
     public array $toOne;
@@ -63,37 +54,30 @@ class EntityStructure
      * @param EntityProperty[] $properties
      */
     public function __construct(
-        array $properties,
-        string $table,
+        private readonly array $properties,
+        private readonly string $tableName,
         string $namespace,
-        string $dbDir,
-        Inflector $inflector,
-        array $primaries,
+        public string $dbDir,
+        private readonly Inflector $inflector,
+        private readonly array $primaries,
         Structure $structure
     ) {
-        $this->tableName = $table;
-        $this->inflector = $inflector;
-        $this->className = $this->toClassName($table);
-        $this->properties = $properties;
-
-        $this->dbDir = $dbDir;
+        $this->className = $this->toClassName($this->tableName);
         $this->repositoryNamespace = new PhpNamespace($namespace . '\\Repository');
-        $this->repositoryDir = $dbDir . '/Repository';
+        $this->repositoryDir = $this->dbDir . '/Repository';
         $this->queryNamespace = new PhpNamespace($namespace . '\\Repository\\Query');
-        $this->queryDir = $dbDir . '/Repository/Query';
+        $this->queryDir = $this->dbDir . '/Repository/Query';
         $this->repositoryGenNamespace = new PhpNamespace($namespace . '\\Repository\\Generated\\Repository');
-        $this->repositoryGenDir = $dbDir . '/Repository/Generated/Repository';
+        $this->repositoryGenDir = $this->dbDir . '/Repository/Generated/Repository';
         $this->queryGenNamespace = new PhpNamespace($namespace . '\\Repository\\Generated\\Query');
-        $this->queryGenDir = $dbDir . '/Repository/Generated/Query';
+        $this->queryGenDir = $this->dbDir . '/Repository/Generated/Query';
         $this->entityNamespace = new PhpNamespace($namespace . '\\Repository\\Entity');
-        $this->entityDir = $dbDir . '/Repository/Entity';
+        $this->entityDir = $this->dbDir . '/Repository/Entity';
         $this->entityGenNamespace = new PhpNamespace($namespace . '\\Repository\\Generated\\Entity');
-        $this->entityGenDir = $dbDir . '/Repository/Generated/Entity';
+        $this->entityGenDir = $this->dbDir . '/Repository/Generated/Entity';
 
-        $this->primaries = $primaries;
-
-        $this->toMany = $structure->getHasManyReference($table) ?? [];
-        $this->toOne = $structure->getBelongsToReference($table) ?? [];
+        $this->toMany = $structure->getHasManyReference($this->tableName);
+        $this->toOne = $structure->getBelongsToReference($this->tableName);
         $this->manyToMany = $this->getManyToManyTables($structure);
     }
 
@@ -107,9 +91,9 @@ class EntityStructure
             if (count($mnColumns) !== 1) {
                 continue;
             }
-            $toOne = $structure->getBelongsToReference($mnTable) ?? [];
+            $toOne = $structure->getBelongsToReference($mnTable);
             $refColumns = array_flip(array_diff($toOne, [$mnTable]));
-            if (count($refColumns) !== 2) {
+            if (count($refColumns) !== self::TWO) {
                 continue;
             }
             $otherTable = array_diff($toOne, [$this->tableName]);
@@ -126,7 +110,7 @@ class EntityStructure
 
     public static function toClassCase(Inflector $inflector, string $string): string
     {
-        if (!Strings::endsWith($string, 'ta')) {
+        if (!\str_ends_with($string, 'ta')) {
             $string = $inflector->singularize($string);
         }
         return Strings::firstUpper($inflector->camelize($string));

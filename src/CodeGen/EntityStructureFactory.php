@@ -14,7 +14,7 @@ use Nette\Utils\Strings;
 
 class EntityStructureFactory
 {
-    private const TYPE_MAP = [
+    private const array TYPE_MAP = [
         'datetime' => DateTimeInterface::class,
         'date' => DateTimeInterface::class,
         'time' => DateTimeInterface::class,
@@ -48,17 +48,11 @@ class EntityStructureFactory
         'enum' => 'string',
     ];
 
-    private Structure $structure;
+    private readonly Inflector $inflector;
 
-    private Inflector $inflector;
-
-    private Container $container;
-
-    public function __construct(Structure $structure, Container $container)
+    public function __construct(private readonly Structure $structure, private readonly Container $container)
     {
-        $this->structure = $structure;
         $this->inflector = InflectorFactory::create()->build();
-        $this->container = $container;
     }
 
     public function create(string $table, string $namespace, string $dbDir): EntityStructure
