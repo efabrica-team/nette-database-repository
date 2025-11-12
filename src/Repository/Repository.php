@@ -22,9 +22,11 @@ use Traversable;
  */
 abstract class Repository
 {
-    protected Explorer $explorer;
+    private const int DEFAULT_RETRY_TIMES = 2;
 
-    private string $tableName;
+    private const int DEFAULT_RETRY_TIMES_FOR_ENSURE = 3;
+
+    protected Explorer $explorer;
 
     /** @var class-string<E> */
     private string $entityClass;
@@ -44,10 +46,9 @@ abstract class Repository
      * @param class-string<E> $entityClass
      * @param class-string<Q> $queryClass
      */
-    public function __construct(string $tableName, string $entityClass, string $queryClass, RepositoryDependencies $deps)
+    public function __construct(private string $tableName, string $entityClass, string $queryClass, RepositoryDependencies $deps)
     {
         $this->explorer = $deps->getExplorer();
-        $this->tableName = $tableName;
         assert(is_a($entityClass, Entity::class, true));
         $this->entityClass = $entityClass;
         assert(is_a($queryClass, Query::class, true));
@@ -496,8 +497,11 @@ abstract class Repository
      * @return T
      * @throws Throwable
      */
-    final public function ensure(callable $callback, int $retryTimes = 3, bool $reconnect = true)
-    {
+    final public function ensure(
+        callable $callback,
+        int $retryTimes = self::DEFAULT_RETRY_TIMES_FOR_ENSURE,
+        bool $reconnect = true,
+    ) {
         $attempts = 1;
         while ($attempts < $retryTimes) {
             try {
@@ -517,7 +521,6 @@ abstract class Repository
     /*******************************
      * Deprecations
      ******************************/
-
     /**
      * @deprecated Use query() instead
      * @deprecated instead of overriding, implement SelectEventSubscriber in the repository
@@ -561,7 +564,7 @@ abstract class Repository
      * @deprecated use ensure() instead
      * @template T
      */
-    final public function retry(callable $callback, int $retryTimes = 2)
+    final public function retry(callable $callback, int $retryTimes = self::DEFAULT_RETRY_TIMES)
     {
         return $this->ensure($callback, $retryTimes, false);
     }

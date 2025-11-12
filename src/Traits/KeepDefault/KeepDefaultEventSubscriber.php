@@ -91,6 +91,7 @@ final class KeepDefaultEventSubscriber extends EventSubscriber implements SoftDe
         $repository->updateEntities(...$batch);
     }
 
+    #[\Override]
     public function onInsert(InsertRepositoryEvent $event): InsertEventResponse
     {
         $result = $event->handle();
@@ -98,6 +99,7 @@ final class KeepDefaultEventSubscriber extends EventSubscriber implements SoftDe
         return $result;
     }
 
+    #[\Override]
     public function onUpdate(UpdateQueryEvent $event, array &$data): UpdateEventResponse
     {
         $result = $event->handle($data);
@@ -111,6 +113,7 @@ final class KeepDefaultEventSubscriber extends EventSubscriber implements SoftDe
         return $result;
     }
 
+    #[\Override]
     public function onDelete(DeleteQueryEvent $event): DeleteEventResponse
     {
         $result = $event->handle();

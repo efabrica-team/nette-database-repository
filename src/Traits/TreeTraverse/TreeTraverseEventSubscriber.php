@@ -17,11 +17,14 @@ use Efabrica\NetteRepository\Traits\SoftDelete\SoftDeleteSubscriber;
 
 class TreeTraverseEventSubscriber extends EventSubscriber implements SoftDeleteSubscriber
 {
+    private const int TWO = 2;
+
     public function supportsEvent(RepositoryEvent $event): bool
     {
         return $event->hasBehavior(TreeTraverseBehavior::class);
     }
 
+    #[\Override]
     public function onInsert(InsertRepositoryEvent $event): InsertEventResponse
     {
         $response = $event->handle();
@@ -29,6 +32,7 @@ class TreeTraverseEventSubscriber extends EventSubscriber implements SoftDeleteS
         return $response;
     }
 
+    #[\Override]
     public function onUpdate(UpdateQueryEvent $event, array &$data): UpdateEventResponse
     {
         $response = $event->handle($data);
@@ -36,6 +40,7 @@ class TreeTraverseEventSubscriber extends EventSubscriber implements SoftDeleteS
         return $response;
     }
 
+    #[\Override]
     public function onDelete(DeleteQueryEvent $event): DeleteEventResponse
     {
         $response = $event->handle();
@@ -59,6 +64,9 @@ class TreeTraverseEventSubscriber extends EventSubscriber implements SoftDeleteS
 
         $treeStructure = [];
         foreach ($repository->query()->select($select)->order($order) as $row) {
+            if ($row === false) {
+                continue;
+            }
             if (!isset($treeStructure[$row[$behavior->getParentColumn()]])) {
                 $treeStructure[$row[$behavior->getParentColumn()]] = [];
             }
@@ -71,7 +79,7 @@ class TreeTraverseEventSubscriber extends EventSubscriber implements SoftDeleteS
         array &$treeStructure,
         Repository $repository,
         TreeTraverseBehavior $behavior,
-        int $id = null,
+        ?int $id = null,
         int $value = 0,
         int $depth = 1
     ): int {
@@ -96,7 +104,7 @@ class TreeTraverseEventSubscriber extends EventSubscriber implements SoftDeleteS
 
         $repository->update($id, [
             $behavior->getLeftColumn() => $lft,
-            $behavior->getRightColumn() => $value + 2,
+            $behavior->getRightColumn() => $value + self::TWO,
             $behavior->getDepthColumn() => $depth,
         ]);
         return $value + 1;

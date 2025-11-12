@@ -8,21 +8,12 @@ use Efabrica\NetteRepository\Repository\RepositoryBehaviors;
 
 abstract class QueryEvent extends RepositoryEvent
 {
-    protected QueryInterface $query;
-
-    /**
-     * @var iterable<Entity>|null
-     */
-    private ?iterable $entities;
-
     /**
      * @param iterable<Entity>|null $entities
      */
-    public function __construct(QueryInterface $query, ?iterable $entities = null)
+    public function __construct(protected QueryInterface $query, private ?iterable $entities = null)
     {
-        $this->query = $query;
-        $this->entities = $entities;
-        parent::__construct($query->getRepository());
+        parent::__construct($this->query->getRepository());
     }
 
     public function getQuery(): QueryInterface
@@ -41,6 +32,7 @@ abstract class QueryEvent extends RepositoryEvent
     /**
      * @return RepositoryBehaviors Ensures behaviors that were removed after query() was called will still be available
      */
+    #[\Override]
     public function getBehaviors(): RepositoryBehaviors
     {
         return $this->query->getBehaviors();

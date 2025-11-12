@@ -16,6 +16,7 @@ class SoftDeleteEventSubscriber extends EventSubscriber
         return $event->hasBehavior(SoftDeleteBehavior::class);
     }
 
+    #[\Override]
     public function onSelect(SelectQueryEvent $event): SelectEventResponse
     {
         /** @var SoftDeleteBehavior $behavior */
@@ -26,6 +27,7 @@ class SoftDeleteEventSubscriber extends EventSubscriber
         return $event->handle();
     }
 
+    #[\Override]
     public function onDelete(DeleteQueryEvent $event): DeleteEventResponse
     {
         $behavior = $event->getBehavior(SoftDeleteBehavior::class);

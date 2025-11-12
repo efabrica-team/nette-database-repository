@@ -13,23 +13,17 @@ class RepositoryBehaviors implements IteratorAggregate
 {
     private array $behaviors = [];
 
-    private Repository $repository;
-
-    private ScopeContainer $scope;
-
     private ?array $scoped = null;
 
-    public function __construct(Repository $repository, ScopeContainer $scope)
+    public function __construct(private Repository $repository, private ScopeContainer $scope)
     {
-        $this->repository = $repository;
-        $this->scope = $scope;
     }
 
     public function add(RepositoryBehavior $behavior, ?string $key = null): self
     {
         if ($key === null) {
-            if (!isset($this->behaviors[get_class($behavior)])) {
-                $this->behaviors[get_class($behavior)] = $behavior;
+            if (!isset($this->behaviors[$behavior::class])) {
+                $this->behaviors[$behavior::class] = $behavior;
             } else {
                 $this->behaviors[] = $behavior;
             }
@@ -43,7 +37,7 @@ class RepositoryBehaviors implements IteratorAggregate
     public function replace(RepositoryBehavior $behavior, ?string $key = null): self
     {
         if ($key === null) {
-            $this->behaviors[get_class($behavior)] = $behavior;
+            $this->behaviors[$behavior::class] = $behavior;
         } else {
             $this->behaviors[$key] = $behavior;
         }

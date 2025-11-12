@@ -19,12 +19,9 @@ final class CustomCastBehavior extends CastBehavior
      */
     private $encode;
 
-    private string $type;
-
-    public function __construct(array $fields, callable $decodeFromDB, callable $encodeForDB, string $type = 'mixed')
+    public function __construct(array $fields, callable $decodeFromDB, callable $encodeForDB, private readonly string $type = 'mixed')
     {
         parent::__construct(...$fields);
-        $this->type = $type;
         $this->decode = $decodeFromDB;
         $this->encode = $encodeForDB;
     }

@@ -26,7 +26,7 @@ final class CarbonCastBehavior extends CastBehavior
                 return null;
             }
             return CarbonImmutable::parse($encoded);
-        } catch (Throwable $e) {
+        } catch (Throwable) {
             return null;
         }
     }

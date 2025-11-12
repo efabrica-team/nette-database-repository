@@ -12,14 +12,8 @@ use Efabrica\NetteRepository\Traits\RepositoryBehavior;
  */
 class KeepDefaultBehavior extends RepositoryBehavior
 {
-    private string $field;
-
-    private ?Query $query;
-
-    public function __construct(string $field, ?Query $query = null)
+    public function __construct(private readonly string $field, private readonly ?Query $query = null)
     {
-        $this->field = $field;
-        $this->query = $query;
     }
 
     public function getField(): string

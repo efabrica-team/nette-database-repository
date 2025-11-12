@@ -23,6 +23,7 @@ class Query extends Selection implements QueryInterface
         parent::__construct($repository->getExplorer(), $repository->getExplorer()->getConventions(), $repository->getTableName());
     }
 
+    #[\Override]
     public function createSelectionInstance(?string $table = null): Query
     {
         if ($table === null) {
@@ -31,6 +32,7 @@ class Query extends Selection implements QueryInterface
         return $this->repository->getManager()->byTableName($table)->query()->withScope($this->behaviors->getScope());
     }
 
+    #[\Override]
     public function createGroupedSelectionInstance(string $table, string $column): GroupedQuery
     {
         return GroupedQuery::fromQuery($this, $table, $column);

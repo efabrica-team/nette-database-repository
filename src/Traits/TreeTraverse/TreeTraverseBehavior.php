@@ -6,15 +6,15 @@ use Efabrica\NetteRepository\Traits\RepositoryBehavior;
 
 class TreeTraverseBehavior extends RepositoryBehavior
 {
-    private string $leftColumn;
+    private readonly string $leftColumn;
 
-    private string $rightColumn;
+    private readonly string $rightColumn;
 
-    private string $depthColumn;
+    private readonly string $depthColumn;
 
-    private string $parentColumn;
+    private readonly string $parentColumn;
 
-    private string $sortingColumn;
+    private readonly string $sortingColumn;
 
     public function __construct(?string $leftColumn, ?string $rightColumn, ?string $depthColumn, ?string $parentColumn, ?string $sortingColumn)
     {

@@ -10,11 +10,8 @@ use Efabrica\NetteRepository\Traits\RepositoryBehavior;
  */
 class FilterBehavior extends RepositoryBehavior implements FilterBehaviorInterface
 {
-    private array $where;
-
-    public function __construct(array $where = [])
+    public function __construct(private readonly array $where = [])
     {
-        $this->where = $where;
     }
 
     public function applyFilter(QueryInterface $query): void

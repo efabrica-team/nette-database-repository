@@ -7,16 +7,13 @@ use Efabrica\NetteRepository\Traits\RepositoryBehavior;
 
 class DefaultOrderBehavior extends RepositoryBehavior
 {
-    private string $columns;
-
-    private array $params;
+    private readonly array $params;
 
     /**
      * @param mixed ...$params
      */
-    public function __construct(string $columns, ...$params)
+    public function __construct(private readonly string $columns, ...$params)
     {
-        $this->columns = $columns;
         $this->params = $params;
     }
 

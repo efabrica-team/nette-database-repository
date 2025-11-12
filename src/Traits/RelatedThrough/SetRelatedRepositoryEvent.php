@@ -12,18 +12,10 @@ use LogicException;
 
 class SetRelatedRepositoryEvent extends RepositoryEvent
 {
-    private Repository $throughRepo;
-
-    private Entity $owner;
-
-    private iterable $owned;
+    private readonly Repository $throughRepo;
 
     /** @var (string|int)[] */
-    private array $ownedIds;
-
-    private string $ownerColumn;
-
-    private string $ownedColumn;
+    private readonly array $ownedIds;
 
     /**
      * @param Repository $throughRepo Many to many repository
@@ -32,15 +24,11 @@ class SetRelatedRepositoryEvent extends RepositoryEvent
      * @param string $ownerColumn Column in the through table that references the owner (ex.: "group_id")
      * @param string $ownedColumn Column in the through table that references the owned (ex.: "user_id")
      */
-    public function __construct(Repository $throughRepo, Entity $owner, iterable $owned, string $ownerColumn, string $ownedColumn)
+    public function __construct(Repository $throughRepo, private Entity $owner, private readonly iterable $owned, private readonly string $ownerColumn, private readonly string $ownedColumn)
     {
         parent::__construct($throughRepo);
         $this->throughRepo = $throughRepo;
-        $this->owner = $owner;
-        $this->owned = $owned;
-        $this->ownedIds = $this->mapOwnedToIds($owned);
-        $this->ownerColumn = $ownerColumn;
-        $this->ownedColumn = $ownedColumn;
+        $this->ownedIds = $this->mapOwnedToIds($this->owned);
     }
 
     public function handle(): SetRelatedEventResponse

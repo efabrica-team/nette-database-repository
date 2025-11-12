@@ -6,20 +6,11 @@ use Efabrica\NetteRepository\Traits\RepositoryBehavior;
 
 class DefaultValueBehavior extends RepositoryBehavior
 {
-    private string $field;
-
-    /**
-     * @var mixed
-     */
-    private $value;
-
     /**
      * @param mixed  $value
      */
-    public function __construct(string $field, $value)
+    public function __construct(private readonly string $field, private $value)
     {
-        $this->field = $field;
-        $this->value = $value;
     }
 
     public function getField(): string

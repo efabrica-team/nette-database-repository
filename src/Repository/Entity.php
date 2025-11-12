@@ -110,6 +110,7 @@ abstract class Entity extends ActiveRow
      * @param array<static::*,mixed> $data
      * @return bool
      */
+    #[\Override]
     public function update(iterable $data = []): bool
     {
         $this->fill($data);
@@ -123,6 +124,7 @@ abstract class Entity extends ActiveRow
         return (bool)$result;
     }
 
+    #[\Override]
     public function delete(): int
     {
         return $this->query->createSelectionInstance()->delete([$this]);
@@ -131,11 +133,13 @@ abstract class Entity extends ActiveRow
     /**
      * @param mixed $key
      */
+    #[\Override]
     public function __isset($key): bool
     {
         return isset($this->unsavedChanges[$key]) || parent::__isset($key);
     }
 
+    #[\Override]
     public function &__get(string $key): mixed
     {
         if (array_key_exists($key, $this->unsavedChanges)) {
@@ -173,6 +177,7 @@ abstract class Entity extends ActiveRow
         $this->$key = null;
     }
 
+    #[\Override]
     public function toArray(): array
     {
         return $this->unsavedChanges + $this->getInternalData();
@@ -203,6 +208,7 @@ abstract class Entity extends ActiveRow
     /**
      * @internal Use typehinted Entity getters instead
      */
+    #[\Override]
     public function ref(string $key, ?string $throughColumn = null): ?ActiveRow
     {
         return parent::ref($key, $throughColumn);
@@ -211,6 +217,7 @@ abstract class Entity extends ActiveRow
     /**
      * @internal Use typehinted $otherRepo->findBy($throughColumn, $row[$key]) instead
      */
+    #[\Override]
     public function related(string $key, ?string $throughColumn = null): GroupedSelection
     {
         return parent::related($key, $throughColumn);
@@ -309,6 +316,7 @@ abstract class Entity extends ActiveRow
         return $a;
     }
 
+    #[\Override]
     public function getIterator(): Iterator
     {
         return new ArrayIterator(array_filter($this->toArray(), fn($value) => $value !== null));
@@ -319,6 +327,7 @@ abstract class Entity extends ActiveRow
      * @param bool $original true = do not include unsaved changes, false = include unsaved primary key changes
      * @return int|string|(int|string)[]|DateTimeInterface|null primary key value
      */
+    #[\Override]
     public function getPrimary(bool $throw = true, bool $original = true): mixed
     {
         $primary = $this->query->getPrimary($throw);
@@ -359,6 +368,7 @@ abstract class Entity extends ActiveRow
      * @param bool $original true = do not include unsaved changes, false = include unsaved primary key changes
      * @return string of primary key values joined by |
      */
+    #[\Override]
     public function getSignature(bool $throw = true, bool $original = true): string
     {
         return implode('|', (array)$this->getPrimary($throw, $original));

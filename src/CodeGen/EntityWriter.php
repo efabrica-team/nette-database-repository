@@ -55,8 +55,8 @@ class EntityWriter
             $structure->entityGenNamespace->addUse($relStructure->repositoryNamespace->getName() . '\\' . $relClassName . 'Repository');
             $structure->entityGenNamespace->addUse($mnStructure->entityGenNamespace->getName() . '\\' . $mnClassName);
             $structure->entityGenNamespace->addUse($mnStructure->repositoryNamespace->getName() . '\\' . $mnClassName . 'Repository');
-            $SELF_COLUMN = mb_strtoupper($selfColumn);
-            $OTHER_COLUMN = mb_strtoupper($otherColumn);
+            $SELF_COLUMN = mb_strtoupper((string) $selfColumn);
+            $OTHER_COLUMN = mb_strtoupper((string) $otherColumn);
 
             $class->addMethod('get' . $structure->toPluralName($relClassName))
                 ->setBody(
@@ -92,7 +92,7 @@ class EntityWriter
                 $relRepo = $relStructure->repositoryNamespace->getName() . '\\' . $relClassName . 'Repository';
                 $structure->entityGenNamespace->addUse($relEntity);
                 $structure->entityGenNamespace->addUse($relRepo);
-                $RELATED_COLUMN = mb_strtoupper($relColumn);
+                $RELATED_COLUMN = mb_strtoupper((string) $relColumn);
                 $class->addMethod('get' . $structure->toClassName($columnName))
                     ->setBody("\$row = \$this->ref({$relClassName}Repository::TABLE_NAME, self::$RELATED_COLUMN);\n" .
                         "assert(\$row === null || \$row instanceof {$relClassName});\n" .
@@ -118,7 +118,7 @@ class EntityWriter
             $structure->entityGenNamespace->addUse($relEntity);
             $structure->entityGenNamespace->addUse(GroupedQuery::class);
             $structure->entityGenNamespace->addUse($relRepo);
-            $RELATED_COLUMN = mb_strtoupper($relatedColumn);
+            $RELATED_COLUMN = mb_strtoupper((string) $relatedColumn);
             $body = "/** @var iterable<{$relClassName}>&GroupedQuery \$query */\n" .
                 "\$query = \$this->related({$relClassName}Repository::TABLE_NAME, $relClassName::$RELATED_COLUMN);\n" .
                 'return $query;';

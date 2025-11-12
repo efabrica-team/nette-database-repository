@@ -20,6 +20,7 @@ final class DateEventSubscriber extends EventSubscriber implements SoftDeleteSub
         return $event->hasBehavior(DateBehavior::class);
     }
 
+    #[\Override]
     public function onInsert(InsertRepositoryEvent $event): InsertEventResponse
     {
         /** @var DateBehavior $behavior */
@@ -37,6 +38,7 @@ final class DateEventSubscriber extends EventSubscriber implements SoftDeleteSub
         return $event->handle();
     }
 
+    #[\Override]
     public function onUpdate(UpdateQueryEvent $event, array &$data): UpdateEventResponse
     {
         /** @var DateBehavior $behavior */

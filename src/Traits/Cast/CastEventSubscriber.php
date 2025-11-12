@@ -31,6 +31,7 @@ final class CastEventSubscriber extends EventSubscriber
         }
     }
 
+    #[\Override]
     public function onInsert(InsertRepositoryEvent $event): InsertEventResponse
     {
         foreach ($event->getBehaviors()->all() as $behavior) {
@@ -47,6 +48,7 @@ final class CastEventSubscriber extends EventSubscriber
         return $event->handle();
     }
 
+    #[\Override]
     public function onUpdate(UpdateQueryEvent $event, array &$data): UpdateEventResponse
     {
         foreach ($event->getBehaviors()->all() as $behavior) {

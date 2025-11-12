@@ -34,6 +34,7 @@ final class GroupedQuery extends GroupedSelection implements QueryInterface
         return new self($tableName, $column, $query, $query->query);
     }
 
+    #[\Override]
     public function createSelectionInstance(?string $table = null): Query
     {
         if ($table === null) {
@@ -42,6 +43,7 @@ final class GroupedQuery extends GroupedSelection implements QueryInterface
         return $this->repository->getManager()->byTableName($table)->query()->withScope($this->behaviors->getScope());
     }
 
+    #[\Override]
     public function createGroupedSelectionInstance(string $table, string $column): self
     {
         return self::fromGroupedQuery($this, $table, $column);

@@ -8,20 +8,12 @@ use Efabrica\NetteRepository\Subscriber\RepositoryEventSubscribers;
 use Nette\Database\Explorer;
 use Nette\DI\Container;
 
-final class RepositoryDependencies
+final readonly class RepositoryDependencies
 {
-    private Explorer $explorer;
-
     private RepositoryEventSubscribers $events;
 
-    private RepositoryManager $repositoryManager;
-
-    private ScopeContainer $scopeContainer;
-
-    public function __construct(Explorer $explorer, Container $container, RepositoryManager $repositoryManager, ScopeContainer $scopeContainer)
+    public function __construct(private Explorer $explorer, Container $container, private RepositoryManager $repositoryManager, private ScopeContainer $scopeContainer)
     {
-        $this->explorer = $explorer;
-
         $subscribers = [];
         foreach ($container->findByType(EventSubscriber::class) as $eventSubscriberName) {
             $eventSubscriber = $container->getService($eventSubscriberName);
@@ -30,8 +22,6 @@ final class RepositoryDependencies
             }
         }
         $this->events = new RepositoryEventSubscribers(...$subscribers);
-        $this->repositoryManager = $repositoryManager;
-        $this->scopeContainer = $scopeContainer;
     }
 
     public function getExplorer(): Explorer

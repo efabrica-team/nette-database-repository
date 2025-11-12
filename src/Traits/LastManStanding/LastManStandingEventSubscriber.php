@@ -26,6 +26,7 @@ final class LastManStandingEventSubscriber extends EventSubscriber implements So
         }
     }
 
+    #[\Override]
     public function onDelete(DeleteQueryEvent $event): DeleteEventResponse
     {
         $this->ensureLastMan($event);

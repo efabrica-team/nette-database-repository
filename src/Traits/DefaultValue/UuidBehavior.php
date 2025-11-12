@@ -11,6 +11,7 @@ class UuidBehavior extends DefaultValueBehavior
         parent::__construct($field, null);
     }
 
+    #[\Override]
     public function getValue()
     {
         return Uuid::uuid4()->toString();

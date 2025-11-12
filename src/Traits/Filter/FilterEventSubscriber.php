@@ -14,6 +14,7 @@ final class FilterEventSubscriber extends EventSubscriber
         return $event->hasBehavior(FilterBehaviorInterface::class);
     }
 
+    #[\Override]
     public function onSelect(SelectQueryEvent $event): SelectEventResponse
     {
         foreach ($event->getBehaviors()->all() as $behavior) {

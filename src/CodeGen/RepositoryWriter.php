@@ -138,7 +138,7 @@ class RepositoryWriter
             throw new RuntimeException("Could not find start line for class $class");
         }
 
-        $extends = str_contains($lines[$startLine], 'extends')
+        $extends = str_contains((string) $lines[$startLine], 'extends')
             ? $lines[$startLine]
             : $lines[$startLine - 1];
         if (!str_contains($extends, 'extends') || str_contains($extends, $shortBaseClassName)) {
@@ -153,11 +153,11 @@ class RepositoryWriter
         $useLine = null;
         $namespaceLine = null;
         foreach ($lines as $i => $line) {
-            if (str_starts_with($line, 'use ')) {
+            if (str_starts_with((string) $line, 'use ')) {
                 $useLine = $i;
                 break;
             }
-            if (str_starts_with($line, 'namespace ')) {
+            if (str_starts_with((string) $line, 'namespace ')) {
                 $namespaceLine = $i;
             }
         }
@@ -177,13 +177,13 @@ class RepositoryWriter
     {
         $linesToUnset = [];
         foreach ($lines as $i => $line) {
-            if (preg_match('/@method.*\s+find(\w+)\(/', $line, $matches) === 1) {
+            if (preg_match('/@method.*\s+find(\w+)\(/', (string) $line, $matches) === 1) {
                 $linesToUnset[] = $i;
-            } elseif (str_contains($line, ' $tableName = ')) {
+            } elseif (str_contains((string) $line, ' $tableName = ')) {
                 $linesToUnset[] = $i;
-                if (trim($lines[$i - 1]) === '') {
+                if (trim((string) $lines[$i - 1]) === '') {
                     $linesToUnset[] = $i - 1;
-                } elseif (trim($lines[$i + 1]) === '') {
+                } elseif (trim((string) $lines[$i + 1]) === '') {
                     $linesToUnset[] = $i + 1;
                 }
                 continue;
@@ -214,7 +214,7 @@ class RepositoryWriter
                     $endingLine = $j;
                     break;
                 }
-                if (str_contains($l, '}')) {
+                if (str_contains((string) $l, '}')) {
                     $endingLine = $j;
                 }
             }

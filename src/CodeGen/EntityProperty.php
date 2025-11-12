@@ -4,23 +4,14 @@ namespace Efabrica\NetteRepository\CodeGen;
 
 class EntityProperty
 {
-    protected string $type;
-
-    protected string $name;
-
     /**
      * @var string contains everything after the property name and native type
      */
     protected string $annotations;
 
-    private string $nativeType;
-
-    public function __construct(string $type, string $name, string $annotations, string $nativeType)
+    public function __construct(protected string $type, protected string $name, string $annotations, private readonly string $nativeType)
     {
-        $this->type = $type;
-        $this->name = $name;
         $this->annotations = trim($annotations);
-        $this->nativeType = $nativeType;
     }
 
     public function getType(): string

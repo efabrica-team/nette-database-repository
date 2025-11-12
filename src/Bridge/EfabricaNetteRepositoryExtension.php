@@ -25,6 +25,7 @@ use Symfony\Component\Console\Application;
 
 class EfabricaNetteRepositoryExtension extends CompilerExtension
 {
+    #[\Override]
     public function getConfigSchema(): Schema
     {
         return Expect::structure([
@@ -71,6 +72,14 @@ class EfabricaNetteRepositoryExtension extends CompilerExtension
         $builder->addDefinition($this->prefix('sortingEventSubscriber'))->setFactory(SortingEventSubscriber::class);
     }
 
+    /**
+     * @return array{
+     *     migrations: true,
+     *     migration_log: true,
+     *     phinxlog: true,
+     *     phoenix_log: true,
+     * }
+     */
     public function getDefaultIgnoreTables(): array
     {
         return [

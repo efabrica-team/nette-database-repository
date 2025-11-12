@@ -24,17 +24,11 @@ abstract class RepositoryEvent
     protected bool $ended = false;
 
     /**
-     * @var Repository<E, Query<E>>
-     */
-    private Repository $repository;
-
-    /**
      * @param Repository<E, Query<E>> $repository
      */
-    public function __construct(Repository $repository)
+    public function __construct(private readonly Repository $repository)
     {
-        $this->repository = $repository;
-        $this->subscribers = $repository->getEventSubscribers()->toArray();
+        $this->subscribers = $this->repository->getEventSubscribers()->toArray();
     }
 
     /**
