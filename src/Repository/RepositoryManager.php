@@ -46,6 +46,11 @@ class RepositoryManager
      */
     public static function hasTrait($repository, string $trait): bool
     {
-        return array_any([-1 => $repository] + class_parents($repository), fn($parent) => in_array($trait, class_uses($parent) ?: [], true));
+        foreach ([-1 => $repository] + class_parents($repository) as $parent) {
+            if (in_array($trait, class_uses($parent) ?: [], true)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

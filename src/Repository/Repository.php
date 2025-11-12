@@ -522,30 +522,34 @@ abstract class Repository
      * Deprecations
      ******************************/
     /**
+     * @deprecated Use query() instead
      * @deprecated instead of overriding, implement SelectEventSubscriber in the repository
      */
-    #[\Deprecated(message: 'Use query() instead')]
     final public function findAll(): Query
     {
         return $this->query();
     }
 
-    #[\Deprecated(message: 'Use getExplorer() instead')]
+    /**
+     * @deprecated Use getExplorer() instead
+     */
     final public function getConnection(): Explorer
     {
         return $this->getExplorer();
     }
 
     /**
+     * @deprecated use rawQuery() instead
      * @deprecated instead of overriding, implement SelectEventSubscriber in the repository
      */
-    #[\Deprecated(message: 'use rawQuery() instead')]
     final public function getTable(): Query
     {
         return $this->rawQuery();
     }
 
-    #[\Deprecated(message: 'use insert() instead')]
+    /**
+     * @deprecated use insert() instead
+     */
     final public function multiInsert(array $data): int
     {
         $this->query()->insert($data);
@@ -557,15 +561,17 @@ abstract class Repository
      * @param int $retryTimes
      * @return T
      * @throws Throwable
+     * @deprecated use ensure() instead
      * @template T
      */
-    #[\Deprecated(message: 'use ensure() instead')]
     final public function retry(callable $callback, int $retryTimes = self::DEFAULT_RETRY_TIMES)
     {
         return $this->ensure($callback, $retryTimes, false);
     }
 
-    #[\Deprecated(message: 'use query()->chunks() instead')]
+    /**
+     * @deprecated use query()->chunks() instead
+     */
     final public function chunk(Query $query, ?int $chunkSize, callable $callback, ?int $count = null): void
     {
         if ($count !== null) {

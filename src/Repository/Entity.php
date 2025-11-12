@@ -73,7 +73,12 @@ abstract class Entity extends ActiveRow
 
     public function isPristine(): bool
     {
-        return array_all($this->getInternalData(), fn($value) => !($value !== null));
+        foreach ($this->getInternalData() as $value) {
+            if ($value !== null) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

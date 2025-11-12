@@ -29,7 +29,7 @@
         }
     ],
     "require": {
-        "php": "^8.4",
+        "php": "^8.3",
         "ext-json": "*",
         "ext-pdo": "*",
         "doctrine/inflector": "^2.0",
@@ -48,8 +48,7 @@
         "phpunit/phpunit": "^9.6",
         "nette/application": "^3.1",
         "nesbot/carbon": "^3.1",
-        "ramsey/uuid": "^4.2",
-        "rector/rector": "^2.2"
+        "ramsey/uuid": "^4.2"
     },
     "autoload": {
         "psr-4": {

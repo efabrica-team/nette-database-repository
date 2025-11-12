@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Changed
-- increased minimum PHP compatibility to 8.4
+- code support for PHP 8.4
 
 ## [0.5.7] - 2025-10-31
 ### Fixed
