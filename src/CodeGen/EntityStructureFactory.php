@@ -63,6 +63,7 @@ class EntityStructureFactory
 
     public function create(string $table, string $namespace, string $dbDir): EntityStructure
     {
+        $tableAlias = $this->container->getParameter('netteRepository')['tableAlias'][$table] ?? null;
         $columns = $this->structure->getColumns($table);
         $primaries = [];
         $properties = [];
@@ -102,7 +103,7 @@ class EntityStructureFactory
             $properties[$column['name']] = new EntityProperty($type, $column['name'], implode(' ', $annotations), $nativeType);
         }
 
-        $structure = new EntityStructure($properties, $table, $namespace, $dbDir, $this->inflector, $primaries, $this->structure);
+        $structure = new EntityStructure($properties, $table, $namespace, $dbDir, $this->inflector, $primaries, $this->structure, $tableAlias);
 
         $this->processTypeOverrides($structure);
 

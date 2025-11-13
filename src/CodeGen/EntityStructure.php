@@ -69,11 +69,12 @@ class EntityStructure
         string $dbDir,
         Inflector $inflector,
         array $primaries,
-        Structure $structure
+        Structure $structure,
+        ?string $tableAlias,
     ) {
         $this->tableName = $table;
         $this->inflector = $inflector;
-        $this->className = $this->toClassName($table);
+        $this->className = $this->toClassName($tableAlias ?? $table);
         $this->properties = $properties;
 
         $this->dbDir = $dbDir;
