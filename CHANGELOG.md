@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+
+## [0.4.5] - 2025-11-17
+
 ### Fixed
 - Fix repository connection ensure (if callback throw)
 
@@ -62,7 +66,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial version
 
-[Unreleased]: https://github.com/efabrica-team/nette-database-repository/compare/0.4.4...main
+[Unreleased]: https://github.com/efabrica-team/nette-database-repository/compare/0.4.5...main
+[0.4.5]: https://github.com/efabrica-team/nette-database-repository/compare/0.4.4...0.4.5
 [0.4.4]: https://github.com/efabrica-team/nette-database-repository/compare/0.4.3...0.4.4
 [0.4.3]: https://github.com/efabrica-team/nette-database-repository/compare/0.4.2...0.4.3
 [0.4.2]: https://github.com/efabrica-team/nette-database-repository/compare/0.4.1...0.4.2
