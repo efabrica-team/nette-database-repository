@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+
+
+## [0.5.8] - 2025-11-17
 ### Fixed
 - Fix repository connection ensure class Nette\Database\ConnectionException
 
@@ -98,7 +102,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial version
 
-[Unreleased]: https://github.com/efabrica-team/nette-database-repository/compare/0.5.7...main
+[Unreleased]: https://github.com/efabrica-team/nette-database-repository/compare/0.5.8...main
+[0.5.8]: https://github.com/efabrica-team/nette-database-repository/compare/0.5.7...0.5.8
 [0.5.7]: https://github.com/efabrica-team/nette-database-repository/compare/0.5.6...0.5.7
 [0.5.6]: https://github.com/efabrica-team/nette-database-repository/compare/0.5.5...0.5.6
 [0.5.5]: https://github.com/efabrica-team/nette-database-repository/compare/0.5.4...0.5.5
