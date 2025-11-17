@@ -9,7 +9,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
-## [0.4.5] - 2025-11-17
+## [0.5.7] - 2025-10-31
+### Fixed
+- internalData bug in QueryTrait
+
+## [0.5.6] - 2025-10-27
+### Fixed
+- fix DefaultValueEventSubscriber
+
+## [0.5.5] - 2025-10-27
+### Fixed
+- UuidBehavior is no longer placeholder code
+
+## [0.5.4] - 2025-10-22
+### Fixed
+- 0.5.3 create() null behavior related fixes (iterator aggregate)
+
+## [0.5.3] - 2025-10-22
+### Fixed
+- repository create() now correctly creates null values for empty columns
+- internalData() get/set split (@internal method)
+
+## [0.5.2] - 2025-10-15
+### Fixed
+- fixed delete() operation to work with entities in non-event mode
+
+## [0.5.1] - 2025-07-23
+### Fixed
+- wrong diff behavior when updating entities (unsavedDiff())
+
+## [0.5.0] - 2025-03-18
+### Added
+- nette/database 3.2 support
+- PHP8.3 required
+- sorting to top/bottom
 ### Fixed
 - Fix repository connection ensure (if callback throw)
 
@@ -65,8 +98,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial version
 
-[Unreleased]: https://github.com/efabrica-team/nette-database-repository/compare/0.4.5...main
-[0.4.5]: https://github.com/efabrica-team/nette-database-repository/compare/0.4.4...0.4.5
+[Unreleased]: https://github.com/efabrica-team/nette-database-repository/compare/0.5.7...main
+[0.5.7]: https://github.com/efabrica-team/nette-database-repository/compare/0.5.6...0.5.7
+[0.5.6]: https://github.com/efabrica-team/nette-database-repository/compare/0.5.5...0.5.6
+[0.5.5]: https://github.com/efabrica-team/nette-database-repository/compare/0.5.4...0.5.5
+[0.5.4]: https://github.com/efabrica-team/nette-database-repository/compare/0.5.3...0.5.4
+[0.5.3]: https://github.com/efabrica-team/nette-database-repository/compare/0.5.2...0.5.3
+[0.5.2]: https://github.com/efabrica-team/nette-database-repository/compare/0.5.1...0.5.2
+[0.5.1]: https://github.com/efabrica-team/nette-database-repository/compare/0.5.0...0.5.1
+[0.5.0]: https://github.com/efabrica-team/nette-database-repository/compare/0.4.4...0.5.0
 [0.4.4]: https://github.com/efabrica-team/nette-database-repository/compare/0.4.3...0.4.4
 [0.4.3]: https://github.com/efabrica-team/nette-database-repository/compare/0.4.2...0.4.3
 [0.4.2]: https://github.com/efabrica-team/nette-database-repository/compare/0.4.1...0.4.2

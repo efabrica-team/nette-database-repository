@@ -256,12 +256,12 @@ abstract class Repository
         } else {
             $chunks = [];
             foreach ($entities as $entity) {
-                $diff = $entity->unsavedChanges();
+                $diff = $entity->unsavedDiff();
                 ksort($diff);
                 $found = false;
                 /** @var Entity[] $chunk */
                 foreach ($chunks as $chunk) {
-                    if ($chunk[0]->unsavedChanges() === $diff) {
+                    if ($chunk[0]->unsavedDiff() === $diff) {
                         $chunk[] = $entity;
                         $found = true;
                         break;
@@ -275,7 +275,7 @@ abstract class Repository
         $count = 0;
         /** @var Entity[] $chunk */
         foreach ($chunks as $chunk) {
-            $count += $this->query()->update($chunk[0]->unsavedChanges(), $chunk);
+            $count += $this->query()->update($chunk[0]->unsavedDiff(), $chunk);
         }
         return $count;
     }
@@ -421,7 +421,14 @@ abstract class Repository
     public function create(): Entity
     {
         $class = $this->entityClass;
-        return new $class([], $this->query());
+
+        $columns = $this->explorer->getStructure()->getColumns($this->getTableName());
+        $data = [];
+        foreach ($columns as $column) {
+            $data[$column['name']] = null;
+        }
+
+        return new $class($data, $this->query());
     }
 
     /**
@@ -433,6 +440,12 @@ abstract class Repository
     {
         $class = $this->entityClass;
         $query ??= $this->query();
+
+        $columns = $this->explorer->getStructure()->getColumns($this->getTableName());
+        foreach ($columns as $column) {
+            $existingData[$column['name']] ??= null;
+        }
+
         $entity = new $class($existingData, $query);
         foreach ($query->getEventSubscribers() as $event) {
             $event->onLoad($entity, $this);
