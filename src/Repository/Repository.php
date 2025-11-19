@@ -8,7 +8,7 @@ use Efabrica\NetteRepository\Repository\Scope\Scope;
 use Efabrica\NetteRepository\Subscriber\RepositoryEventSubscribers;
 use Efabrica\NetteRepository\Traits\RelatedThrough\SetRelatedRepositoryEvent;
 use LogicException;
-use MongoDB\Driver\Exception\ConnectionException;
+use Nette\Database\ConnectionException;
 use Nette\Application\BadRequestException;
 use Nette\Database\Explorer;
 use Nette\Database\Table\ActiveRow;
