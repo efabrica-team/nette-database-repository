@@ -247,6 +247,16 @@ netteRepo:
         phinxlog: true
 ```
 
+#### Table alias
+
+You can define a custom alias for specific tables using the `tableAlias` parameter in the config file. The defined alias will be used as the entity name when generating the structure:
+
+```neon=
+netteRepo:
+    tableAlias:
+        migrations: true
+```
+
 #### Custom Inheritance
 
 If you want to set different `extends` or `implements` for a generated class, you can do that by adding an entry into your config file:
