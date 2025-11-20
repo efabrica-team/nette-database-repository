@@ -254,7 +254,7 @@ You can define a custom alias for specific tables using the `tableAlias` paramet
 ```neon=
 netteRepo:
     tableAlias:
-        migrations: true
+        matches: games
 ```
 
 #### Custom Inheritance
