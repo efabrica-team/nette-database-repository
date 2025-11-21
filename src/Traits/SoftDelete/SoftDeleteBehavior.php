@@ -18,6 +18,8 @@ class SoftDeleteBehavior extends RepositoryBehavior
      */
     private $newValue;
 
+    private ?bool $emptyValue;
+
     private bool $filterDeletedRows;
 
     /**
@@ -27,6 +29,7 @@ class SoftDeleteBehavior extends RepositoryBehavior
     {
         $this->column = $column;
         $this->newValue = $newValue ?? new DateTimeImmutable();
+        $this->emptyValue = $newValue === true ? false : null;
         $this->filterDeletedRows = $filterDeletedRows;
     }
 
@@ -46,6 +49,11 @@ class SoftDeleteBehavior extends RepositoryBehavior
     public function getNewValue()
     {
         return $this->newValue;
+    }
+
+    public function getEmptyValue(): ?bool
+    {
+        return $this->emptyValue;
     }
 
     public function withoutFilter(): self
