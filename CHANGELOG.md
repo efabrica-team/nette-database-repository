@@ -6,12 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+
+
+## [0.6.0] - 2025-11-24
 ### Added
 - Table alias which is used for class name
 
 ### Fixed
 - Default value for SoftDeleteBehavior
-
 
 ## [0.5.8] - 2025-11-17
 ### Fixed
@@ -106,7 +109,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial version
 
-[Unreleased]: https://github.com/efabrica-team/nette-database-repository/compare/0.5.8...main
+[Unreleased]: https://github.com/efabrica-team/nette-database-repository/compare/0.6.0...main
+[0.6.0]: https://github.com/efabrica-team/nette-database-repository/compare/0.5.8...0.6.0
 [0.5.8]: https://github.com/efabrica-team/nette-database-repository/compare/0.5.7...0.5.8
 [0.5.7]: https://github.com/efabrica-team/nette-database-repository/compare/0.5.6...0.5.7
 [0.5.6]: https://github.com/efabrica-team/nette-database-repository/compare/0.5.5...0.5.6
