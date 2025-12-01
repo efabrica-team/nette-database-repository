@@ -2,21 +2,28 @@
 
 namespace Efabrica\NetteRepository\CodeGen;
 
+use Efabrica\NetteRepository\Repository\Entity;
 use Efabrica\NetteRepository\Repository\Query;
 use Nette\PhpGenerator\ClassType;
 
 class QueryWriter
 {
+    private const BASE_QUERY_NAME = 'QueryBase';
+
     public static function writeAppQueryBase(EntityStructure $structure, FileWriter $writer): void
     {
-        $class = new ClassType('QueryBase', $structure->queryNamespace);
+        $class = new ClassType(self::BASE_QUERY_NAME, $structure->queryNamespace);
         if (class_exists($structure->queryNamespace->getName() . '\\' . $class->getName())) {
             return;
         }
 
-        $structure->queryNamespace->addUse(Query::class);
+        $structure->queryNamespace
+            ->addUse(Query::class)
+            ->addUse(Entity::class);
         $class->setAbstract();
         $class->setExtends(Query::class);
+        $class->addComment("@template E of Entity");
+        $class->addComment("@extends Query<E>");
 
         $writer->writeClass($class, $structure->queryDir);
         $structure->repositoryNamespace->removeUse(Query::class);
@@ -30,8 +37,7 @@ class QueryWriter
         $structure->queryGenNamespace
             ->addUse($entityClass)
             ->addUse($repositoryClass)
-            ->addUse($queryBaseClass)
-        ;
+            ->addUse($queryBaseClass);
         $baseClass = new ClassType("{$structure->getClassName()}QueryBase", $structure->queryGenNamespace);
         $baseClass->setAbstract();
         $baseClass->setExtends($queryBaseClass);
@@ -45,6 +51,7 @@ class QueryWriter
         $baseClass->addComment("@method {$structure->getClassName()} createRow(array \$data = [])");
         $baseClass->addComment("@method {$structure->getClassName()} current()");
         $baseClass->addComment("@method {$structure->getClassName()}Repository getRepository()");
+        $baseClass->addComment("@extends " . self::BASE_QUERY_NAME . "<{$structure->getClassName()}>");
 
         $writer->writeClass($baseClass, $structure->queryGenDir);
     }
