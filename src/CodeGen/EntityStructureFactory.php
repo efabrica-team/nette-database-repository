@@ -63,7 +63,7 @@ class EntityStructureFactory
 
     public function create(string $table, string $namespace, string $dbDir): EntityStructure
     {
-        $tableAlias = $this->container->getParameter('netteRepo')['tableAlias'][$table] ?? null;
+        $tableAlias = $this->container->getParameters()['netteRepo']['tableAlias'][$table] ?? null;
         $columns = $this->structure->getColumns($table);
         $primaries = [];
         $properties = [];
