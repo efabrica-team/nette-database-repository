@@ -37,6 +37,7 @@ class EfabricaNetteRepositoryExtension extends CompilerExtension
                 ]),
                 'string'
             )->default([]),
+            'tableAlias' => Expect::arrayOf('string', 'string')->default([]),
         ]);
     }
 
