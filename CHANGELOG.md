@@ -7,7 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2025-12-05
+### Added
+- Table alias in extension
 
+### Fixed
+- Query writer
+- Repository code generation command
 
 ## [0.6.0] - 2025-11-24
 ### Added
@@ -109,7 +115,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial version
 
-[Unreleased]: https://github.com/efabrica-team/nette-database-repository/compare/0.6.0...main
+[Unreleased]: https://github.com/efabrica-team/nette-database-repository/compare/0.7.0...main
+[0.7.0]: https://github.com/efabrica-team/nette-database-repository/compare/0.6.0...0.7.0
 [0.6.0]: https://github.com/efabrica-team/nette-database-repository/compare/0.5.8...0.6.0
 [0.5.8]: https://github.com/efabrica-team/nette-database-repository/compare/0.5.7...0.5.8
 [0.5.7]: https://github.com/efabrica-team/nette-database-repository/compare/0.5.6...0.5.7
