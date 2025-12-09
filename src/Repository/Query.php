@@ -64,9 +64,9 @@ class Query extends Selection implements QueryInterface
 
     public function getReferencedTable(ActiveRow $row, ?string $table, ?string $column = null): ActiveRow|false|null
     {
-        if ($column === null && $table !== null) {
+        if (!$column) {
             $belongsTo = $this->conventions->getBelongsToReference($this->name, $table);
-            if ($belongsTo === null) {
+            if (!$belongsTo) {
                 return false;
             }
 
@@ -79,24 +79,24 @@ class Query extends Selection implements QueryInterface
 
         $checkPrimaryKey = $row[$column];
 
-        /** @var array<string, mixed> $referenced */
         $referenced = &$this->refCache['referenced'][$this->getSpecificCacheKey()]["$table.$column"];
         $selection = &$referenced['selection'];
         $cacheKeys = &$referenced['cacheKeys'];
         if ($selection === null || ($checkPrimaryKey !== null && !isset($cacheKeys[$checkPrimaryKey]))) {
             $this->execute();
             $cacheKeys = [];
-            foreach ($this->rows ?? [] as $sRow) {
-                if ($sRow[$column] === null) {
+            foreach ($this->rows as $row) {
+                if ($row[$column] === null) {
                     continue;
                 }
-                $key = $sRow[$column];
+
+                $key = $row[$column];
                 $cacheKeys[$key] = true;
             }
 
             if ($cacheKeys) {
                 $selection = $this->createSelectionInstance($table);
-                $selection->where($this->getPrefixedPrimary($selection), array_keys($cacheKeys));
+                $selection->where($this->getPrefixedPrimary($selection), array_keys($cacheKeys)); // modified unlike Selection
             } else {
                 $selection = [];
             }
@@ -105,12 +105,12 @@ class Query extends Selection implements QueryInterface
         return $selection[$checkPrimaryKey ?? ''] ?? null;
     }
 
+
     private function addPrimaryWhere(mixed $key): void
     {
         if (is_string($this->primary)) {
             $this->where($this->name . '.' . $this->primary, $key);
         }
-
         if (is_array($this->primary)) {
             $primaries = array_map(fn(string $column) => $this->name . '.' . $column, $this->primary);
             $this->where($primaries, $key);
