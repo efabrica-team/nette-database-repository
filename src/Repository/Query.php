@@ -105,7 +105,6 @@ class Query extends Selection implements QueryInterface
         return $selection[$checkPrimaryKey ?? ''] ?? null;
     }
 
-
     private function addPrimaryWhere(mixed $key): void
     {
         if (is_string($this->primary)) {
@@ -129,5 +128,4 @@ class Query extends Selection implements QueryInterface
         }
         return array_map(fn($key) => $selection->getName() . '.' . $key, $primary);
     }
-
 }
