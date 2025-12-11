@@ -36,7 +36,7 @@ class FileWriter
             }
         }
         $strictTypes = 'declare(strict_types=1);';
-        $contents = "<?php\n\n" . $strictTypes."\n\n".$namespace . $classType;
+        $contents = "<?php\n\n" . $strictTypes . "\n\n" . $namespace . $classType;
         $contents = str_replace("\t", '    ', $contents);
         $contents = preg_replace('/\n{3,}/', "\n\n", $contents) ?? $contents;
         $this->writeFile($dir . '/' . $classType->getName() . '.php', $contents);
