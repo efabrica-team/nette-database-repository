@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Prefixed primary key with table name in referenced table
+- Prefix filtered columns by table name
 
 ## [0.7.0] - 2025-12-05
 ### Added
