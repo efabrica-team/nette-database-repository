@@ -71,7 +71,7 @@ class TreeTraverseEventSubscriber extends EventSubscriber implements SoftDeleteS
         array &$treeStructure,
         Repository $repository,
         TreeTraverseBehavior $behavior,
-        int $id = null,
+        ?int $id = null,
         int $value = 0,
         int $depth = 1
     ): int {
