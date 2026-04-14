@@ -6,12 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-### Added
-- Table name prefix in order columns
 
+## [0.8.0] - 2026-04-14
 ### Changed
 - upgraded symfony libs & PHP to version 8.4 [BC]
 - Normalized nullable parameter type declarations (potential BC if methods are overridden)
+
+### Added
+- Table name prefix in order columns
 
 ### Fixed
 - Prefixed primary key with table name in referenced table
@@ -125,7 +127,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial version
 
-[Unreleased]: https://github.com/efabrica-team/nette-database-repository/compare/0.7.0...main
+[Unreleased]: https://github.com/efabrica-team/nette-database-repository/compare/0.8.0...main
+[0.8.0]: https://github.com/efabrica-team/nette-database-repository/compare/0.7.0...0.8.0
 [0.7.0]: https://github.com/efabrica-team/nette-database-repository/compare/0.6.0...0.7.0
 [0.6.0]: https://github.com/efabrica-team/nette-database-repository/compare/0.5.8...0.6.0
 [0.5.8]: https://github.com/efabrica-team/nette-database-repository/compare/0.5.7...0.5.8
