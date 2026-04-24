@@ -31,6 +31,6 @@ $console = $container->getByType(Application::class);
 /** @var RepositoryCodeGenerationCommand $command */
 $command = $container->getByType(RepositoryCodeGenerationCommand::class);
 
-$console->add($command);
+$console->addCommand($command);
 $console->setDefaultCommand($command->getName(), true);
 $console->run();
