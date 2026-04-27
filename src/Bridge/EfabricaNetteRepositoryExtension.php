@@ -37,6 +37,7 @@ class EfabricaNetteRepositoryExtension extends CompilerExtension
                 ]),
                 'string'
             )->default([]),
+            'tableAlias' => Expect::arrayOf('string', 'string')->default([]),
         ]);
     }
 
@@ -55,7 +56,7 @@ class EfabricaNetteRepositoryExtension extends CompilerExtension
 
         $builder->addDefinition('symfonyConsoleApp')
             ->setFactory(Application::class)
-            ->addSetup('add', [$builder->getDefinition($this->prefix('codeGenCommand'))])
+            ->addSetup('addCommand', [$builder->getDefinition($this->prefix('codeGenCommand'))])
         ;
 
         $builder->addDefinition($this->prefix('castEventSubscriber'))->setFactory(CastEventSubscriber::class);

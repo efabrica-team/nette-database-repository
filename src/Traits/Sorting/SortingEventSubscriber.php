@@ -23,8 +23,9 @@ class SortingEventSubscriber extends EventSubscriber implements RelatedEventSubs
     public function onInsert(InsertRepositoryEvent $event): InsertEventResponse
     {
         $behavior = $event->getBehavior(SortingBehavior::class);
+        $query = $event->getRepository()->query();
         $sortingColumn = $behavior->getColumn();
-        $max = $event->getRepository()->query()->max($sortingColumn);
+        $max = $query->max($query->getName() . '.' . $sortingColumn);
         foreach ($event->getEntities() as $entity) {
             if (!isset($entity->$sortingColumn)) {
                 $max += $behavior->getStep();

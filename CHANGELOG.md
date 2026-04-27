@@ -8,7 +8,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Fixed
 - Static must by compatible Selection::insert QueryInterface::page
+- Ensured compatibility with Symfony Console 8 command registration
 
+## [0.8.0] - 2026-04-14
+### Changed
+- upgraded symfony libs & PHP to version 8.4 [BC]
+- Normalized nullable parameter type declarations (potential BC if methods are overridden)
+
+### Added
+- Table name prefix in order columns
+
+### Fixed
+- Prefixed primary key with table name in referenced table
+- Prefix filtered columns by table name
+
+## [0.7.0] - 2025-12-05
+### Added
+- Table alias in extension
+
+### Fixed
+- Query writer
+- Repository code generation command
 
 ## [0.6.0] - 2025-11-24
 ### Added
@@ -110,7 +130,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial version
 
-[Unreleased]: https://github.com/efabrica-team/nette-database-repository/compare/0.6.0...main
+[Unreleased]: https://github.com/efabrica-team/nette-database-repository/compare/0.8.0...main
+[0.8.0]: https://github.com/efabrica-team/nette-database-repository/compare/0.7.0...0.8.0
+[0.7.0]: https://github.com/efabrica-team/nette-database-repository/compare/0.6.0...0.7.0
 [0.6.0]: https://github.com/efabrica-team/nette-database-repository/compare/0.5.8...0.6.0
 [0.5.8]: https://github.com/efabrica-team/nette-database-repository/compare/0.5.7...0.5.8
 [0.5.7]: https://github.com/efabrica-team/nette-database-repository/compare/0.5.6...0.5.7

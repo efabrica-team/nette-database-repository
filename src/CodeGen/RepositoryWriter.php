@@ -2,6 +2,8 @@
 
 namespace Efabrica\NetteRepository\CodeGen;
 
+use Efabrica\NetteRepository\Repository\Entity;
+use Efabrica\NetteRepository\Repository\Query;
 use Efabrica\NetteRepository\Repository\Repository;
 use Efabrica\NetteRepository\Repository\RepositoryBehaviors;
 use Efabrica\NetteRepository\Repository\RepositoryDependencies;
@@ -13,16 +15,25 @@ use RuntimeException;
 
 class RepositoryWriter
 {
+    private const BASE_REPOSITORY_NAME = 'RepositoryBase';
+
     public static function writeAppRepositoryBase(EntityStructure $structure, FileWriter $writer): void
     {
-        $class = new ClassType('RepositoryBase', $structure->repositoryNamespace);
+        $class = new ClassType(self::BASE_REPOSITORY_NAME, $structure->repositoryNamespace);
         if (class_exists($structure->repositoryNamespace->getName() . '\\' . $class->getName())) {
             return;
         }
 
-        $structure->repositoryNamespace->addUse(Repository::class);
+        $structure->repositoryNamespace
+            ->addUse(Repository::class)
+            ->addUse(Entity::class)
+            ->addUse(Query::class);
+
         $class->setAbstract();
         $class->setExtends(Repository::class);
+        $class->addComment("@template E of Entity");
+        $class->addComment("@template Q of Query");
+        $class->addComment("@extends Repository<E, Q<E>>");
 
         $writer->writeClass($class, $structure->repositoryDir);
         $structure->repositoryNamespace->removeUse(Repository::class);
@@ -74,13 +85,13 @@ class RepositoryWriter
         $class->addComment("@method int delete({$structure->getClassName()}|{$primaryType}array \$entities)");
         $class->addComment("@method class-string<{$structure->getClassName()}> getEntityClass()");
         $class->addComment("@method {$structure->getClassName()} create()");
+        $class->addComment("@extends " . self::BASE_REPOSITORY_NAME . "<{$structure->getClassName()}, {$structure->getClassName()}Query<{$structure->getClassName()}>>");
 
         $class->addMethod('__construct')
             ->setParameters([
                 (new Parameter('deps'))->setType(RepositoryDependencies::class),
             ])
-            ->setBody("parent::__construct(static::TABLE_NAME, {$structure->getClassName()}::class, {$structure->getClassName()}Query::class, \$deps);")
-        ;
+            ->setBody("parent::__construct(static::TABLE_NAME, {$structure->getClassName()}::class, {$structure->getClassName()}Query::class, \$deps);");
 
         $writer->writeClass($class, $structure->repositoryGenDir);
     }
@@ -93,8 +104,7 @@ class RepositoryWriter
             ->addUse(RepositoryBehaviors::class)
             ->addUse($repositoryClass)
             ->addUse($structure->queryNamespace->getName() . '\\' . $structure->getClassName() . 'Query')
-            ->addUse($structure->entityGenNamespace->getName() . '\\' . $structure->getClassName())
-        ;
+            ->addUse($structure->entityGenNamespace->getName() . '\\' . $structure->getClassName());
 
         $class = new ClassType($structure->getClassName() . 'Repository', $structure->repositoryNamespace);
         $class->setFinal();
@@ -103,8 +113,7 @@ class RepositoryWriter
         $class->addMethod('setup')
             ->setReturnType('void')
             ->setProtected()
-            ->addParameter('behaviors')->setType(RepositoryBehaviors::class)
-        ;
+            ->addParameter('behaviors')->setType(RepositoryBehaviors::class);
 
         return $class;
     }

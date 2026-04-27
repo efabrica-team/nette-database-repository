@@ -29,7 +29,7 @@
         }
     ],
     "require": {
-        "php": "^8.3",
+        "php": "^8.4",
         "ext-json": "*",
         "ext-pdo": "*",
         "doctrine/inflector": "^2.0",
@@ -37,8 +37,8 @@
         "nette/database": "~3.2",
         "nette/di": "^3.1",
         "nette/php-generator": "^4.1.4",
-        "nikic/php-parser": "^4.16|^5.0",
-        "symfony/console": "^5.4|^6.0|^7.0",
+        "nikic/php-parser": "^5.0",
+        "symfony/console": "^8.0",
         "symfony/polyfill-php80": "^1.29"
     },
     "require-dev": {

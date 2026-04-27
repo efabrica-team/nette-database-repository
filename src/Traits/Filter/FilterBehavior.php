@@ -19,6 +19,14 @@ class FilterBehavior extends RepositoryBehavior implements FilterBehaviorInterfa
 
     public function applyFilter(QueryInterface $query): void
     {
-        $query->where($this->where);
+        $tablePrefixedWhere = [];
+        foreach ($this->where as $key => $value) {
+            if (!str_contains($key, '.')) {
+                $key = $query->getRepository()->getTableName() . '.' . $key;
+            }
+            $tablePrefixedWhere[$key] = $value;
+        }
+
+        $query->where($tablePrefixedWhere);
     }
 }

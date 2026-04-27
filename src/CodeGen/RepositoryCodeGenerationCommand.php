@@ -30,12 +30,22 @@ class RepositoryCodeGenerationCommand extends Command
     private Structure $structure;
 
     /**
-     * @var object{ignoreTables: array, configNeonPath: string, inheritance: array{extends: string, implements: array<string>}[]}
+     * @var object{
+     *     ignoreTables: array,
+     *     configNeonPath: string,
+     *     inheritance: array{extends: string, implements: array<string>}[],
+     *     tableAlias: array<string, string>
+     * }
      */
     private object $config;
 
     /**
-     * @param object{ignoreTables: array, configNeonPath: string, inheritance: array{extends: string, implements: array<string>}[]} $config
+     * @param object{
+     *     ignoreTables: array,
+     *     configNeonPath: string,
+     *     inheritance: array{extends: string, implements: array<string>}[],
+     *     tableAlias: array<string, string>
+     * } $config
      */
     public function __construct(string $appDir, object $config, EntityStructureFactory $structureFactory, Structure $structure)
     {
@@ -104,12 +114,18 @@ class RepositoryCodeGenerationCommand extends Command
 
         $structures = [];
         foreach ($tables as $table) {
-            if ($this->config->ignoreTables[$table['name']] ?? false) {
+            $tableName = $table['name'];
+            if ($this->config->ignoreTables[$tableName] ?? false) {
                 continue;
             }
-            $namespace = $repoNamespaces[$table['name']] ?? $this->namespace;
-            $dbDir = $repoDirs[$table['name']] ?? ($this->appDir . '/' . $this->repoDir);
-            $structures[$table['name']] = $this->structureFactory->create($table['name'], $namespace, $dbDir);
+            $namespace = $repoNamespaces[$tableName] ?? $this->namespace;
+            $dbDir = $repoDirs[$tableName] ?? ($this->appDir . '/' . $this->repoDir);
+            $structures[$tableName] = $this->structureFactory->create(
+                $tableName,
+                $namespace,
+                $dbDir,
+                $this->config->tableAlias[$tableName] ?? null
+            );
         }
         if (!isset($dbDir)) {
             if ($tables === []) {
