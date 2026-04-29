@@ -45,10 +45,14 @@
         "nette/bootstrap": "^3.1",
         "tracy/tracy": "^2.9",
         "nette/http": "^3.2",
+        "phpstan/phpstan": "^2.1",
         "phpunit/phpunit": "^9.6",
         "nette/application": "^3.1",
         "nesbot/carbon": "^3.1",
         "ramsey/uuid": "^4.2"
+    },
+    "scripts": {
+        "phpstan": "phpstan analyse --memory-limit=1G"
     },
     "autoload": {
         "psr-4": {

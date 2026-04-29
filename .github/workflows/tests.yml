@@ -1,0 +1,41 @@
+name: Tests
+
+on:
+    pull_request:
+    push:
+        branches:
+            - main
+
+jobs:
+    phpstan:
+        name: PHPStan (${{ matrix.dependencies }})
+        runs-on: ubuntu-latest
+
+        strategy:
+            fail-fast: false
+            matrix:
+                include:
+                    - dependencies: highest
+                      composer-options: ''
+                    - dependencies: lowest
+                      composer-options: '--prefer-lowest --prefer-stable'
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: '8.4'
+                  coverage: none
+                  tools: composer:v2
+
+            - name: Validate composer.json
+              run: composer validate --strict --no-check-lock
+
+            - name: Install dependencies
+              run: composer update --no-interaction --no-progress --prefer-dist ${{ matrix.composer-options }}
+
+            - name: Run PHPStan
+              run: composer phpstan

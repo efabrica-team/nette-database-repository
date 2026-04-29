@@ -4,9 +4,6 @@ namespace Efabrica\NetteRepository\Repository\Scope;
 
 use Efabrica\NetteRepository\Repository\RepositoryBehaviors;
 
-/**
- * @immutable
- */
 class ScopeContainer implements Scope
 {
     private FullScope $full;
