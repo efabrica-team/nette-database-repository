@@ -2,6 +2,7 @@
 
 namespace Efabrica\NetteRepository\Traits\SoftDelete;
 
+use Closure;
 use DateTimeImmutable;
 use DateTimeInterface;
 use Efabrica\NetteRepository\Traits\RepositoryBehavior;
@@ -13,24 +14,24 @@ class SoftDeleteBehavior extends RepositoryBehavior
 {
     private string $column;
 
-    /**
-     * @var bool|DateTimeInterface
-     */
-    private $newValue;
+    private bool|int|DateTimeInterface|Closure $newValue;
 
-    private ?bool $emptyValue;
+    private bool|int|null $emptyValue;
 
     private bool $filterDeletedRows;
 
     /**
-     * @param bool|DateTimeInterface $newValue use true if column is bool, null for DateTimeImmutable
-     * @param bool|null $emptyValue  override for "not deleted" value (undefined = use default behavior)
+     * @param bool|int|DateTimeInterface|Closure|null $newValue value to write when deleting:
+     *     true for bool columns, int for unix-timestamp columns, DateTimeInterface for datetime columns,
+     *     Closure (returning one of the above) to resolve a fresh value per delete,
+     *     null for the default new DateTimeImmutable().
+     * @param bool|int|null $emptyValue override for "not deleted" value (undefined = use default behavior)
      */
     public function __construct(
         string $column,
-        $newValue = null,
+        bool|int|DateTimeInterface|Closure|null $newValue = null,
         bool $filterDeletedRows = true,
-        ?bool $emptyValue = null
+        bool|int|null $emptyValue = null,
     ) {
         $this->column = $column;
         $this->newValue = $newValue ?? new DateTimeImmutable();
@@ -53,15 +54,15 @@ class SoftDeleteBehavior extends RepositoryBehavior
         return $this->column;
     }
 
-    /**
-     * @return bool|DateTimeInterface
-     */
-    public function getNewValue()
+    public function getNewValue(): bool|int|DateTimeInterface
     {
+        if ($this->newValue instanceof Closure) {
+            return ($this->newValue)();
+        }
         return $this->newValue;
     }
 
-    public function getEmptyValue(): ?bool
+    public function getEmptyValue(): bool|int|null
     {
         return $this->emptyValue;
     }

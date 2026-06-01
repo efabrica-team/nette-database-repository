@@ -10,7 +10,6 @@ use Traversable;
 
 /**
  * @implements IteratorAggregate<EventSubscriber>
- * @immutable
  */
 final class RepositoryEventSubscribers implements IteratorAggregate
 {

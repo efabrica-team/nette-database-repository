@@ -186,7 +186,7 @@ interface QueryInterface extends Iterator, Countable, ArrayAccess
      * @param int|null $numOfPages number of pages
      * @return self&$this
      */
-    public function page(int $page, int $itemsPerPage, &$numOfPages = null): static;
+    public function page(int $page, int $itemsPerPage, ?int &$numOfPages = null): static;
 
     /**
      * Sets group clause, more calls rewrite old value.
