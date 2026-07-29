@@ -2,7 +2,6 @@
 
 namespace Efabrica\NetteRepository\CodeGen;
 
-use Efabrica\NetteRepository\Repository\Entity;
 use Efabrica\NetteRepository\Repository\Query;
 use Nette\PhpGenerator\ClassType;
 
@@ -18,12 +17,9 @@ class QueryWriter
         }
 
         $structure->queryNamespace
-            ->addUse(Query::class)
-            ->addUse(Entity::class);
+            ->addUse(Query::class);
         $class->setAbstract();
         $class->setExtends(Query::class);
-        $class->addComment("@template E of Entity");
-        $class->addComment("@extends Query<E>");
 
         $writer->writeClass($class, $structure->queryDir);
         $structure->repositoryNamespace->removeUse(Query::class);
@@ -51,7 +47,6 @@ class QueryWriter
         $baseClass->addComment("@method {$structure->getClassName()} createRow(array \$data = [])");
         $baseClass->addComment("@method {$structure->getClassName()} current()");
         $baseClass->addComment("@method {$structure->getClassName()}Repository getRepository()");
-        $baseClass->addComment("@extends " . self::BASE_QUERY_NAME . "<{$structure->getClassName()}>");
 
         $writer->writeClass($baseClass, $structure->queryGenDir);
     }
