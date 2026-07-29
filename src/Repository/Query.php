@@ -6,6 +6,7 @@ use Nette\Database\Table\Selection;
 
 /**
  * @template E of Entity
+ * @extends Selection<E>
  */
 class Query extends Selection implements QueryInterface
 {
