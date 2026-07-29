@@ -3,7 +3,6 @@
 namespace Efabrica\NetteRepository\Event;
 
 use Efabrica\NetteRepository\Repository\Entity;
-use Efabrica\NetteRepository\Repository\QueryInterface;
 use Generator;
 use LogicException;
 use SplObjectStorage;
@@ -31,18 +30,18 @@ class UpdateQueryEvent extends QueryEvent
         }
         $rawQuery = $this->query->scopeRaw();
         $update = $rawQuery->update($data);
-        $this->refreshEntities($data, $rawQuery);
+        $this->refreshEntities($data);
         return new UpdateEventResponse($this, $update);
     }
 
-    private function refreshEntities(array $data, QueryInterface $rawQuery): void
+    private function refreshEntities(array $data): void
     {
         $entities = $this->getEntities();
         if (!is_array($entities) || $this->getQuery()->getPrimary(false) === null) {
             return;
         }
 
-        $newEntities = $this->fetchNewEntities($data, $entities, $rawQuery);
+        $newEntities = $this->fetchNewEntities($data, $entities);
         foreach ($entities as $entity) {
             $signature = $entity->getSignature(true, false);
             if ($signature !== '') {
@@ -89,20 +88,24 @@ class UpdateQueryEvent extends QueryEvent
     }
 
     /**
-     * @param array          $updateData
-     * @param array          $entities
-     * @param QueryInterface $rawQuery
+     * @param array $updateData
+     * @param array $entities
      * @return Entity[]
      */
-    private function fetchNewEntities(array $updateData, array $entities, QueryInterface $rawQuery): array
+    private function fetchNewEntities(array $updateData, array $entities): array
     {
         $primaryKeys = $this->getRepository()->getPrimary();
         $newEntities = [];
-        if (array_intersect_key($updateData, array_flip($primaryKeys)) !== []) {
-            $newEntityQuery = $this->getRepository()->query()->whereEntities($entities, false);
-        } else {
-            $newEntityQuery = $rawQuery->where('1=1')->fetchAll();
-        }
+        // Reload the just-updated rows purely by primary key, on a fresh, raw-scoped query:
+        //  - fresh, because the original query's WHERE may reference columns this update just changed,
+        //    which would make the refetch return nothing;
+        //  - raw-scoped, because behavior filters (e.g. SoftDelete's "deleted_at IS NULL") could likewise
+        //    exclude a row we just wrote. onLoad transforms such as Cast still run, since they are gated by
+        //    the repository's behaviors, not by the query scope.
+        // If the update changed a primary key, look the rows up by their new (already-filled in-memory) key
+        // values; otherwise by their original key values (see #Entity was not found after update).
+        $useCurrent = array_intersect_key($updateData, array_flip($primaryKeys)) !== [];
+        $newEntityQuery = $this->getRepository()->query()->scopeRaw()->whereEntities($entities, !$useCurrent);
         /** @var Entity $entity */
         foreach ($newEntityQuery as $entity) {
             $newEntities[$entity->getSignature()] = $entity;

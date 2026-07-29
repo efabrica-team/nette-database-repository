@@ -11,6 +11,7 @@ use Nette\Database\Table\Selection;
 class Query extends Selection implements QueryInterface
 {
     use QueryTrait;
+    use QuerySelectionTrait;
 
     public const CHUNK_SIZE = 127;
 

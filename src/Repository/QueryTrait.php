@@ -28,7 +28,7 @@ trait QueryTrait
 
     private array $entityState = [];
 
-    public function insert(iterable $data): Entity|array|int|bool
+    public function insert(iterable $data): Entity|array|int
     {
         if ($data === []) {
             return 0;
