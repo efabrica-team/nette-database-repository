@@ -39,7 +39,7 @@ class EntityWriter
             if (str_contains($prop->getType(), DateTimeInterface::class)) {
                 $structure->entityGenNamespace->addUse(DateTimeInterface::class);
             }
-            $class->addConstant(mb_strtoupper($prop->getName()), $prop->getName())->setPublic();
+            $class->addConstant(mb_strtoupper($prop->getName()), $prop->getName())->setPublic()->setType('string');
         }
 
         $ignoreTables = [];

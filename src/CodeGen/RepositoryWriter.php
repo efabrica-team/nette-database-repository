@@ -66,7 +66,7 @@ class RepositoryWriter
 
         $class->setAbstract();
         $class->setExtends($baseClass);
-        $class->addConstant('TABLE_NAME', $structure->getTableName());
+        $class->addConstant('TABLE_NAME', $structure->getTableName())->setType('string');
         $class->addComment('@generated Do Not Touch!');
         $class->addComment("@method {$structure->getClassName()}Query query()");
         $class->addComment("@method {$structure->getClassName()}Query findBy(array \$conditions)");
