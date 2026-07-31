@@ -15,6 +15,8 @@ use ReturnTypeWillChange;
 
 /**
  * @template E of Entity
+ * @extends Iterator<string, E>
+ * @extends ArrayAccess<string, E>
  */
 interface QueryInterface extends Iterator, Countable, ArrayAccess
 {

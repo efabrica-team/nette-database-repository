@@ -5,6 +5,11 @@ namespace Efabrica\NetteRepository\Repository;
 use Nette\Database\Table\GroupedSelection;
 use Nette\Database\Table\Selection;
 
+/**
+ * @template E of Entity
+ * @extends GroupedSelection<E>
+ * @implements QueryInterface<E>
+ */
 final class GroupedQuery extends GroupedSelection implements QueryInterface
 {
     use QueryTrait;
