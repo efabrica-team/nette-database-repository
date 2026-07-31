@@ -19,6 +19,6 @@ trait SoftDeleteTrait
     {
         /** @var SoftDeleteBehavior $behavior */
         $behavior = $this->getBehaviors()->get(SoftDeleteBehavior::class, true);
-        return $this->update($entity, [$behavior->getColumn() => null]);
+        return $this->update($entity, [$behavior->getColumn() => $behavior->getEmptyValue()]);
     }
 }
