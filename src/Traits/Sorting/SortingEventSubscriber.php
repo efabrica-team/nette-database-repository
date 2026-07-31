@@ -25,11 +25,12 @@ class SortingEventSubscriber extends EventSubscriber implements RelatedEventSubs
         $behavior = $event->getBehavior(SortingBehavior::class);
         $query = $event->getRepository()->query();
         $sortingColumn = $behavior->getColumn();
-        $max = $query->max($query->getName() . '.' . $sortingColumn);
+        $max = $query->max(str_contains($sortingColumn, '.') ? $sortingColumn : $query->getName() . '.' . $sortingColumn);
         foreach ($event->getEntities() as $entity) {
-            if (!isset($entity->$sortingColumn)) {
+            $columnName = str_contains($sortingColumn, '.') ? substr($sortingColumn, strpos($sortingColumn, '.') + 1) : $sortingColumn;
+            if (!isset($entity->$columnName)) {
                 $max += $behavior->getStep();
-                $entity->$sortingColumn = $max;
+                $entity->$columnName = $max;
             }
         }
         return $event->handle();
