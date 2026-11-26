@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Fixed
 - Fix SortingEventSubscriber double-prefixing with table-qualified columns
+- CodeGen: value types of array/iterable in generated @method tags (PHPStan 2), @extends only for generic app base classes
 
 ## [0.10.1] - 2026-06-02
 

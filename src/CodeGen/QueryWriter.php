@@ -44,14 +44,16 @@ class QueryWriter
 
         $baseClass->addComment('@internal Typehint extended classes only');
         $baseClass->addComment('@generated');
-        $baseClass->addComment("@method insert({$structure->getClassName()}|array \$data)");
+        $baseClass->addComment("@method insert({$structure->getClassName()}|array<mixed> \$data)");
         $baseClass->addComment("@method {$structure->getClassName()}[] fetchAll()");
         $baseClass->addComment("@method {$structure->getClassName()}|null fetch()");
         $baseClass->addComment("@method {$structure->getClassName()}|null first()");
-        $baseClass->addComment("@method {$structure->getClassName()} createRow(array \$data = [])");
+        $baseClass->addComment("@method {$structure->getClassName()} createRow(array<mixed> \$data = [])");
         $baseClass->addComment("@method {$structure->getClassName()} current()");
         $baseClass->addComment("@method {$structure->getClassName()}Repository getRepository()");
-        $baseClass->addComment("@extends " . self::BASE_QUERY_NAME . "<{$structure->getClassName()}>");
+        if (FileWriter::isGenericClass($queryBaseClass)) {
+            $baseClass->addComment("@extends " . self::BASE_QUERY_NAME . "<{$structure->getClassName()}>");
+        }
 
         $writer->writeClass($baseClass, $structure->queryGenDir);
     }
