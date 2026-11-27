@@ -53,7 +53,7 @@ class RepositoryWriter
             ->addUse('Generator');
 
         if (count($structure->getPrimaries()) > 1) {
-            $primaryType = 'array'; // generics dont work in @method
+            $primaryType = 'array<mixed>';
         } else {
             $primaries = $structure->getPrimaries();
             $primaryType = reset($primaries);
@@ -69,23 +69,25 @@ class RepositoryWriter
         $class->addConstant('TABLE_NAME', $structure->getTableName());
         $class->addComment('@generated Do Not Touch!');
         $class->addComment("@method {$structure->getClassName()}Query query()");
-        $class->addComment("@method {$structure->getClassName()}Query findBy(array \$conditions)");
-        $class->addComment("@method {$structure->getClassName()}Query search(array \$columns, string \$search)");
+        $class->addComment("@method {$structure->getClassName()}Query findBy(array<mixed> \$conditions)");
+        $class->addComment("@method {$structure->getClassName()}Query search(array<mixed> \$columns, string \$search)");
         $class->addComment("@method {$structure->getClassName()}[] fetchAll()");
         $class->addComment("@method Generator<{$structure->getClassName()}> fetchChunked()");
         $class->addComment("@method {$structure->getClassName()}|null find($primaryType{$structure->getClassName()} \$$primaryName)");
-        $class->addComment("@method {$structure->getClassName()}|null findOneBy(array \$conditions)");
+        $class->addComment("@method {$structure->getClassName()}|null findOneBy(array<mixed> \$conditions)");
         $class->addComment("@method {$structure->getClassName()} findOrFail($primaryType{$structure->getClassName()} \$$primaryName)");
-        $class->addComment("@method {$structure->getClassName()} findOrNew(array \$conditions, array \$newValues = [])");
-        $class->addComment("@method {$structure->getClassName()} findOrInsert(array \$conditions, array \$newValues = [])");
-        $class->addComment("@method {$structure->getClassName()}|int insert({$structure->getClassName()}|iterable \$entities)");
-        $class->addComment("@method {$structure->getClassName()} insertOne(array \$data)");
-        $class->addComment("@method int update({$structure->getClassName()}|{$primaryType}array \$entity, iterable \$data)");
+        $class->addComment("@method {$structure->getClassName()} findOrNew(array<mixed> \$conditions, array<mixed> \$newValues = [])");
+        $class->addComment("@method {$structure->getClassName()} findOrInsert(array<mixed> \$conditions, array<mixed> \$newValues = [])");
+        $class->addComment("@method {$structure->getClassName()}|int insert({$structure->getClassName()}|iterable<mixed> \$entities)");
+        $class->addComment("@method {$structure->getClassName()} insertOne(array<string, mixed> \$data)");
+        $class->addComment("@method int update({$structure->getClassName()}|{$primaryType}array<mixed> \$entity, iterable<mixed> \$data)");
         $class->addComment("@method void updateEntities({$structure->getClassName()} ...\$entities)");
-        $class->addComment("@method int delete({$structure->getClassName()}|{$primaryType}array \$entities)");
+        $class->addComment("@method int delete({$structure->getClassName()}|{$primaryType}array<mixed> \$entities)");
         $class->addComment("@method class-string<{$structure->getClassName()}> getEntityClass()");
         $class->addComment("@method {$structure->getClassName()} create()");
-        $class->addComment("@extends " . self::BASE_REPOSITORY_NAME . "<{$structure->getClassName()}, {$structure->getClassName()}Query<{$structure->getClassName()}>>");
+        if (FileWriter::isGenericClass($baseClass)) {
+            $class->addComment("@extends " . self::BASE_REPOSITORY_NAME . "<{$structure->getClassName()}, {$structure->getClassName()}Query<{$structure->getClassName()}>>");
+        }
 
         $class->addMethod('__construct')
             ->setParameters([

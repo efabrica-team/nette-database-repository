@@ -4,6 +4,7 @@ namespace Efabrica\NetteRepository\CodeGen;
 
 use Nette\PhpGenerator\ClassLike;
 use Nette\PhpGenerator\ClassType;
+use ReflectionClass;
 use RuntimeException;
 
 class FileWriter
@@ -17,6 +18,19 @@ class FileWriter
     public function __construct(array $inheritance)
     {
         $this->inheritance = $inheritance;
+    }
+
+    /**
+     * @param class-string|string $class
+     */
+    public static function isGenericClass(string $class): bool
+    {
+        // a missing base class is written by the generator itself, with @template
+        if (!class_exists($class)) {
+            return true;
+        }
+        $docComment = (new ReflectionClass($class))->getDocComment();
+        return $docComment !== false && str_contains($docComment, '@template');
     }
 
     public function writeClass(ClassLike $classType, string $dir): void
